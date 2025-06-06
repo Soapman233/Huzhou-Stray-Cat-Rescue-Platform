@@ -2,7 +2,7 @@
   <div>
     <!-- 走马灯开始 -->
     <div class="block text-center">
-      <el-carousel height="200px" motion-blur>
+      <el-carousel height="500px" motion-blur>
         <el-carousel-item v-for="item in banners" :key="item.id">
           <img :src="item.imageUrl" alt="Banner" style="width: 100%; height: 100%; object-fit: cover;" />
         </el-carousel-item>
@@ -50,12 +50,12 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
-// 轮播图数据
+// 轮播图数据（使用本地图片）
 const banners = ref([
-  { id: 1, imageUrl: 'https://placekitten.com/800/200?image=1' },
-  { id: 2, imageUrl: 'https://placekitten.com/800/200?image=2' },
-  { id: 3, imageUrl: 'https://placekitten.com/800/200?image=3' },
-  { id: 4, imageUrl: 'https://placekitten.com/800/200?image=4' }
+  { id: 1, imageUrl: new URL('/src/assets/banners/banner1.jpg', import.meta.url).href },
+  { id: 2, imageUrl: new URL('/src/assets/banners/banner2.jpg', import.meta.url).href },
+  { id: 3, imageUrl: new URL('/src/assets/banners/banner3.jpg', import.meta.url).href },
+  { id: 4, imageUrl: new URL('/src/assets/banners/banner4.jpg', import.meta.url).href }
 ]);
 
 // 猫咪数据（占位符，建议替换为后端接口）
