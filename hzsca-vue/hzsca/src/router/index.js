@@ -7,6 +7,7 @@ const router = createRouter({
     {path: '/', redirect: '/hzsca/home'},
     {path: '/hzsca', component: ()=> import('../views/HomeView.vue'),children: [
         {path: 'home', component: ()=> import('../views/Homepage.vue'),meta: {title: '首页'}},
+        {path: 'adopt', component: ()=> import('../views/adopt.vue'),meta: {title: '领养'}},
       ]},
   ],
 })

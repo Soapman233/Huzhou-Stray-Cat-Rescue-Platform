@@ -9,10 +9,10 @@
           </div>
           <div style="display: flex; gap: 15px;">
             <router-link to="/" class="nav-link">主页</router-link>
-            <router-link to="/adopt" class="nav-link">领养</router-link>
-            <router-link to="/activity" class="nav-link">活动</router-link>
-            <router-link to="/report" class="nav-link">工作报告</router-link>
-            <router-link to="/donate" class="nav-link">捐助我们</router-link>
+            <router-link to="/hzsca/adopt" class="nav-link">领养</router-link>
+            <router-link to="/hzsca/activity" class="nav-link">活动</router-link>
+            <router-link to="/hzsca/report" class="nav-link">工作报告</router-link>
+            <router-link to="/hzsca/donate" class="nav-link">捐助我们</router-link>
           </div>
         </div>
         <div style="display: flex; align-items: center; gap: 10px;">
