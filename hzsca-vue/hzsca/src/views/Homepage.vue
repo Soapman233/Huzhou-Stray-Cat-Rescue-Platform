@@ -1,14 +1,14 @@
 <template>
   <div>
-    <!--走马灯开始-->
+    <!-- 走马灯开始 -->
     <div class="block text-center">
       <el-carousel height="200px" motion-blur>
-        <el-carousel-item v-for="item in 4" :key="item">
-          <h3 class="small justify-center" text="2xl">{{ item }}</h3>
+        <el-carousel-item v-for="item in banners" :key="item.id">
+          <img :src="item.imageUrl" alt="Banner" style="width: 100%; height: 100%; object-fit: cover;" />
         </el-carousel-item>
       </el-carousel>
     </div>
-    <!--走马灯结束-->
+    <!-- 走马灯结束 -->
 
     <div class="adoption-section">
       <div class="content-wrapper">
@@ -16,18 +16,30 @@
         <div class="section-title">
           <span>待领养的猫猫</span>
         </div>
+        <!-- 加载状态 -->
+        <div v-if="cats.length === 0" class="loading">加载中...</div>
         <!-- 猫咪图片 -->
-        <div class="image-gallery">
+        <div v-else class="image-gallery">
           <div v-for="cat in cats" :key="cat.id" class="image-placeholder">
-            <img v-if="cat.imageUrl" :src="cat.imageUrl" alt="Cat Image" class="cat-image" />
+            <img
+                v-if="cat.imageUrl"
+                :src="cat.imageUrl"
+                alt="Cat Image"
+                class="cat-image"
+                @error="cat.imageUrl = 'https://placekitten.com/150/150'"
+            />
           </div>
         </div>
         <!-- 统计区域 -->
         <div class="stats-box">
-          <div class="stats-number">56</div>
-          <div class="stats-label">待领养猫</div>
-          <div class="stats-number">4915</div>
-          <div class="stats-label">已领养</div>
+          <div class="stats-item">
+            <div class="stats-number">56</div>
+            <div class="stats-label">待领养猫</div>
+          </div>
+          <div class="stats-item">
+            <div class="stats-number">4915</div>
+            <div class="stats-label">已领养</div>
+          </div>
         </div>
       </div>
     </div>
@@ -35,11 +47,44 @@
 </template>
 
 <script setup>
-// 模拟猫咪数据（后端接口应替换此部分）
-const cats = ref(Array(16).fill().map((_, index) => ({
-  id: index,
-  imageUrl: '' // 后端应提供图片URL
-})));
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+// 轮播图数据
+const banners = ref([
+  { id: 1, imageUrl: 'https://placekitten.com/800/200?image=1' },
+  { id: 2, imageUrl: 'https://placekitten.com/800/200?image=2' },
+  { id: 3, imageUrl: 'https://placekitten.com/800/200?image=3' },
+  { id: 4, imageUrl: 'https://placekitten.com/800/200?image=4' }
+]);
+
+// 猫咪数据（占位符，建议替换为后端接口）
+const cats = ref([]);
+
+// 模拟从后端获取数据（可替换为真实接口）
+onMounted(async () => {
+  try {
+    // 假设后端接口为 https://your-api-endpoint/cats
+    // const response = await axios.get('https://your-api-endpoint/cats');
+    // cats.value = response.data.map(cat => ({
+    //   id: cat.id,
+    //   imageUrl: cat.imageUrl
+    // }));
+
+    // 临时使用占位符图片
+    cats.value = Array(16).fill().map((_, index) => ({
+      id: index,
+      imageUrl: `https://placekitten.com/150/150?image=${index + 1}`
+    }));
+  } catch (error) {
+    console.error('Failed to fetch cat data:', error);
+    // 失败时使用占位符
+    cats.value = Array(16).fill().map((_, index) => ({
+      id: index,
+      imageUrl: `https://placekitten.com/150/150?image=${index + 1}`
+    }));
+  }
+});
 </script>
 
 <style scoped>
@@ -92,9 +137,10 @@ const cats = ref(Array(16).fill().map((_, index) => ({
 
 .image-gallery {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 15px;
   margin-bottom: 30px;
+  width: 100%;
 }
 
 .image-placeholder {
@@ -114,24 +160,36 @@ const cats = ref(Array(16).fill().map((_, index) => ({
 }
 
 .stats-box {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
   background-color: #1E4A6D;
   color: #FFF;
-  padding: 30px 40px;
+  padding: 20px;
   border-radius: 8px;
-  text-align: center;
   width: 300px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.stats-item {
+  text-align: center;
+}
+
 .stats-number {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 700;
   line-height: 1;
 }
 
 .stats-label {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 400;
-  margin-bottom: 20px;
+}
+
+.loading {
+  font-size: 16px;
+  color: #1E4A6D;
+  text-align: center;
+  margin: 20px 0;
 }
 </style>
