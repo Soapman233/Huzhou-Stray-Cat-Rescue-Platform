@@ -5,6 +5,11 @@
     <span class="header-text">待领养猫猫</span>
   </div>
   <!-- 头部结束 -->
+
+  <div>
+
+  </div>
+
 </template>
 
 <script setup>
