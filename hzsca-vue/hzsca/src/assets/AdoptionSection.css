@@ -1,0 +1,161 @@
+.el-carousel__item h3 {
+    color: #475669;
+    opacity: 0.75;
+    line-height: 200px;
+    margin: 0;
+    text-align: center;
+}
+
+.adoption-section {
+    background-color: #F7F9FC;
+    padding: 20px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.adoption-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><circle cx="5" cy="5" r="1" fill="#E0E7F1"/><rect x="10" y="10" width="2" height="2" fill="#E0E7F1"/></svg>');
+    background-repeat: repeat;
+    opacity: 0.3;
+    pointer-events: none;
+}
+
+.content-wrapper {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.section-title {
+    margin-bottom: 20px;
+}
+
+.section-title span {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1E4A6D;
+}
+
+.image-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+    width: 100%;
+}
+
+.image-placeholder {
+    width: 150px;
+    height: 150px;
+    border: 2px solid #D3E2F0;
+    border-radius: 8px;
+    background-color: #F5F5F5;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+.cat-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.stats-box {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background-color: #1E4A6D;
+    color: #FFF;
+    padding: 20px;
+    border-radius: 8px;
+    width: 300px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.stats-item {
+    text-align: center;
+}
+
+.stats-number {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.stats-label {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.loading {
+    font-size: 16px;
+    color: #1E4A6D;
+    text-align: center;
+    margin: 20px 0;
+}
+
+/* 养猫须知 */
+.mr-4 {
+    font-size: 25px;
+    color: #1E4A6D;
+    text-align: center;
+    margin: 20px 0;
+    font-weight: bold
+}
+
+.knowledge-section {
+    padding-left: 50px;
+    margin-right: 50px;
+}
+
+.knowledge-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.collapse-title  {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.collapse-content {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.text-content {
+    flex: 1;
+    font-size: 15px;
+}
+
+.text-content div {
+    margin-bottom: 10px;
+}
+
+.collapse-image {
+    width: 50%;
+    max-width: 300px;
+    height: auto;
+    object-fit: cover;
+}
+
+.attention{
+    font-size: 15px;
+    color: #1E4A6D;
+    margin: 20px 0;
+    font-weight: bold
+}
