@@ -11,6 +11,10 @@ const router = createRouter({
                 {path: 'login', component: ()=> import('../views/login.vue'),meta: {title: '登录'}},
                 {path: 'regist', component: ()=> import('../views/regist.vue'),meta: {title: '注册'}},
             ]},
+        { path: '/login',  meta: { title: '登录系统' },  component: () => import('../views/login.vue') },
+        { path: '/regist', meta: { title: '欢迎注册' },  component: () => import('../views/regist.vue') },
+        { path: '/404', name: 'NotFound', meta: { title: '404找不到页面' },  component: () => import('../views/404.vue') },
+        { path: '/:pathMatch(.*)', redirect: '/404' }
     ],
 })
 

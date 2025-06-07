@@ -19,7 +19,7 @@
           <button style="background-color: rgba(255,111,97,0.71); color: #FFF; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
             立即探索
           </button>
-          <button style="background-color: #b78c46; color: #FFF; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;">
+          <button style="background-color: #b78c46; color: #FFF; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer;"@click="goToPage">
             <el-icon><Avatar /></el-icon>
           </button>
         </div>
@@ -43,6 +43,13 @@
 
 <script setup>
 import { Avatar } from '@element-plus/icons-vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const goToPage = () => {
+  router.push('/hzsca/login');
+};
 </script>
 
 <style scoped>
