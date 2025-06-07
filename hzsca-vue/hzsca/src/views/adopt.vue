@@ -7,14 +7,21 @@
   <!-- 头部结束 -->
 
   <div>
-
+    <div class="row">
+      <div v-for="cat in cats" :key="cat.id" class="col-md-3 cat-card" @click="goToDetail(cat.id)">
+        <img :src="cat.imageUrl" alt="cat image" class="img-fluid">
+        <p>{{ cat.name }}</p>
+        <p>{{ cat.gender }} - {{ cat.age }} 岁</p>
+      </div>
+    </div>
   </div>
 
 </template>
 
 <script setup>
 import { computed } from 'vue';
-
+import axios from 'axios';
+import '/src/assets/Adopt.css';
 const bgImage = new URL('/src/assets/header-bg.jpg', import.meta.url).href;
 
 const carouselHeight = computed(() => {
@@ -25,33 +32,29 @@ const carouselHeight = computed(() => {
 window.addEventListener('resize', () => {
   carouselHeight.value;
 });
+
+export default {
+  data() {
+    return {
+      cats: []
+    }
+  },
+  mounted() {
+    this.fetchCats();
+  },
+  methods: {
+    fetchCats() {
+      axios.get('/cats').then(response => {
+        this.cats = response.data;
+      });
+    },
+    goToDetail(id) {
+      this.$router.push(`/cats/${id}`);
+    }
+  }
+}
 </script>
 
 <style scoped>
-.header-section {
-  position: relative;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
-.header-image {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.6;
-  z-index: 0;
-}
-
-.header-text {
-  font-size: 75px;
-  font-weight: 700;
-  color: #235f91;
-  text-align: center;
-  z-index: 1;
-}
 </style>
