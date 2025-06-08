@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzsca.mapper.CatsMapper">
+    <!-- 结果映射 -->
+    <resultMap id="CatResultMap" type="com.hzsca.entity.Animals">
+        <!-- Animals 属性 -->
+        <id column="AnimalID" property="AnimalID"/>
+        <result column="Name" property="Name"/>
+        <result column="Species" property="Species"/>
+        <result column="Breed" property="Breed"/>
+        <result column="Age" property="Age"/>
+        <result column="Gender" property="Gender"/>
+        <result column="HealthStatus" property="HealthStatus"/>
+        <result column="Description" property="Description"/>
+        <result column="ImageURL" property="ImageURL"/>
+        <result column="Source" property="Source"/>
+    </resultMap>
+
+    <select id="getAllCats" resultMap="CatResultMap">
+        SELECT
+            AnimalID,
+            Name,
+            Species,
+            Breed,
+            Age,
+            Gender,
+            HealthStatus,
+            Description,
+            ImageURL,
+            Source
+        FROM Animals
+        WHERE Species = '猫'
+    </select>
+
+    <select id="getCatById" parameterType="int" resultMap="CatResultMap">
+        SELECT
+            AnimalID,
+            Name,
+            Species,
+            Breed,
+            Age,
+            Gender,
+            HealthStatus,
+            Description,
+            ImageURL,
+            Source
+        FROM Animals
+        WHERE AnimalID = #{id} AND Species = '猫'
+    </select>
+</mapper>

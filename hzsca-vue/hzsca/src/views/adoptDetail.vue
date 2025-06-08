@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <h1>{{ cat.name }}</h1>
-    <img :src="cat.imageUrl" alt="cat image" class="img-fluid">
+    <img :src="`${config.imageBaseURL}/cats/${cat.imageUrl}`" alt="cat image" class="img-fluid">
     <p><strong>性别：</strong> {{ cat.gender }}</p>
     <p><strong>年龄：</strong> {{ cat.age }} 岁</p>
     <p><strong>性情：</strong> {{ cat.temperament }}</p>
@@ -13,24 +13,30 @@
 </template>
 
 <script>
-import axios from 'axios';
+import {ref, onMounted} from 'vue';
+import {useRoute} from 'vue-router';
+import request from '../utils/request';
+import config from '../config/config';
+
+const route = useRoute();
+const cat = ref({});
 
 export default {
-  data() {
+  setup() {
+    const fetchCat = async () => {
+      const id = route.params.id;
+      const response = await request.get(`/api/cats/${id}`);
+      cat.value = response.data;
+    };
+
+    onMounted(() => {
+      fetchCat();
+    });
+
     return {
-      cat: {}
-    }
-  },
-  mounted() {
-    this.fetchCat();
-  },
-  methods: {
-    fetchCat() {
-      const id = this.$route.params.id;
-      axios.get(`/cats/${id}`).then(response => {
-        this.cat = response.data;
-      });
-    }
+      cat,
+      config
+    };
   }
 }
 </script>
