@@ -27,6 +27,9 @@
             <strong>健康状态：</strong> {{ cat.HealthStatus || '暂无记录' }}
           </div>
           <div class="info-item">
+            <strong>品种：</strong> {{ cat.Breed || '暂无记录' }}
+          </div>
+          <div class="info-item">
             <strong>来源：</strong> {{ cat.Source || '未知' }}
           </div>
         </div>
