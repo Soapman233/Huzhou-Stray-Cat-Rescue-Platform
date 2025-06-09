@@ -1,10 +1,17 @@
 <template>
   <div>
     <!-- 走马灯开始 -->
-    <div class="block text-center">
-      <el-carousel height="500px" motion-blur>
+    <div class="carousel-container">
+      <el-carousel height="500px" :interval="5000" arrow="always" :autoplay="true">
         <el-carousel-item v-for="item in banners" :key="item.id">
-          <img :src="item.imageUrl" alt="Banner" style="width: 100%; height: 100%; object-fit: cover;" />
+          <div class="carousel-item">
+            <img
+                :src="item.imageUrl"
+                :alt="`Banner ${item.id}`"
+                class="carousel-image"
+                @load="handleImageLoad"
+            />
+          </div>
         </el-carousel-item>
       </el-carousel>
     </div>
@@ -20,14 +27,18 @@
         <div v-if="loading" class="loading">加载中...</div>
         <!-- 猫咪图片开始 -->
         <div v-else class="image-gallery">
-          <div v-for="cat in cats" :key="cat.id" class="image-placeholder">
+          <div v-for="cat in displayCats" :key="cat.AnimalID" class="image-placeholder" @click="goToDetail(cat.AnimalID)">
             <img
-                v-if="cat.imageUrl"
-                :src="cat.imageUrl"
+                :src="getImageUrl(cat)"
                 alt="Cat Image"
                 class="cat-image"
-                @error="cat.imageUrl = 'https://placekitten.com/150/150'"
-            />
+                @error="handleImageError"
+                @load="handleCatImageLoad"
+            >
+            <div class="cat-info">
+              <h5>{{ cat.Name || '未知名字' }}</h5>
+              <p>{{ cat.Description || '暂无描述' }}</p>
+            </div>
           </div>
         </div>
         <!-- 猫咪图片结束 -->
@@ -49,7 +60,7 @@
 
     <!--养猫须知开始-->
     <div class="knowledge-section">
-      <div class="knowledge-wrapper" >
+      <div class="knowledge-wrapper">
         <div class="section-title" style="padding-top: 20px">
           <span class="mr-4" style="padding-left: 5px"> 养 猫 须 知 </span>
         </div>
@@ -72,7 +83,7 @@
                 🐱 如家里有籐编、皮制或布艺沙发，可在表面盖上一块布，而墙角和木制家居脚可装上磨爪板，以防猫咪爪花，最重要是提供适当的磨爪板来满足猫咪的需求。如图示：
               </div>
             </div>
-            <img src="/src/assets/sofa.jpg" alt="Sofa Protection" class="collapse-image" />
+            <img src="/src/assets/sofa.jpg" alt="Sofa Protection" class="collapse-image"/>
           </div>
           <div class="attention">
             注：领养人士请明白动物有其天生的行为，请用爱心及耐性好好教导猫咪。
@@ -89,10 +100,12 @@
                 注：以防在运载猫咪途中意外让它逃脱，宠物笼必须用胶带索好。
               </div>
               <div>
-                🐱 在领猫咪回家前，请预备好饲养铁笼（最小尺寸为3尺，双层笼更佳）。宠外需罩上布，并放置好砂盆、 食物碗、水碗、舒适的小猫床、猫抓板及玩具。
+                🐱 在领猫咪回家前，请预备好饲养铁笼（最小尺寸为3尺，双层笼更佳）。宠外需罩上布，并放置好砂盆、
+                食物碗、水碗、舒适的小猫床、猫抓板及玩具。
               </div>
               <div>
-                🐱 先把猫咪安置在笼中一段时间，待猫咪对你和新环境不再害怕便可离开饲养铁笼。若家中原本已有猫咪，两猫咪须先隔离 14天方可接触。
+                🐱 先把猫咪安置在笼中一段时间，待猫咪对你和新环境不再害怕便可离开饲养铁笼。若家中原本已有猫咪，两猫咪须先隔离
+                14天方可接触。
               </div>
               <div>
                 🐱 许多猫咪刚到新家时会感到非常害怕、没有安全感，因此有可能会误伤主人。
@@ -101,10 +114,11 @@
                 🐱 你可预备手套，温柔的轻抚猫咪、跟它说话，待它适应了，自然会主动来亲近你。切忌在开始时遇上挫折便退还给送养人，否则只是错失了一只值得疼爱的好猫咪。
               </div>
               <div>
-                <img src="/src/assets/home-gp.jpg" class="collapse-image" />
+                <img src="/src/assets/home-gp.jpg" class="collapse-image"/>
               </div>
               <div class="attention">
-                注 : 让猫咪主动亲近你是非常重要的，代表著它已经信任你。强迫猫咪只会让它感到紧张而抗拒，亦有可能导致攻击行为， 或是影响日后与主人的相处。
+                注 : 让猫咪主动亲近你是非常重要的，代表著它已经信任你。强迫猫咪只会让它感到紧张而抗拒，亦有可能导致攻击行为，
+                或是影响日后与主人的相处。
               </div>
             </div>
           </div>
@@ -143,7 +157,7 @@
                 <div>
                   骨头：鸡、鸭、鹅、鱼等骨头
                 </div>
-                <img src="/src/assets/food-gp.jpg" class="collapse-image" />
+                <img src="/src/assets/food-gp.jpg" class="collapse-image"/>
               </div>
               <div>
                 🐱 以下植物对猫咪有害，不可给猫咪啃咬：
@@ -157,7 +171,8 @@
                 </div>
               </div>
               <div>
-                🐱 主人可因应猫咪的身体情况而考虑给猫咪服用补充食品，如L-Lysine可预防、舒缓因疱疹病毒引起之眼、鼻感染，减少眼睛分泌物产生；Osteosupport 可减轻关节炎症状。
+                🐱 主人可因应猫咪的身体情况而考虑给猫咪服用补充食品，如L-Lysine可预防、舒缓因疱疹病毒引起之眼、鼻感染，减少眼睛分泌物产生；Osteosupport
+                可减轻关节炎症状。
               </div>
               <div>
                 🐱 零食：只可在亲子活动时以奖励方式给猫咪，只可当小食而不可作主粮。
@@ -169,7 +184,8 @@
           <div class="collapse-content">
             <div class="text-content">
               <div>
-                🐱 猫是很爱干净的动物，一般唐猫每天都会把自己把毛和脸清洗得干干净净，主人为它们洗澡的次数不需太频密。但间中也要为它们梳理毛发，有助促进皮肤的新陈代谢 。
+                🐱 猫是很爱干净的动物，一般唐猫每天都会把自己把毛和脸清洗得干干净净，主人为它们洗澡的次数不需太频密。但间中也要为它们梳理毛发，有助促进皮肤的新陈代谢
+                。
               </div>
               <div class="attention">
                 注：如湿洗的话，必须彻底过清皂液，及于浴后替猫咪吹干毛发，特别是肚上的毛，否则容易感冒。
@@ -232,52 +248,206 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import {ref, onMounted} from 'vue';
+import {useRouter} from 'vue-router';
 import request from '../utils/request';
 import config from '../config/config';
 import '/src/assets/AdoptionSection.css';
 
+const router = useRouter();
 const banners = ref([
-  { id: 1, imageUrl: new URL('/src/assets/banners/banner1.jpg', import.meta.url).href },
-  { id: 2, imageUrl: new URL('/src/assets/banners/banner2.jpg', import.meta.url).href },
-  { id: 3, imageUrl: new URL('/src/assets/banners/banner3.jpg', import.meta.url).href },
-  { id: 4, imageUrl: new URL('/src/assets/banners/banner4.jpg', import.meta.url).href }
+  {id: 1, imageUrl: new URL('/src/assets/banners/banner1.jpg', import.meta.url).href, loaded: false},
+  {id: 2, imageUrl: new URL('/src/assets/banners/banner2.jpg', import.meta.url).href, loaded: false},
+  {id: 3, imageUrl: new URL('/src/assets/banners/banner3.jpg', import.meta.url).href, loaded: false},
+  {id: 4, imageUrl: new URL('/src/assets/banners/banner4.jpg', import.meta.url).href, loaded: false}
 ]);
 
 // 猫咪数据
 const cats = ref([]);
 const loading = ref(false);
+const displayCats = ref([]);
 
-// 从后端获取数据
-onMounted(async () => {
+const goToDetail = (id) => {
+  router.push(`/hzsca/adopt/${id}`);
+};
+
+const getImageUrl = (cat) => {
+  try {
+    console.log('Processing cat image:', cat);
+    if (!cat || !cat.ImageURL) {
+      console.log('No image URL provided, using default image');
+      // 使用一个简单的占位符图片
+      return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJh+WbvueJhzwvdGV4dD48L3N2Zz4=';
+    }
+
+    // 检查是否是完整的 URL
+    if (cat.ImageURL.startsWith('http://') || cat.ImageURL.startsWith('https://')) {
+      console.log('Using full URL:', cat.ImageURL);
+      return cat.ImageURL;
+    }
+
+    // 检查是否是 Base64 数据
+    if (cat.ImageURL.startsWith('data:image')) {
+      console.log('Using Base64 image data');
+      return cat.ImageURL;
+    }
+
+    // 处理相对路径
+    const baseUrl = config.imageBaseURL || 'http://localhost:8080';
+    const cleanImageUrl = cat.ImageURL.startsWith('/') ? cat.ImageURL.substring(1) : cat.ImageURL;
+    const fullUrl = `${baseUrl}/${cleanImageUrl}`;
+    console.log('Generated full URL:', fullUrl);
+    return fullUrl;
+  } catch (err) {
+    console.error('Error processing image URL:', err);
+    return 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJh+WbvueJhzwvdGV4dD48L3N2Zz4=';
+  }
+};
+
+const handleImageError = (e) => {
+  console.log('Image load error, using default image');
+  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJh+WbvueJhzwvdGV4dD48L3N2Zz4=';
+};
+
+const handleImageLoad = (e) => {
+  const img = e.target;
+  const banner = banners.value.find(b => b.imageUrl === img.src);
+  if (banner) {
+    banner.loaded = true;
+  }
+};
+
+const handleCatImageLoad = (e) => {
+  console.log('Cat image loaded successfully:', e.target.src);
+  // 可以在这里添加图片加载成功的逻辑
+};
+
+const fetchCats = async () => {
   loading.value = true;
   try {
     const response = await request.get('/api/cats');
-    if (Array.isArray(response)) {
-      cats.value = response.slice(0, 14).map(cat => ({
+    console.log('Homepage API Response:', response);
+
+    // 检查响应结构
+    let data = response;
+    if (response && response.data) {
+      data = response.data;
+    }
+
+    console.log('Homepage processed data:', data);
+
+    if (Array.isArray(data)) {
+      cats.value = data.slice(0, 14).map(cat => ({
         id: cat.AnimalID,
-        imageUrl: getImageUrl(cat.ImageURL)
+        imageUrl: getImageUrl(cat)
       }));
+      displayCats.value = data.slice(0, 12);
+      console.log('Homepage final cats:', displayCats.value);
+    } else {
+      console.error('Homepage data is not an array:', typeof data, data);
+      cats.value = [];
+      displayCats.value = [];
     }
   } catch (error) {
     console.error('Failed to fetch cat data:', error);
     cats.value = [];
+    displayCats.value = [];
   } finally {
     loading.value = false;
   }
-});
+};
 
-// 获取图片URL的辅助函数
-function getImageUrl(imageUrl) {
-  if (!imageUrl) {
-    return new URL('/src/assets/default-cat.jpg', import.meta.url).href;
-  }
-  const baseUrl = config?.imageBaseURL || 'http://localhost:8080';
-  const cleanImageUrl = imageUrl.replace(/^\/cats\//, '');
-  return `${baseUrl}/cats/${cleanImageUrl}`;
-}
+onMounted(() => {
+  fetchCats();
+});
 </script>
 
 <style scoped>
+.carousel-container {
+  width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+}
 
+.carousel-item {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+}
+
+.carousel-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+:deep(.el-carousel__container) {
+  height: 500px !important;
+}
+
+:deep(.el-carousel__item) {
+  overflow: hidden;
+}
+
+:deep(.el-carousel__arrow) {
+  background-color: rgba(31, 45, 61, 0.5);
+  border-radius: 50%;
+  transition: all 0.3s;
+}
+
+:deep(.el-carousel__arrow:hover) {
+  background-color: rgba(31, 45, 61, 0.8);
+}
+
+/* 猫咪图片和信息样式 */
+.cat-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  color: white;
+  padding: 10px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.image-placeholder:hover .cat-info {
+  transform: translateY(0);
+}
+
+.cat-info h5 {
+  margin: 0 0 5px 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.cat-info p {
+  margin: 0;
+  font-size: 12px;
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.image-placeholder {
+  position: relative;
+  cursor: pointer;
+}
+
+.cat-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.image-placeholder:hover .cat-image {
+  transform: scale(1.05);
+}
 </style>

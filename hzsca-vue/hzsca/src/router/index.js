@@ -9,7 +9,7 @@ const router = createRouter({
                 {path: 'home', component: ()=> import('../views/Homepage.vue'),meta: {title: '首页'}},
                 {path: 'adopt', component: ()=> import('../views/adopt.vue'),meta: {title: '领养'}},
                 {path: 'adopt/:id', component: ()=> import('../views/adoptDetail.vue'),meta: {title: '领养详情'}},
-                {path: 'apply/:id', component: ()=> import('../views/Apply.vue'),meta: {title: '申请领养'}},
+                {path: 'adopt/apply/:id', component: ()=> import('../views/Apply.vue'),meta: {title: '申请领养'}},
                 {path: 'login', component: ()=> import('../views/login.vue'),meta: {title: '登录'}},
                 {path: 'regist', component: ()=> import('../views/regist.vue'),meta: {title: '注册'}},
             ]},
