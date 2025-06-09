@@ -37,7 +37,7 @@
             >
             <div class="cat-info">
               <h5>{{ cat.Name || '未知名字' }}</h5>
-              <p>{{ cat.Description || '暂无描述' }}</p>
+              <p>{{ cat.Age || '未知' }} 岁</p>
             </div>
           </div>
         </div>
