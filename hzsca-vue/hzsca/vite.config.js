@@ -5,21 +5,16 @@ import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-import ElementPlus from 'unplugin-element-plus/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
-    // 按需定制主题配置
-    ElementPlus({
-      useSource: true,
-    }),
     AutoImport({
-      resolvers: [ElementPlusResolver({ importStyle: 'sass' })],
+      resolvers: [ElementPlusResolver()],
     }),
     Components({
-      resolvers: [ElementPlusResolver({ importStyle: 'sass' })],
+      resolvers: [ElementPlusResolver()],
     }),
   ],
   resolve: {
@@ -31,10 +26,33 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         // 自动导入定制化样式文件进行样式覆盖
-        additionalData: `
-        @use "@/assets/index.scss" as *;
-      `,
+        additionalData: `@use "@/assets/index.scss" as *;`
       }
     }
   },
+  server: {
+    port: 5173,
+    host: true,
+    open: true,
+    cors: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+        configure: (proxy, options) => {
+          proxy.on('error', (err, req, res) => {
+            console.log('proxy error', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, res) => {
+            console.log('Sending Request to the Target:', req.method, req.url);
+          });
+          proxy.on('proxyRes', (proxyRes, req, res) => {
+            console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+          });
+        }
+      }
+    }
+  }
 })

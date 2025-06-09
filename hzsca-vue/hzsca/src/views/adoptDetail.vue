@@ -124,7 +124,7 @@ const carouselHeight = computed(() => {
     };
 
     const goToApply = () => {
-      router.push(`/hzsca/adopt/apply/${route.params.id}`);
+      router.push(`/hzsca/apply/${route.params.id}`);
     };
 
     onMounted(fetchCat);

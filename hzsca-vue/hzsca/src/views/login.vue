@@ -33,13 +33,16 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import request from '../utils/request'
 
 const router = useRouter()
 
 // 表单数据
 const loginForm = reactive({
   username: '',
-  password: ''
+  password: '',
+  role: 'user'  // 默认为普通用户
 })
 
 const errorMsg = ref('')
@@ -66,21 +69,33 @@ const handleLogin = async () => {
   }
 
   try {
-    // 对输入进行转义处理
-    const safeUsername = encodeURIComponent(loginForm.username)
-    const safePassword = encodeURIComponent(loginForm.password)
+    const { data } = await request({
+      url: '/api/auth/login',
+      method: 'post',
+      data: loginForm
+    });
 
-    // 实际的登录API调用
-    console.log('登录请求:', { username: safeUsername, password: safePassword })
+    if (data.success) {
+      // 登录成功
+      ElMessage.success(data.message || '登录成功');
 
-    // 模拟登录成功并设置cookie，设置过期时间为1小时
-    const expires = new Date(Date.now() + 3600 * 1000).toUTCString()
-    document.cookie = `authToken=yourAuthToken; path=/; expires=${expires}`
+      // 存储用户信息到 localStorage
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('role', data.role);
 
-    // 跳转到主页
-    router.push('/home')
+      // 根据角色跳转到不同页面
+      if (data.role === 'admin') {
+        router.push('/hzsca/admin');
+      } else {
+        router.push('/hzsca/home');
+      }
+    } else {
+      // 登录失败
+      errorMessage(data.message || '登录失败');
+    }
   } catch (error) {
-    errorMessage('登录失败，请稍后重试');
+    console.error('登录错误:', error);
+    errorMessage(error.response?.data?.message || '登录失败，请稍后重试');
   }
 }
 

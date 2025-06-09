@@ -7,17 +7,31 @@
       </div>
       <form @submit.prevent="handleRegister" class="floating-form">
         <div class="input-group">
-          <input type="text" id="username" v-model="username" required maxlength="20" />
+          <input type="text" id="username" v-model="form.username" required maxlength="20" />
           <label for="username">用户名</label>
           <span class="highlight"></span>
         </div>
         <div class="input-group">
-          <input type="phone" id="phone" v-model="phone" required />
+          <input type="text" id="name" v-model="form.name" required maxlength="20" />
+          <label for="name">姓名</label>
+          <span class="highlight"></span>
+        </div>
+        <div class="input-group">
+          <input type="phone" id="phone" v-model="form.phone" required />
           <label for="phone">电话号码</label>
           <span class="highlight"></span>
         </div>
         <div class="input-group">
-          <input type="password" id="password" v-model="password" required minlength="6" maxlength="20" />
+          <select id="gender" v-model="form.gender" required>
+            <option value="">请选择性别</option>
+            <option value="1">男</option>
+            <option value="2">女</option>
+          </select>
+          <label for="gender">性别</label>
+          <span class="highlight"></span>
+        </div>
+        <div class="input-group">
+          <input type="password" id="password" v-model="form.password" required minlength="6" maxlength="20" />
           <label for="password">密码</label>
           <span class="highlight"></span>
         </div>
@@ -26,7 +40,8 @@
           <label for="confirmPassword">确认密码</label>
           <span class="highlight"></span>
         </div>
-        <button type="submit" class="submit-btn">
+        <div class="error-message" v-if="errorMsg">{{ errorMsg }}</div>
+        <button type="submit" class="submit-btn" :disabled="!isFormValid">
           <span>立即注册</span>
           <i class="arrow-icon"></i>
         </button>
@@ -40,20 +55,99 @@
 </template>
 
 <script setup>
-import {ref} from 'vue'
+import { ref, reactive, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
+import request from '../utils/request'
 
-const username = ref('')
-const phone = ref('')
-const password = ref('')
+const router = useRouter()
+const errorMsg = ref('')
 const confirmPassword = ref('')
 
-const handleRegister = () => {
-  console.log({
-    username: username.value,
-    phone: phone.value,
-    password: password.value,
-    confirmPassword: confirmPassword.value
-  })
+const form = reactive({
+  username: '',
+  password: '',
+  name: '',
+  phone: '',
+  gender: '',
+  profile: '',  // 可选
+  avatar: ''    // 可选
+})
+
+// 表单验证
+const isFormValid = computed(() => {
+  return form.username &&
+      form.password &&
+      form.name &&
+      form.phone &&
+      form.gender &&
+      confirmPassword.value &&
+      form.password === confirmPassword.value
+})
+
+// 检查用户名是否存在
+const checkUsername = async () => {
+  try {
+    const { data } = await request({
+      url: '/api/auth/check-username',
+      method: 'post',
+      data: { username: form.username }
+    });
+    return data.exists;
+  } catch (error) {
+    console.error('检查用户名错误:', error);
+    return false;
+  }
+}
+
+// 注册处理
+const handleRegister = async () => {
+  // 基本验证
+  if (!isFormValid.value) {
+    errorMsg.value = '请填写所有必填项';
+    return;
+  }
+
+  if (form.password !== confirmPassword.value) {
+    errorMsg.value = '两次输入的密码不一致';
+    return;
+  }
+
+  // 验证手机号格式
+  const phonePattern = /^1[3-9]\d{9}$/;
+  if (!phonePattern.test(form.phone)) {
+    errorMsg.value = '请输入正确的手机号码';
+    return;
+  }
+
+  try {
+    // 检查用户名是否已存在
+    const exists = await checkUsername();
+    if (exists) {
+      errorMsg.value = '用户名已存在';
+      return;
+    }
+
+    // 发送注册请求
+    const { data } = await request({
+      url: '/api/auth/register',
+      method: 'post',
+      data: form
+    });
+
+    if (data.success) {
+      // 注册成功
+      ElMessage.success(data.message || '注册成功');
+      // 跳转到登录页
+      router.push('/hzsca/login');
+    } else {
+      // 注册失败
+      errorMsg.value = data.message || '注册失败';
+    }
+  } catch (error) {
+    console.error('注册错误:', error);
+    errorMsg.value = error.response?.data?.message || '注册失败，请稍后重试';
+  }
 }
 </script>
 
