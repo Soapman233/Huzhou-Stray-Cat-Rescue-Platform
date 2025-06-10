@@ -1,21 +1,41 @@
 package com.hzsca.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonAlias;
+
 public class Users {
-    private Integer id;
+    @JsonProperty("UserID")
+    private Integer UserID;
+    @JsonProperty("Username")
+    @JsonAlias({"username"})
     private String username;
+    @JsonProperty("Password")
+    @JsonAlias({"password"})
     private String password;
+    @JsonProperty("Phone")
+    @JsonAlias({"phone"})
     private String phone;
+    @JsonProperty("Name")
+    @JsonAlias({"name"})
     private String name;
+    @JsonProperty("Gender")
+    @JsonAlias({"gender"})
     private Integer gender;
+    @JsonProperty("Profile")
+    @JsonAlias({"profile"})
     private String profile;
+    @JsonProperty("Role")
+    @JsonAlias({"role"})
     private String role;
+    @JsonProperty("Avatar")
+    @JsonAlias({"avatar"})
     private String avatar;
 
     public Users() {
     }
 
-    public Users(Integer id, String username, String password, String phone, String name, Integer gender, String profile, String role, String avatar) {
-        this.id = id;
+    public Users(Integer UserID, String username, String password, String phone, String name, Integer gender, String profile, String role, String avatar) {
+        this.UserID = UserID;
         this.username = username;
         this.password = password;
         this.phone = phone;
@@ -26,12 +46,12 @@ public class Users {
         this.avatar = avatar;
     }
 
-    public Integer getId() {
-        return id;
+    public Integer getUserID() {
+        return UserID;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setUserID(Integer UserID) {
+        this.UserID = UserID;
     }
 
     public String getUsername() {

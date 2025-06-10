@@ -200,8 +200,37 @@ const submitForm = async (formEl) => {
   await formEl.validate(async (valid, fields) => {
     if (valid) {
       try {
+        // 获取当前用户信息并添加调试日志
+        const userInfoRaw = localStorage.getItem('userInfo');
+        console.log('Raw userInfo from localStorage:', userInfoRaw);
+
+        let userInfo;
+        try {
+          userInfo = JSON.parse(userInfoRaw);
+          console.log('Parsed userInfo:', userInfo);
+        } catch (e) {
+          console.error('Error parsing userInfo:', e);
+          ElMessage.error('用户信息解析失败');
+          return;
+        }
+
+        if (!userInfo) {
+          console.error('No userInfo found in localStorage');
+          ElMessage.error('请先登录');
+          router.push('/login');
+          return;
+        }
+
+        if (!userInfo.UserID) {  // 只检查大写的 UserID
+          console.error('No UserID found in userInfo:', userInfo);
+          ElMessage.error('用户信息不完整，请重新登录');
+          router.push('/login');
+          return;
+        }
+
         // 1. 创建领养人记录
         const adopterData = {
+          userId: userInfo.UserID,  // 使用大写的 UserID
           name: form.name,
           age: calculateAge(form.birthDate),
           idCardNumber: form.idCardNumber,
@@ -211,7 +240,15 @@ const submitForm = async (formEl) => {
           birthDate: form.birthDate
         };
 
+        console.log('Submitting adopter data:', adopterData);  // 调试日志
+
         const adopterResponse = await request.post('/api/adopters', adopterData);
+        console.log('Adopter response:', adopterResponse);  // 调试日志
+
+        if (!adopterResponse.data.success) {
+          throw new Error(adopterResponse.data.message || '创建领养人信息失败');
+        }
+
         const adopterId = adopterResponse.data.id;
 
         // 2. 创建评估记录
@@ -227,13 +264,24 @@ const submitForm = async (formEl) => {
           petFriendly: form.petFriendly
         };
 
-        await request.post('/api/adoption-assessments', assessmentData);
+        console.log('Submitting assessment data:', assessmentData);  // 调试日志
+
+        const assessmentResponse = await request.post('/api/adoption-assessments', assessmentData);
+        console.log('Assessment response:', assessmentResponse);  // 调试日志
+
+        if (!assessmentResponse.data.success) {
+          throw new Error(assessmentResponse.data.message || '创建评估记录失败');
+        }
+
         ElMessage.success('申请提交成功！');
         router.push('/hzsca/adopt');
       } catch (error) {
         console.error('Error:', error);
-        ElMessage.error('提交失败，请稍后重试');
+        ElMessage.error(error.message || '提交失败，请稍后重试');
       }
+    } else {
+      console.log('Validation failed:', fields);
+      ElMessage.error('请填写所有必填项');
     }
   });
 }

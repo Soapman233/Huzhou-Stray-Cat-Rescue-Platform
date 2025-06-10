@@ -30,6 +30,7 @@ public class AuthController {
             if (user != null && user.getPassword().equals(request.getPassword())) {
                 result.put("success", true);
                 result.put("message", "登录成功");
+                user.setPassword(null);
                 result.put("user", user);
                 result.put("role", "user");
             } else {
@@ -41,6 +42,7 @@ public class AuthController {
             if (admin != null && admin.getPassword().equals(request.getPassword())) {
                 result.put("success", true);
                 result.put("message", "登录成功");
+                admin.setPassword(null); // Don't send password back to client
                 result.put("user", admin);
                 result.put("role", "admin");
             } else {
@@ -74,16 +76,17 @@ public class AuthController {
         newUser.setPassword(request.getPassword());
         newUser.setName(request.getName());
         newUser.setPhone(request.getPhone());
-        newUser.setGender(Integer.parseInt(request.getGender())); // 将String转换为Integer
+        newUser.setGender(Integer.parseInt(request.getGender()));
         newUser.setProfile(request.getProfile());
         newUser.setAvatar(request.getAvatar());
-        newUser.setRole("user");  // 默认角色为普通用户
+        newUser.setRole("user");
 
         // 保存用户信息
         userMapper.insert(newUser);
 
         result.put("success", true);
         result.put("message", "注册成功");
+        newUser.setPassword(null);
         result.put("user", newUser);
         return result;
     }

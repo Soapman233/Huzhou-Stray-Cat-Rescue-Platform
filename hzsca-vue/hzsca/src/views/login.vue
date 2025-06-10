@@ -62,42 +62,88 @@ const validateInput = () => {
 // 登录处理
 const handleLogin = async () => {
   // 防止XSS攻击
-  const xssPattern = /(~|\{|\}|"|'|<|>|\?)/g
+  const xssPattern = /(~|\{|\}|"|'|<|>|\?)/g;
   if (xssPattern.test(loginForm.username) || xssPattern.test(loginForm.password)) {
     errorMessage('警告:输入内容包含非法字符');
-    return
+    return;
   }
 
   try {
-    const { data } = await request({
-      url: '/api/auth/login',
-      method: 'post',
-      data: loginForm
+    const response = await request.post('/api/auth/login', loginForm);
+    console.log('Login response:', response);
+
+    // 检查响应结构
+    const responseData = response.data;
+    console.log('Response data structure:', {
+      success: responseData.success,
+      code: responseData.code,
+      data: responseData.data,
+      message: responseData.message
     });
 
-    if (data.success) {
-      // 登录成功
-      ElMessage.success(data.message || '登录成功');
+    // 检查响应是否成功
+    if (responseData.code === '200' || responseData.success) {
+      // 获取用户数据，适应不同的响应结构
+      const userData = responseData.data || responseData.user || responseData;
+      console.log('User data:', userData);
 
-      // 存储用户信息到 localStorage
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('role', data.role);
+      // 检查用户数据是否存在，注意大小写
+      if (!userData || (!userData.username && !userData.Username)) {
+        console.error('Invalid user data structure:', userData);
+        throw new Error('登录响应格式错误');
+      }
 
-      // 根据角色跳转到不同页面
-      if (data.role === 'admin') {
+      // 构建标准化的用户信息对象，处理不同的字段名称和大小写
+      const userInfo = {
+        // 用户名：优先使用大写开头的字段名
+        username: userData.Username || userData.username || userData.userName || '',
+        // 用户ID：优先使用数据库中的字段名
+        UserID: userData.UserID || userData.userID || userData.userId || userData.id || '',
+        // 姓名：如果没有则使用用户名
+        name: userData.Name || userData.name || userData.Username || userData.username || '',
+        // 角色：默认为普通用户
+        role: userData.Role || userData.role || 'user',
+        // 头像
+        avatar: userData.Avatar || userData.avatar || '',
+        // 性别：默认为1
+        gender: userData.Gender || userData.gender || 1,
+        // 电话
+        phone: userData.Phone || userData.phone || '',
+        // 个人简介
+        profile: userData.Profile || userData.profile || ''
+      };
+
+      console.log('Normalized user info:', userInfo);
+
+      // 存储用户信息
+      localStorage.setItem('userInfo', JSON.stringify(userInfo));
+      localStorage.setItem('token', responseData.token || userData.Token || 'logged-in');
+      localStorage.setItem('username', userInfo.username);
+
+      ElMessage.success('登录成功');
+
+      // 触发登录成功事件
+      window.dispatchEvent(new Event('login-success'));
+
+      // 更新全局登录状态
+      if (window.updateLoginStatus) {
+        window.updateLoginStatus();
+      }
+
+      // 根据角色跳转
+      if (userInfo.role === 'admin') {
         router.push('/hzsca/admin');
       } else {
-        router.push('/hzsca/home');
+        router.push('/');
       }
     } else {
-      // 登录失败
-      errorMessage(data.message || '登录失败');
+      throw new Error(responseData.message || responseData.msg || '登录失败');
     }
   } catch (error) {
-    console.error('登录错误:', error);
-    errorMessage(error.response?.data?.message || '登录失败，请稍后重试');
+    console.error('Login error details:', error);
+    errorMessage(error.response?.data?.message || error.message || '登录失败，请检查用户名和密码');
   }
-}
+};
 
 // 错误提示
 const errorMessage = (text) => {
