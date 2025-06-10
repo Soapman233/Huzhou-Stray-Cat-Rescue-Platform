@@ -1,29 +1,38 @@
 package com.hzsca.mapper;
 
 import com.hzsca.entity.Users;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface UserMapper {
-    @Insert("INSERT INTO Users (Username, Password, name, Phone, Gender, Profile, avatar, role) " +
-            "VALUES (#{username}, #{password}, #{name}, #{phone}, #{gender}, #{profile}, #{avatar}, #{role})")
-    @Options(useGeneratedKeys = true, keyProperty = "UserID")
+    /**
+     * 插入新用户
+     */
     int insert(Users user);
 
-    @Select("SELECT * FROM Users WHERE Username = #{username}")
+    /**
+     * 根据用户名查询用户
+     */
     Users selectByUsername(String username);
 
-    @Select("SELECT * FROM Users WHERE UserID = #{UserID}")
+    /**
+     * 根据ID查询用户
+     */
     Users selectById(Integer UserID);
 
-    @Update("UPDATE Users SET Password = #{password} WHERE Username = #{username}")
+    /**
+     * 更新用户密码
+     */
     int updatePassword(@Param("username") String username, @Param("password") String password);
 
-    @Update("UPDATE Users SET Phone = #{phone}, name = #{name}, " +
-            "Gender = #{gender}, Profile = #{profile}, avatar = #{avatar} " +
-            "WHERE Username = #{username}")
+    /**
+     * 更新用户信息
+     */
     int updateProfile(Users user);
 
-    @Delete("DELETE FROM Users WHERE Username = #{username}")
+    /**
+     * 删除用户
+     */
     int deleteByUsername(String username);
 }

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzsca.mapper.AnimalsMapper">
+    <resultMap id="BaseResultMap" type="com.hzsca.entity.Animals">
+        <id column="AnimalID" property="AnimalID" />
+        <result column="Name" property="Name" />
+        <result column="Species" property="Species" />
+        <result column="Breed" property="Breed" />
+        <result column="Age" property="Age" />
+        <result column="Gender" property="Gender" />
+        <result column="HealthStatus" property="HealthStatus" />
+        <result column="Description" property="Description" />
+        <result column="ImageURL" property="ImageURL" />
+        <result column="Source" property="Source" />
+    </resultMap>
+
+    <select id="getAllCats" resultMap="BaseResultMap">
+        SELECT * FROM Animals WHERE Species = '猫'
+    </select>
+
+    <select id="getCatById" resultMap="BaseResultMap">
+        SELECT * FROM Animals WHERE AnimalID = #{id} AND Species = '猫'
+    </select>
+
+    <select id="getAdoptableCats" resultMap="BaseResultMap">
+        SELECT * FROM Animals WHERE Species = '猫' AND Source = '流浪'
+    </select>
+
+    <update id="updateCat" parameterType="com.hzsca.entity.Animals">
+        UPDATE Animals
+        SET Name = #{Name},
+            Species = '猫',
+            Breed = #{Breed},
+            Age = #{Age},
+            Gender = #{Gender},
+            HealthStatus = #{HealthStatus},
+            Description = #{Description},
+            ImageURL = #{ImageURL},
+            Source = #{Source}
+        WHERE AnimalID = #{AnimalID} AND Species = '猫'
+    </update>
+
+    <insert id="insertCat" parameterType="com.hzsca.entity.Animals" useGeneratedKeys="true" keyProperty="AnimalID">
+        INSERT INTO Animals (Name, Species, Breed, Age, Gender, HealthStatus, Description, ImageURL, Source)
+        VALUES (#{Name}, '猫', #{Breed}, #{Age}, #{Gender}, #{HealthStatus}, #{Description}, #{ImageURL}, #{Source})
+    </insert>
+
+    <delete id="deleteCat">
+        DELETE FROM Animals WHERE AnimalID = #{id} AND Species = '猫'
+    </delete>
+</mapper>

@@ -1,22 +1,20 @@
 package com.hzsca.service;
 
 import com.hzsca.entity.Animals;
-import com.hzsca.mapper.CatsMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 
-@Service
-public class CatsService {
-    @Autowired
-    private CatsMapper catsMapper;
+public interface CatsService {
+    List<Animals> getAllCats();
 
-    public List<Animals> getAllCats() {
-        return catsMapper.getAllCats();
-    }
+    Animals getCatById(Integer id);
 
-    public Animals getCatById(Integer id) {
-        return catsMapper.getCatById(id);
-    }
+    List<Animals> getAdoptableCats();
+
+    boolean updateCat(Animals cat);
+
+    boolean addCat(Animals cat);
+
+    boolean deleteCat(Integer id);
+
+    void preloadCatsToCache();
 }

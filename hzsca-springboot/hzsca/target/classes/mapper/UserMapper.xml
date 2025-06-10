@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzsca.mapper.UserMapper">
+    <resultMap id="BaseResultMap" type="com.hzsca.entity.Users">
+        <id column="UserID" property="UserID" />
+        <result column="Username" property="Username" />
+        <result column="Password" property="Password" />
+        <result column="Phone" property="Phone" />
+        <result column="Name" property="Name" />
+        <result column="Gender" property="Gender" />
+        <result column="Profile" property="Profile" />
+        <result column="Avatar" property="Avatar" />
+        <result column="Role" property="Role" />
+    </resultMap>
+
+    <select id="selectByUsername" resultMap="BaseResultMap">
+        SELECT * FROM Users WHERE Username = #{username}
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT * FROM Users WHERE UserID = #{UserID}
+    </select>
+
+    <insert id="insert" parameterType="com.hzsca.entity.Users" useGeneratedKeys="true" keyProperty="UserID">
+        INSERT INTO Users (Username, Password, Name, Phone, Gender, Profile, Avatar, Role)
+        VALUES (#{Username}, #{Password}, #{Name}, #{Phone}, #{Gender}, #{Profile}, #{Avatar}, #{Role})
+    </insert>
+
+    <update id="updateProfile" parameterType="com.hzsca.entity.Users">
+        UPDATE Users
+        SET Phone = #{Phone},
+            Name = #{Name},
+            Gender = #{Gender},
+            Profile = #{Profile},
+            Avatar = #{Avatar}
+        WHERE Username = #{Username}
+    </update>
+
+    <update id="updatePassword">
+        UPDATE Users
+        SET Password = #{password}
+        WHERE Username = #{username}
+    </update>
+
+    <delete id="deleteByUsername">
+        DELETE FROM Users WHERE Username = #{username}
+    </delete>
+</mapper>
