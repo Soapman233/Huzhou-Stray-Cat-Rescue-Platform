@@ -31,9 +31,9 @@
 </template>
 
 <script setup>
-import {ref, reactive, onMounted} from 'vue'
-import {useRouter} from 'vue-router'
-import {ElMessage} from 'element-plus'
+import { ref, reactive, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import request from '../utils/request'
 
 const router = useRouter()
@@ -81,15 +81,26 @@ const handleLogin = async () => {
       const adminData = adminResponse.data.user;
       console.log('Admin data:', adminData);
 
-      // 存储管理员信息
+      // 存储管理员信息，确保所有必要字段都有值
       const adminInfo = {
-        username: adminData.username,
-        UserID: adminData.id,
-        name: adminData.name || adminData.username,
+        username: adminData.username || adminData.UserName || '',
+        UserID: adminData.id || adminData.UserID || adminData.userId || '',
+        name: adminData.name || adminData.UserName || adminData.username || '',
         role: 'admin',
-        avatar: adminData.avatar || ''
+        avatar: adminData.avatar || '',
+        gender: adminData.gender || 1,
+        phone: adminData.phone || '',
+        profile: adminData.profile || '',
+        email: adminData.email || ''
       };
 
+      // 验证管理员信息完整性
+      if (!adminInfo.username || !adminInfo.UserID) {
+        console.error('Incomplete admin data:', adminData);
+        throw new Error('管理员信息不完整，请联系系统管理员');
+      }
+
+      console.log('Storing admin info:', adminInfo);
       localStorage.setItem('userInfo', JSON.stringify(adminInfo));
       localStorage.setItem('token', adminResponse.data.token || 'logged-in');
       localStorage.setItem('username', adminInfo.username);
@@ -101,7 +112,7 @@ const handleLogin = async () => {
         window.updateLoginStatus();
       }
 
-      router.push('/hzsca/admin');
+      router.push('/hzsca/admin/users');
       return;
     }
 
@@ -115,23 +126,53 @@ const handleLogin = async () => {
     if (userResponse.data.success) {
       // 普通用户登录成功
       const userData = userResponse.data.user;
-      console.log('User data:', userData);
+      console.log('Raw user data:', userData);
 
-      // 构建标准化的用户信息对象
+      // 构建标准化的用户信息对象，确保所有必要字段都有默认值
       const userInfo = {
-        username: userData.username,
-        UserID: userData.UserID || userData.userId || userData.id || '',
-        name: userData.name || userData.username,
+        username: userData.Username || userData.username || '',  // 优先使用 Username
+        UserID: userData.UserID || userData.userID || '',  // 优先使用 UserID
+        name: userData.Name || userData.name || userData.Username || userData.username || '',
         role: 'user',
-        avatar: userData.avatar || '',
-        gender: userData.gender || 1,
-        phone: userData.phone || '',
-        profile: userData.profile || ''
+        avatar: userData.Avatar || userData.avatar || '',
+        gender: userData.Gender || userData.gender || 1,
+        phone: userData.Phone || userData.phone || '',
+        profile: userData.Profile || userData.profile || '',
+        email: userData.Email || userData.email || ''
       };
 
+      // 打印详细的用户数据信息
+      console.log('User data fields:', {
+        Username: userData.Username,
+        username: userData.username,
+        UserID: userData.UserID,
+        userID: userData.userID,
+        Name: userData.Name,
+        name: userData.name
+      });
+
+      // 验证必要字段
+      if (!userInfo.username) {
+        console.error('Missing username in user data:', userData);
+        throw new Error('用户名信息缺失，请重试');
+      }
+
+      if (!userInfo.UserID) {
+        console.error('Missing UserID in user data:', userData);
+        throw new Error('用户ID信息缺失，请重试');
+      }
+
+      // 存储用户信息前先打印日志
+      console.log('Storing user info:', userInfo);
+
+      // 存储用户信息
       localStorage.setItem('userInfo', JSON.stringify(userInfo));
       localStorage.setItem('token', userResponse.data.token || 'logged-in');
       localStorage.setItem('username', userInfo.username);
+
+      // 验证存储是否成功
+      const storedInfo = localStorage.getItem('userInfo');
+      console.log('Stored user info:', storedInfo);
 
       ElMessage.success('登录成功');
       window.dispatchEvent(new Event('login-success'));
@@ -146,6 +187,7 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('Login error details:', error);
+    console.error('Login error response:', error.response);
     errorMessage(error.response?.data?.message || error.message || '登录失败，请检查用户名和密码');
   }
 };

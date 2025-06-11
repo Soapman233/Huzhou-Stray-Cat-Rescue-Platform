@@ -3,6 +3,7 @@ package com.hzsca.mapper;
 import com.hzsca.entity.Users;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import java.util.List;
 
 @Mapper
 public interface UserMapper {
@@ -35,4 +36,9 @@ public interface UserMapper {
      * 删除用户
      */
     int deleteByUsername(String username);
+
+    /**
+     * 获取所有用户
+     */
+    List<Users> selectAll();
 }

@@ -138,7 +138,8 @@ const userInfo = ref({
   gender: 1,
   profile: '',
   role: 'user',
-  avatar: ''
+  avatar: '',
+  email: ''
 });
 
 // 编辑表单
@@ -157,28 +158,45 @@ const fetchUserInfo = async () => {
   try {
     // 从 localStorage 获取用户信息
     const storedUserInfo = localStorage.getItem('userInfo');
+    console.log('Raw stored user info:', storedUserInfo);  // 调试日志
+
     if (!storedUserInfo) {
       throw new Error('未找到用户信息，请重新登录');
     }
 
-    const parsedUserInfo = JSON.parse(storedUserInfo);
-    console.log('Loaded user info from storage:', parsedUserInfo);  // 调试日志
+    let parsedUserInfo;
+    try {
+      parsedUserInfo = JSON.parse(storedUserInfo);
+      console.log('Parsed user info:', parsedUserInfo);  // 调试日志
+    } catch (parseError) {
+      console.error('Error parsing user info:', parseError);
+      throw new Error('用户信息格式错误，请重新登录');
+    }
 
-    if (!parsedUserInfo || !parsedUserInfo.username) {
+    // 验证必要字段
+    if (!parsedUserInfo || typeof parsedUserInfo !== 'object') {
       throw new Error('用户信息无效，请重新登录');
+    }
+
+    if (!parsedUserInfo.username || !parsedUserInfo.UserID) {
+      console.error('Missing required fields:', parsedUserInfo);
+      throw new Error('用户信息不完整，请重新登录');
     }
 
     // 更新用户信息，确保所有字段都有默认值
     userInfo.value = {
       UserID: parsedUserInfo.UserID || '',
-      username: parsedUserInfo.username,
-      name: parsedUserInfo.name || parsedUserInfo.username,
+      username: parsedUserInfo.username || '',
+      name: parsedUserInfo.name || parsedUserInfo.username || '',
       phone: parsedUserInfo.phone || '',
       gender: parsedUserInfo.gender || 1,
       profile: parsedUserInfo.profile || '',
       role: parsedUserInfo.role || 'user',
-      avatar: parsedUserInfo.avatar || ''
+      avatar: parsedUserInfo.avatar || '',
+      email: parsedUserInfo.email || ''
     };
+
+    console.log('Updated user info:', userInfo.value);  // 调试日志
 
     // 初始化编辑表单
     Object.assign(editForm.value, {
@@ -205,8 +223,11 @@ const fetchUserInfo = async () => {
           gender: serverUserInfo.gender || userInfo.value.gender,
           profile: serverUserInfo.profile || userInfo.value.profile,
           avatar: serverUserInfo.avatar || userInfo.value.avatar,
-          role: serverUserInfo.role || userInfo.value.role
+          role: serverUserInfo.role || userInfo.value.role,
+          email: serverUserInfo.email || userInfo.value.email
         };
+
+        console.log('Updated user info from server:', updatedUserInfo);  // 调试日志
 
         // 更新状态和存储
         userInfo.value = updatedUserInfo;
@@ -233,7 +254,7 @@ const fetchUserInfo = async () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userInfo');
     localStorage.removeItem('username');
-    router.push('/login');
+    router.push('/hzsca/login');
   } finally {
     loading.value = false;
   }

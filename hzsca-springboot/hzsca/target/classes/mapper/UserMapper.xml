@@ -13,6 +13,10 @@
         <result column="Role" property="role" />
     </resultMap>
 
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT * FROM Users ORDER BY UserID
+    </select>
+
     <select id="selectByUsername" resultMap="BaseResultMap">
         SELECT * FROM Users WHERE Username = #{username}
     </select>
@@ -45,4 +49,4 @@
     <delete id="deleteByUsername">
         DELETE FROM Users WHERE Username = #{username}
     </delete>
-</mapper>
+</mapper> 

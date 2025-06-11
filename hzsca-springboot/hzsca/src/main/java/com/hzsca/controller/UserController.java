@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -15,6 +16,18 @@ public class UserController {
 
     @Autowired
     private UserMapper userMapper;
+
+    @GetMapping
+    public Result getAllUsers() {
+        try {
+            List<Users> users = userMapper.selectAll();
+            // 移除敏感信息
+            users.forEach(user -> user.setPassword(null));
+            return Result.success(users);
+        } catch (Exception e) {
+            return Result.error("500", "获取用户列表失败: " + e.getMessage());
+        }
+    }
 
     @GetMapping("/current")
     public Result getCurrentUser(@RequestParam String username) {

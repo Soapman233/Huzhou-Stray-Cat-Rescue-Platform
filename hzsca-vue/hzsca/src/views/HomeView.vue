@@ -13,14 +13,52 @@
             <router-link to="/hzsca/activity" class="nav-link">活动</router-link>
             <router-link to="/hzsca/report" class="nav-link">工作报告</router-link>
             <router-link to="/hzsca/donate" class="nav-link">捐助我们</router-link>
+            <!-- 管理员菜单 -->
+            <template v-if="isAdmin">
+              <el-dropdown trigger="click" @command="handleAdminCommand">
+                <span class="nav-link admin-link">
+                  管理后台
+                  <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                </span>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="users">
+                      <el-icon><User /></el-icon>用户管理
+                    </el-dropdown-item>
+                    <el-dropdown-item command="cats">
+                      <el-icon><House /></el-icon>猫咪管理
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </template>
           </div>
         </div>
         <div class="right-section">
-          <el-button v-if="!isLoggedIn" type="primary" class="explore-btn" @click="goToLogin">立即探索</el-button>
-          <div class="avatar-container" @click="handleAvatarClick">
-            <el-avatar v-if="isLoggedIn && userInfo.avatar" :src="getAvatarUrl(userInfo.avatar)" />
-            <el-icon v-else><Avatar /></el-icon>
-          </div>
+          <template v-if="!isLoggedIn">
+            <el-button type="primary" class="explore-btn" @click="goToLogin">立即探索</el-button>
+          </template>
+          <template v-else>
+            <el-dropdown trigger="click" @command="handleCommand">
+              <div class="avatar-container">
+                <el-avatar v-if="userInfo.avatar" :src="getAvatarUrl(userInfo.avatar)" />
+                <el-icon v-else><Avatar /></el-icon>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="personalInfo">
+                    <el-icon><User /></el-icon>个人信息
+                  </el-dropdown-item>
+                  <el-dropdown-item v-if="isAdmin" command="admin" divided>
+                    <el-icon><Setting /></el-icon>管理后台
+                  </el-dropdown-item>
+                  <el-dropdown-item command="logout" divided>
+                    <el-icon><SwitchButton /></el-icon>退出登录
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </template>
         </div>
       </nav>
     </div>
@@ -28,7 +66,11 @@
 
     <!-- 主体开始 -->
     <el-main>
-      <router-view></router-view>
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
     </el-main>
     <!-- 主体结束 -->
 
@@ -41,9 +83,10 @@
 </template>
 
 <script setup>
-import { Avatar } from '@element-plus/icons-vue';
+import { Avatar, User, House, Setting, ArrowDown, SwitchButton } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 import request from '../utils/request';
 import config from '../config/config';
 
@@ -51,13 +94,16 @@ const router = useRouter();
 const isLoggedIn = ref(false);
 const userInfo = ref({
   avatar: '',
-  name: ''
+  name: '',
+  role: ''
 });
+
+// 计算属性：是否为管理员
+const isAdmin = computed(() => userInfo.value.role === 'admin');
 
 // 获取用户信息
 const fetchUserInfo = async () => {
   try {
-    // 首先尝试从 localStorage 获取用户信息
     const storedUserInfo = localStorage.getItem('userInfo');
     if (storedUserInfo) {
       const parsedUserInfo = JSON.parse(storedUserInfo);
@@ -65,7 +111,6 @@ const fetchUserInfo = async () => {
       return;
     }
 
-    // 如果本地没有用户信息，则从服务器获取
     const username = localStorage.getItem('username');
     if (!username) {
       throw new Error('No username found');
@@ -74,22 +119,13 @@ const fetchUserInfo = async () => {
     const response = await request.get(`/api/users/current?username=${username}`);
     if (response.data && response.data.code === '200') {
       userInfo.value = response.data.data;
-      // 更新本地存储的用户信息
       localStorage.setItem('userInfo', JSON.stringify(response.data.data));
     } else {
-      // 如果获取不到用户信息，可能是token过期或无效
-      localStorage.removeItem('token');
-      localStorage.removeItem('userInfo');
-      localStorage.removeItem('username');
-      isLoggedIn.value = false;
+      handleLogout();
     }
   } catch (err) {
     console.error('Failed to fetch user info:', err);
-    // 如果请求失败，清除token并更新登录状态
-    localStorage.removeItem('token');
-    localStorage.removeItem('userInfo');
-    localStorage.removeItem('username');
-    isLoggedIn.value = false;
+    handleLogout();
   }
 };
 
@@ -106,9 +142,23 @@ const checkLoginStatus = () => {
     isLoggedIn.value = false;
     userInfo.value = {
       avatar: '',
-      name: ''
+      name: '',
+      role: ''
     };
   }
+};
+
+// 处理退出登录
+const handleLogout = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userInfo');
+  localStorage.removeItem('username');
+  isLoggedIn.value = false;
+  userInfo.value = {
+    avatar: '',
+    name: '',
+    role: ''
+  };
 };
 
 // 获取头像URL
@@ -119,38 +169,67 @@ const getAvatarUrl = (avatar) => {
   return `${config.imageBaseURL}/${avatar}`;
 };
 
-// 处理头像点击
-const handleAvatarClick = () => {
-  if (isLoggedIn.value) {
-    router.push('/hzsca/personalInfo');
-  } else {
-    router.push('/login');
+// 处理用户菜单命令
+const handleCommand = (command) => {
+  switch (command) {
+    case 'personalInfo':
+      router.push('/hzsca/personalInfo');
+      break;
+    case 'admin':
+      router.push('/hzsca/admin/users');
+      break;
+    case 'logout':
+      ElMessageBox.confirm(
+          '确定要退出登录吗？',
+          '提示',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+      ).then(() => {
+        handleLogout();
+        ElMessage.success('已退出登录');
+        router.push('/hzsca/home');
+      }).catch(() => {});
+      break;
+  }
+};
+
+// 处理管理员菜单命令
+const handleAdminCommand = (command) => {
+  switch (command) {
+    case 'users':
+      router.push('/hzsca/admin/users');
+      break;
+    case 'cats':
+      router.push('/hzsca/admin/cats');
+      break;
   }
 };
 
 // 跳转到登录页
 const goToLogin = () => {
-  router.push('/login');
+  router.push('/hzsca/login');
 };
 
-// 监听 localStorage 中 token 的变化
+// 监听 localStorage 变化
 const handleStorageChange = (e) => {
   if (e.key === 'token') {
     checkLoginStatus();
   }
 };
 
-// 创建一个自定义事件来处理登录状态更新
+// 更新登录状态
 const updateLoginStatus = () => {
   checkLoginStatus();
 };
 
-// 将更新函数暴露给全局，以便其他组件可以调用
+// 暴露更新函数给全局
 window.updateLoginStatus = updateLoginStatus;
 
 onMounted(() => {
   checkLoginStatus();
-  // 添加登录成功事件监听
   window.addEventListener('login-success', updateLoginStatus);
   window.addEventListener('storage', handleStorageChange);
 });
@@ -170,6 +249,8 @@ onUnmounted(() => {
   font-size: 14px;
   padding: 5px 10px;
   transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
 }
 
 .nav-link:hover {
@@ -210,6 +291,10 @@ onUnmounted(() => {
   padding-right: 15px;
 }
 
+.admin-link {
+  cursor: pointer;
+}
+
 .avatar-container {
   cursor: pointer;
   display: flex;
@@ -229,5 +314,22 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+/* 页面切换动画 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 下拉菜单图标样式 */
+.el-dropdown-menu__item .el-icon {
+  margin-right: 8px;
+  vertical-align: middle;
 }
 </style>

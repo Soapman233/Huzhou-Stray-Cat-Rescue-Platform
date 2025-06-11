@@ -28,18 +28,18 @@
         @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55" />
-      <el-table-column prop="username" label="用户名" min-width="120" />
-      <el-table-column prop="name" label="姓名" min-width="120" />
-      <el-table-column prop="phone" label="电话" min-width="120" />
-      <el-table-column prop="gender" label="性别" width="80">
+      <el-table-column prop="Username" label="用户名" min-width="120" />
+      <el-table-column prop="Name" label="姓名" min-width="120" />
+      <el-table-column prop="Phone" label="电话" min-width="120" />
+      <el-table-column prop="Gender" label="性别" width="80">
         <template #default="{ row }">
-          {{ row.gender === 1 ? '男' : '女' }}
+          {{ row.Gender === 1 ? '男' : '女' }}
         </template>
       </el-table-column>
-      <el-table-column prop="role" label="角色" width="100">
+      <el-table-column prop="Role" label="角色" width="100">
         <template #default="{ row }">
-          <el-tag :type="row.role === 'admin' ? 'danger' : 'success'">
-            {{ row.role === 'admin' ? '管理员' : '普通用户' }}
+          <el-tag :type="row.Role === 'admin' ? 'danger' : 'success'">
+            {{ row.Role === 'admin' ? '管理员' : '普通用户' }}
           </el-tag>
         </template>
       </el-table-column>
@@ -175,9 +175,9 @@ const filteredUsers = computed(() => {
   if (!searchQuery.value) return users.value
   const query = searchQuery.value.toLowerCase()
   return users.value.filter(user =>
-      user.username.toLowerCase().includes(query) ||
-      user.name.toLowerCase().includes(query) ||
-      user.phone.includes(query)
+      (user.Username || '').toLowerCase().includes(query) ||
+      (user.Name || '').toLowerCase().includes(query) ||
+      (user.Phone || '').includes(query)
   )
 })
 
@@ -186,12 +186,18 @@ const fetchUsers = async () => {
   loading.value = true
   try {
     const response = await request.get('/api/users')
-    if (response.data && response.data.code === '200' && Array.isArray(response.data.data)) {
-      users.value = response.data.data
-      total.value = response.data.data.length
+    console.log('User list response:', response)  // 添加日志
+    if (response.data && response.data.code === '200') {
+      // 适配后端返回的数据格式
+      const userList = Array.isArray(response.data.data) ? response.data.data :
+          (response.data.data && Array.isArray(response.data.data.data) ? response.data.data.data : [])
+      users.value = userList
+      total.value = userList.length
+      console.log('Processed user list:', users.value)  // 添加日志
     } else {
       users.value = []
       total.value = 0
+      console.error('Invalid response format:', response.data)  // 添加日志
     }
   } catch (error) {
     ElMessage.error('获取用户列表失败')
@@ -219,7 +225,15 @@ const handleAdd = () => {
 // 处理编辑用户
 const handleEdit = (row) => {
   dialogType.value = 'edit'
-  form.value = { ...row }
+  form.value = {
+    username: row.Username,
+    name: row.Name,
+    phone: row.Phone,
+    gender: row.Gender,
+    role: row.Role,
+    profile: row.Profile,
+    avatar: row.Avatar
+  }
   dialogVisible.value = true
 }
 
@@ -235,7 +249,7 @@ const handleDelete = (row) => {
       }
   ).then(async () => {
     try {
-      await request.delete(`/api/users/delete?username=${row.username}`)
+      await request.delete(`/api/users/delete?username=${row.Username}`)
       ElMessage.success('删除成功')
       fetchUsers()
     } catch (error) {
