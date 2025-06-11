@@ -4,136 +4,142 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Animals {
     @JsonProperty("AnimalID")
-    private Integer AnimalID;
+    private Integer animalId;
     @JsonProperty("Name")
-    private String Name;
+    private String name;
     @JsonProperty("Species")
-    private String Species;
+    private String species;
     @JsonProperty("Breed")
-    private String Breed;
+    private String breed;
     @JsonProperty("Age")
-    private Integer Age;
+    private Float age;
     @JsonProperty("Gender")
-    private String Gender;
+    private String gender;
     @JsonProperty("HealthStatus")
-    private String HealthStatus;
+    private String healthStatus;
     @JsonProperty("Description")
-    private String Description;
+    private String description;
     @JsonProperty("ImageURL")
-    private String ImageURL;
+    private String imageUrl;
     @JsonProperty("Source")
-    private String Source;
+    private String source;
 
     public Animals() {
     }
 
-    public Animals(Integer AnimalID, String Name, String Species, String Breed, Integer Age, String Gender,
-                   String HealthStatus, String Description, String ImageURL, String Source) {
-        this.AnimalID = AnimalID;
-        this.Name = Name;
-        this.Species = Species;
-        this.Breed = Breed;
-        this.Age = Age;
-        this.Gender = Gender;
-        this.HealthStatus = HealthStatus;
-        this.Description = Description;
-        this.ImageURL = ImageURL;
-        this.Source = Source;
+    public Animals(Integer animalId, String name, String species, String breed, Float age, String gender,
+                   String healthStatus, String description, String imageUrl, String source) {
+        this.animalId = animalId;
+        this.name = name;
+        this.species = species;
+        this.breed = breed;
+        this.age = age;
+        this.gender = gender;
+        this.healthStatus = healthStatus;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.source = source;
     }
 
-    public Integer getAnimalID() {
-        return AnimalID;
+    public Integer getAnimalId() {
+        return animalId;
     }
 
-    public void setAnimalID(Integer AnimalID) {
-        this.AnimalID = AnimalID;
+    public void setAnimalId(Integer animalId) {
+        this.animalId = animalId;
     }
 
     public String getName() {
-        return Name;
+        return name;
     }
 
-    public void setName(String Name) {
-        this.Name = Name;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getSpecies() {
-        return Species;
+        return species;
     }
 
-    public void setSpecies(String Species) {
-        this.Species = Species;
+    public void setSpecies(String species) {
+        this.species = species;
     }
 
     public String getBreed() {
-        return Breed;
+        return breed;
     }
 
-    public void setBreed(String Breed) {
-        this.Breed = Breed;
+    public void setBreed(String breed) {
+        this.breed = breed;
     }
 
-    public Integer getAge() {
-        return Age;
+    public Float getAge() {
+        return age;
     }
 
-    public void setAge(Integer Age) {
-        this.Age = Age;
+    public void setAge(Float age) {
+        this.age = age;
     }
 
     public String getGender() {
-        return Gender;
+        if (gender != null && !gender.equals("雄性") && !gender.equals("雌性") && !gender.equals("未知")) {
+            throw new IllegalArgumentException("Gender must be one of: 雄性, 雌性, 未知");
+        }
+        return gender;
     }
 
-    public void setGender(String Gender) {
-        this.Gender = Gender;
+    public void setGender(String gender) {
+        if (gender != null && !gender.equals("雄性") && !gender.equals("雌性") && !gender.equals("未知")) {
+            throw new IllegalArgumentException("Gender must be one of: 雄性, 雌性, 未知");
+        }
+        this.gender = gender;
     }
 
     public String getHealthStatus() {
-        return HealthStatus;
+        return healthStatus;
     }
 
-    public void setHealthStatus(String HealthStatus) {
-        this.HealthStatus = HealthStatus;
+    public void setHealthStatus(String healthStatus) {
+        this.healthStatus = healthStatus;
     }
 
     public String getDescription() {
-        return Description;
+        return description;
     }
 
-    public void setDescription(String Description) {
-        this.Description = Description;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public String getImageURL() {
-        return ImageURL;
+    public String getImageUrl() {
+        return imageUrl;
     }
 
-    public void setImageURL(String ImageURL) {
-        this.ImageURL = ImageURL;
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getSource() {
-        return Source;
+        return source;
     }
 
-    public void setSource(String Source) {
-        this.Source = Source;
+    public void setSource(String source) {
+        this.source = source;
     }
 
     @Override
     public String toString() {
         return "Animals{" +
-                "AnimalID=" + AnimalID +
-                ", Name='" + Name + '\'' +
-                ", Species='" + Species + '\'' +
-                ", Breed='" + Breed + '\'' +
-                ", Age=" + Age +
-                ", Gender='" + Gender + '\'' +
-                ", HealthStatus='" + HealthStatus + '\'' +
-                ", Description='" + Description + '\'' +
-                ", ImageURL='" + ImageURL + '\'' +
-                ", Source='" + Source + '\'' +
+                "animalId=" + animalId +
+                ", name='" + name + '\'' +
+                ", species='" + species + '\'' +
+                ", breed='" + breed + '\'' +
+                ", age=" + age +
+                ", gender='" + gender + '\'' +
+                ", healthStatus='" + healthStatus + '\'' +
+                ", description='" + description + '\'' +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", source='" + source + '\'' +
                 '}';
     }
 }

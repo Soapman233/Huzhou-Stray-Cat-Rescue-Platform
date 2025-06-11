@@ -1,9 +1,13 @@
 import axios from "axios";
 import { ElMessage } from "element-plus";
+import router from '../router'
 
 const request = axios.create({
-    baseURL: '',  // 保持为空，因为我们使用的是相对路径
-    timeout: 30000,
+    baseURL: '/api',  // API 的基础URL
+    timeout: 5000,  // 请求超时时间
+    headers: {
+        'Content-Type': 'application/json'
+    },
     withCredentials: true  // 允许跨域请求携带凭证
 })
 
@@ -16,7 +20,6 @@ request.interceptors.request.use(config => {
         data: config.data
     });
 
-    config.headers['Content-Type'] = 'application/json;charset=utf-8';
     // 从 localStorage 获取 token（如果有的话）
     const token = localStorage.getItem('token');
     if (token) {
@@ -24,7 +27,7 @@ request.interceptors.request.use(config => {
     }
     return config
 }, error => {
-    console.error('Request Error:', error);
+    console.error('Request error:', error);
     return Promise.reject(error)
 });
 
@@ -39,11 +42,7 @@ request.interceptors.response.use(
         return response;
     },
     error => {
-        console.error('Response Error:', {
-            status: error.response?.status,
-            data: error.response?.data,
-            message: error.message
-        });
+        console.error('Response error:', error);
 
         if (error.response) {
             switch (error.response.status) {
@@ -51,12 +50,11 @@ request.interceptors.response.use(
                     ElMessage.error(error.response.data.message || '请求参数错误');
                     break;
                 case 401:
-                    ElMessage.error('未登录或登录已过期');
-                    // 可以在这里处理登录过期的逻辑，比如跳转到登录页
+                    // 未授权，清除 token 并跳转到登录页
                     localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('role');
-                    window.location.href = '/hzsca/login';
+                    localStorage.removeItem('userInfo');
+                    ElMessage.error('登录已过期，请重新登录');
+                    router.push('/login');
                     break;
                 case 403:
                     ElMessage.error('没有权限访问该资源');
@@ -65,15 +63,17 @@ request.interceptors.response.use(
                     ElMessage.error('请求的资源不存在');
                     break;
                 case 500:
-                    ElMessage.error('服务器内部错误');
+                    ElMessage.error('服务器错误，请稍后重试');
                     break;
                 default:
                     ElMessage.error(error.response.data.message || '请求失败');
             }
         } else if (error.request) {
-            ElMessage.error('无法连接到服务器，请检查网络连接');
+            // 请求已发出但没有收到响应
+            ElMessage.error('网络错误，请检查您的网络连接');
         } else {
-            ElMessage.error(error.message);
+            // 请求配置出错
+            ElMessage.error('请求配置错误');
         }
         return Promise.reject(error);
     }

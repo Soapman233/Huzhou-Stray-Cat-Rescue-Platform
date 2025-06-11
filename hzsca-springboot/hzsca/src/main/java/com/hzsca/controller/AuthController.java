@@ -10,10 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     @Autowired
     private UserMapper userMapper;
 
@@ -24,34 +28,42 @@ public class AuthController {
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody LoginRequest request) {
         Map<String, Object> result = new HashMap<>();
+        logger.info("Login attempt for username: {}, role: {}", request.getUsername(), request.getRole());
 
         if ("user".equals(request.getRole())) {
             Users user = userMapper.selectByUsername(request.getUsername());
             if (user != null && user.getPassword().equals(request.getPassword())) {
                 result.put("success", true);
                 result.put("message", "登录成功");
-                user.setPassword(null);
+                user.setPassword(null); // Don't send password back to client
                 result.put("user", user);
                 result.put("role", "user");
+                logger.info("User login successful for: {}", request.getUsername());
             } else {
                 result.put("success", false);
                 result.put("message", "用户名或密码错误");
+                logger.warn("User login failed for: {}", request.getUsername());
             }
         } else if ("admin".equals(request.getRole())) {
             Admin admin = adminMapper.selectByUsername(request.getUsername());
+            logger.info("Admin lookup result: {}", admin != null ? "found" : "not found");
+
             if (admin != null && admin.getPassword().equals(request.getPassword())) {
                 result.put("success", true);
                 result.put("message", "登录成功");
                 admin.setPassword(null); // Don't send password back to client
                 result.put("user", admin);
                 result.put("role", "admin");
+                logger.info("Admin login successful for: {}", request.getUsername());
             } else {
                 result.put("success", false);
                 result.put("message", "用户名或密码错误");
+                logger.warn("Admin login failed for: {}", request.getUsername());
             }
         } else {
             result.put("success", false);
             result.put("message", "无效的角色类型");
+            logger.warn("Invalid role type attempted: {}", request.getRole());
         }
 
         return result;
@@ -76,17 +88,17 @@ public class AuthController {
         newUser.setPassword(request.getPassword());
         newUser.setName(request.getName());
         newUser.setPhone(request.getPhone());
-        newUser.setGender(Integer.parseInt(request.getGender()));
+        newUser.setGender(Integer.parseInt(request.getGender())); // 将String转换为Integer
         newUser.setProfile(request.getProfile());
         newUser.setAvatar(request.getAvatar());
-        newUser.setRole("user");
+        newUser.setRole("user");  // 默认角色为普通用户
 
         // 保存用户信息
         userMapper.insert(newUser);
 
         result.put("success", true);
         result.put("message", "注册成功");
-        newUser.setPassword(null);
+        newUser.setPassword(null); // Don't send password back to client
         result.put("user", newUser);
         return result;
     }

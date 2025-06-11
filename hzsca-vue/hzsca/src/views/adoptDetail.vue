@@ -101,23 +101,12 @@ const fetchCat = async () => {
     const response = await request.get(`/api/cats/${route.params.id}`);
     console.log('API Response:', response);
 
-    // 检查响应结构
-    let data = response;
-    if (response && response.data) {
-      data = response.data;
+    if (response.data && response.data.code === '200' && response.data.data) {
+      cat.value = response.data.data;
+      console.log('Final cat data:', cat.value);
+    } else {
+      throw new Error(response.data?.msg || '未找到猫咪信息');
     }
-
-    console.log('Processed data:', data);
-
-    if (!data) {
-      throw new Error('未找到猫咪信息');
-    }
-    if (!data.AnimalID) {
-      throw new Error('返回的数据格式不正确');
-    }
-
-    cat.value = data;
-    console.log('Final cat data:', cat.value);
   } catch (err) {
     console.error('Failed to fetch cat:', err);
     error.value = err.message || '获取猫咪信息失败，请稍后重试';

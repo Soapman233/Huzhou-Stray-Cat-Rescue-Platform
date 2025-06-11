@@ -4,16 +4,16 @@
     <!-- 结果映射 -->
     <resultMap id="CatResultMap" type="com.hzsca.entity.Animals">
         <!-- Animals 属性 -->
-        <id column="AnimalID" property="AnimalID"/>
-        <result column="Name" property="Name"/>
-        <result column="Species" property="Species"/>
-        <result column="Breed" property="Breed"/>
-        <result column="Age" property="Age"/>
-        <result column="Gender" property="Gender"/>
-        <result column="HealthStatus" property="HealthStatus"/>
-        <result column="Description" property="Description"/>
-        <result column="ImageURL" property="ImageURL"/>
-        <result column="Source" property="Source"/>
+        <id column="AnimalID" property="animalId"/>
+        <result column="Name" property="name"/>
+        <result column="Species" property="species"/>
+        <result column="Breed" property="breed"/>
+        <result column="Age" property="age"/>
+        <result column="Gender" property="gender"/>
+        <result column="HealthStatus" property="healthStatus"/>
+        <result column="Description" property="description"/>
+        <result column="ImageURL" property="imageUrl"/>
+        <result column="Source" property="source"/>
     </resultMap>
 
     <select id="getAllCats" resultMap="CatResultMap">

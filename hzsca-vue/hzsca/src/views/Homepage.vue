@@ -326,30 +326,19 @@ const fetchCats = async () => {
   loading.value = true;
   try {
     const response = await request.get('/api/cats');
-    console.log('Homepage API Response:', response);
+    console.log('API Response:', response);
 
-    // 检查响应结构
-    let data = response;
-    if (response && response.data) {
-      data = response.data;
-    }
-
-    console.log('Homepage processed data:', data);
-
-    if (Array.isArray(data)) {
-      cats.value = data.slice(0, 14).map(cat => ({
-        id: cat.AnimalID,
-        imageUrl: getImageUrl(cat)
-      }));
-      displayCats.value = data.slice(0, 12);
-      console.log('Homepage final cats:', displayCats.value);
+    if (response.data && response.data.code === '200' && Array.isArray(response.data.data)) {
+      cats.value = response.data.data;
+      // 显示16只猫
+      displayCats.value = response.data.data.slice(0, 16);
     } else {
-      console.error('Homepage data is not an array:', typeof data, data);
       cats.value = [];
       displayCats.value = [];
+      console.warn('Invalid data format or empty data');
     }
   } catch (error) {
-    console.error('Failed to fetch cat data:', error);
+    console.error('Failed to fetch cats:', error);
     cats.value = [];
     displayCats.value = [];
   } finally {
@@ -357,9 +346,7 @@ const fetchCats = async () => {
   }
 };
 
-onMounted(() => {
-  fetchCats();
-});
+onMounted(fetchCats);
 </script>
 
 <style scoped>
@@ -449,5 +436,60 @@ onMounted(() => {
 
 .image-placeholder:hover .cat-image {
   transform: scale(1.05);
+}
+
+/* 修改图片网格布局为2x8 */
+.image-gallery {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 1rem;
+  padding: 1rem;
+  width: 100%;
+}
+
+.image-placeholder {
+  position: relative;
+  cursor: pointer;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.cat-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+/* 响应式布局 */
+@media (max-width: 1200px) {
+  .image-gallery {
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .image-gallery {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .image-gallery {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .image-gallery {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+  }
 }
 </style>

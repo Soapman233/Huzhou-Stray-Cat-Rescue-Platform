@@ -2,15 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hzsca.mapper.UserMapper">
     <resultMap id="BaseResultMap" type="com.hzsca.entity.Users">
-        <id column="UserID" property="UserID" />
-        <result column="Username" property="Username" />
-        <result column="Password" property="Password" />
-        <result column="Phone" property="Phone" />
-        <result column="Name" property="Name" />
-        <result column="Gender" property="Gender" />
-        <result column="Profile" property="Profile" />
-        <result column="Avatar" property="Avatar" />
-        <result column="Role" property="Role" />
+        <id column="UserID" property="userID" />
+        <result column="Username" property="username" />
+        <result column="Password" property="password" />
+        <result column="Phone" property="phone" />
+        <result column="Name" property="name" />
+        <result column="Gender" property="gender" />
+        <result column="Profile" property="profile" />
+        <result column="Avatar" property="avatar" />
+        <result column="Role" property="role" />
     </resultMap>
 
     <select id="selectByUsername" resultMap="BaseResultMap">
@@ -21,19 +21,19 @@
         SELECT * FROM Users WHERE UserID = #{UserID}
     </select>
 
-    <insert id="insert" parameterType="com.hzsca.entity.Users" useGeneratedKeys="true" keyProperty="UserID">
+    <insert id="insert" parameterType="com.hzsca.entity.Users" useGeneratedKeys="true" keyProperty="userID">
         INSERT INTO Users (Username, Password, Name, Phone, Gender, Profile, Avatar, Role)
-        VALUES (#{Username}, #{Password}, #{Name}, #{Phone}, #{Gender}, #{Profile}, #{Avatar}, #{Role})
+        VALUES (#{username}, #{password}, #{name}, #{phone}, #{gender}, #{profile}, #{avatar}, #{role})
     </insert>
 
     <update id="updateProfile" parameterType="com.hzsca.entity.Users">
         UPDATE Users
-        SET Phone = #{Phone},
-            Name = #{Name},
-            Gender = #{Gender},
-            Profile = #{Profile},
-            Avatar = #{Avatar}
-        WHERE Username = #{Username}
+        SET Phone = #{phone},
+            Name = #{name},
+            Gender = #{gender},
+            Profile = #{profile},
+            Avatar = #{avatar}
+        WHERE Username = #{username}
     </update>
 
     <update id="updatePassword">

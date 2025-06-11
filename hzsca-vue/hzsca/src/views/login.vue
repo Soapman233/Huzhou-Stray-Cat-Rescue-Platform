@@ -31,9 +31,9 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import {ref, reactive, onMounted} from 'vue'
+import {useRouter} from 'vue-router'
+import {ElMessage} from 'element-plus'
 import request from '../utils/request'
 
 const router = useRouter()
@@ -42,7 +42,7 @@ const router = useRouter()
 const loginForm = reactive({
   username: '',
   password: '',
-  role: 'user'  // 默认为普通用户
+  role: 'user'  // 默认为普通用户，登录时根据用户名判断是否为管理员
 })
 
 const errorMsg = ref('')
@@ -69,75 +69,80 @@ const handleLogin = async () => {
   }
 
   try {
-    const response = await request.post('/api/auth/login', loginForm);
-    console.log('Login response:', response);
-
-    // 检查响应结构
-    const responseData = response.data;
-    console.log('Response data structure:', {
-      success: responseData.success,
-      code: responseData.code,
-      data: responseData.data,
-      message: responseData.message
+    // 先尝试管理员登录
+    const adminResponse = await request.post('/api/auth/login', {
+      ...loginForm,
+      role: 'admin'
     });
+    console.log('Admin login response:', adminResponse);
 
-    // 检查响应是否成功
-    if (responseData.code === '200' || responseData.success) {
-      // 获取用户数据，适应不同的响应结构
-      const userData = responseData.data || responseData.user || responseData;
-      console.log('User data:', userData);
+    if (adminResponse.data.success) {
+      // 管理员登录成功
+      const adminData = adminResponse.data.user;
+      console.log('Admin data:', adminData);
 
-      // 检查用户数据是否存在，注意大小写
-      if (!userData || (!userData.username && !userData.Username)) {
-        console.error('Invalid user data structure:', userData);
-        throw new Error('登录响应格式错误');
-      }
-
-      // 构建标准化的用户信息对象，处理不同的字段名称和大小写
-      const userInfo = {
-        // 用户名：优先使用大写开头的字段名
-        username: userData.Username || userData.username || userData.userName || '',
-        // 用户ID：优先使用数据库中的字段名
-        UserID: userData.UserID || userData.userID || userData.userId || userData.id || '',
-        // 姓名：如果没有则使用用户名
-        name: userData.Name || userData.name || userData.Username || userData.username || '',
-        // 角色：默认为普通用户
-        role: userData.Role || userData.role || 'user',
-        // 头像
-        avatar: userData.Avatar || userData.avatar || '',
-        // 性别：默认为1
-        gender: userData.Gender || userData.gender || 1,
-        // 电话
-        phone: userData.Phone || userData.phone || '',
-        // 个人简介
-        profile: userData.Profile || userData.profile || ''
+      // 存储管理员信息
+      const adminInfo = {
+        username: adminData.username,
+        UserID: adminData.id,
+        name: adminData.name || adminData.username,
+        role: 'admin',
+        avatar: adminData.avatar || ''
       };
 
-      console.log('Normalized user info:', userInfo);
+      localStorage.setItem('userInfo', JSON.stringify(adminInfo));
+      localStorage.setItem('token', adminResponse.data.token || 'logged-in');
+      localStorage.setItem('username', adminInfo.username);
 
-      // 存储用户信息
-      localStorage.setItem('userInfo', JSON.stringify(userInfo));
-      localStorage.setItem('token', responseData.token || userData.Token || 'logged-in');
-      localStorage.setItem('username', userInfo.username);
-
-      ElMessage.success('登录成功');
-
-      // 触发登录成功事件
+      ElMessage.success('管理员登录成功');
       window.dispatchEvent(new Event('login-success'));
 
-      // 更新全局登录状态
       if (window.updateLoginStatus) {
         window.updateLoginStatus();
       }
 
-      // 根据角色跳转
-      if (userInfo.role === 'admin') {
-        router.push('/hzsca/admin');
-      } else {
-        router.push('/');
+      router.push('/hzsca/admin');
+      return;
+    }
+
+    // 如果不是管理员，尝试普通用户登录
+    const userResponse = await request.post('/api/auth/login', {
+      ...loginForm,
+      role: 'user'
+    });
+    console.log('User login response:', userResponse);
+
+    if (userResponse.data.success) {
+      // 普通用户登录成功
+      const userData = userResponse.data.user;
+      console.log('User data:', userData);
+
+      // 构建标准化的用户信息对象
+      const userInfo = {
+        username: userData.username,
+        UserID: userData.UserID || userData.userId || userData.id || '',
+        name: userData.name || userData.username,
+        role: 'user',
+        avatar: userData.avatar || '',
+        gender: userData.gender || 1,
+        phone: userData.phone || '',
+        profile: userData.profile || ''
+      };
+
+      localStorage.setItem('userInfo', JSON.stringify(userInfo));
+      localStorage.setItem('token', userResponse.data.token || 'logged-in');
+      localStorage.setItem('username', userInfo.username);
+
+      ElMessage.success('登录成功');
+      window.dispatchEvent(new Event('login-success'));
+
+      if (window.updateLoginStatus) {
+        window.updateLoginStatus();
       }
+
+      router.push('/');
     } else {
-      throw new Error(responseData.message || responseData.msg || '登录失败');
+      throw new Error(userResponse.data.message || '登录失败');
     }
   } catch (error) {
     console.error('Login error details:', error);

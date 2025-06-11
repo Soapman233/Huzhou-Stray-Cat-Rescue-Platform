@@ -56,7 +56,7 @@ import request from '../utils/request'
 import config from '../config/config'
 
 // 默认图片（使用本地图片）
-const DEFAULT_IMAGE = '/src/assets/default-cat.jpg'
+const DEFAULT_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJh+WbvueJhzwvdGV4dD48L3N2Zz4='
 
 export default {
   name: 'AdoptView',
@@ -87,40 +87,43 @@ export default {
         const response = await request.get('/api/cats');
         console.log('API Response:', response);
 
-        // 检查响应结构
-        let data = response;
-        if (response && response.data) {
-          data = response.data;
+        const result = response.data; // 获取 Result 对象
+        if (!result || result.code !== "200") {
+          throw new Error(result?.msg || '请求失败');
         }
 
-        console.log('Processed data:', data);
+        // 从 Result 对象中提取 data 数组
+        const catData = result.data;
+        console.log('Processed data:', catData);
 
-        if (!data) {
+        if (!Array.isArray(catData)) {
+          console.error('Invalid data format:', catData);
+          throw new Error('数据格式错误');
+        }
+
+        if (catData.length === 0) {
           error.value = '暂无可领养的猫咪';
+          cats.value = [];
           return;
         }
 
-        if (Array.isArray(data)) {
-          // 检查第一个猫咪对象的属性名
-          if (data.length > 0) {
-            console.log('First cat object properties:', Object.keys(data[0]));
-            console.log('First cat ImageURL value:', data[0].ImageURL);
-            console.log('First cat raw object:', data[0]);
-          }
+        // 检查第一个猫咪对象的属性名
+        if (catData.length > 0) {
+          console.log('First cat object properties:', Object.keys(catData[0]));
+          console.log('First cat ImageURL value:', catData[0].ImageURL);
+          console.log('First cat raw object:', catData[0]);
+        }
 
-          cats.value = data.filter(cat => cat && Object.keys(cat).length > 0);
-          console.log('Final processed cats:', cats.value);
+        cats.value = catData.filter(cat => cat && Object.keys(cat).length > 0);
+        console.log('Final processed cats:', cats.value);
 
-          if (cats.value.length === 0) {
-            error.value = '暂无可领养的猫咪';
-          }
-        } else {
-          console.error('Data is not an array:', typeof data, data);
-          error.value = '数据格式错误';
+        if (cats.value.length === 0) {
+          error.value = '暂无可领养的猫咪';
         }
       } catch (err) {
         console.error('Failed to fetch cats:', err);
         error.value = err.message || '获取数据失败，请稍后重试';
+        cats.value = [];
       } finally {
         loading.value = false;
       }

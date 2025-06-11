@@ -123,10 +123,10 @@ public class CatsServiceImpl implements CatsService {
         if (result > 0) {
             try {
                 // Try to clear related caches
-                clearCatCaches(cat.getAnimalID());
-                logger.debug("Cleared cache for cat {}", cat.getAnimalID());
+                clearCatCaches(cat.getAnimalId());
+                logger.debug("Cleared cache for cat {}", cat.getAnimalId());
             } catch (Exception e) {
-                logger.warn("Failed to clear cache for cat {}: {}", cat.getAnimalID(), e.getMessage());
+                logger.warn("Failed to clear cache for cat {}: {}", cat.getAnimalId(), e.getMessage());
             }
             return true;
         }
@@ -157,7 +157,7 @@ public class CatsServiceImpl implements CatsService {
         int result = animalsMapper.deleteCat(id);
         if (result > 0) {
             try {
-
+                // Try to clear all related caches
                 clearCatCaches(id);
                 logger.debug("Cleared cache for deleted cat {}", id);
             } catch (Exception e) {
@@ -179,7 +179,7 @@ public class CatsServiceImpl implements CatsService {
 
                 // Cache individual cats
                 for (Animals cat : allCats) {
-                    String cacheKey = CATS_CACHE_KEY + cat.getAnimalID();
+                    String cacheKey = CATS_CACHE_KEY + cat.getAnimalId();
                     redisUtil.set(cacheKey, cat, CACHE_DURATION);
                 }
                 logger.debug("Preloaded individual cats to cache");

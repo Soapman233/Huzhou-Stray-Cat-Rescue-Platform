@@ -1,4 +1,4 @@
-package com.hzsca.util;
+package com.hzsca.utils;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;

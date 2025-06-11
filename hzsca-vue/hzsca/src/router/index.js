@@ -13,6 +13,15 @@ const router = createRouter({
                 {path: 'personalInfo', component: ()=> import('../views/PersonalInfo.vue'),meta: {title: '个人信息'}},
                 {path: 'login', component: ()=> import('../views/login.vue'),meta: {title: '登录'}},
                 {path: 'regist', component: ()=> import('../views/regist.vue'),meta: {title: '注册'}},
+                {path: 'admin',
+                    component: () => import('../views/admin/AdminLayout.vue'),
+                    meta: { title: '管理后台', requiresAuth: true, role: 'admin' },
+                    children: [
+                        {path: 'users', component: () => import('../views/admin/UserManagement.vue'), meta: { title: '用户管理', requiresAuth: true, role: 'admin' }},
+                        {path: 'cats', name: 'CatManagement', component: () => import('../views/admin/CatManagement.vue'), meta: {title: '猫咪管理', requiresAuth: true, requiresAdmin: true}
+                        }
+                    ]
+                }
             ]},
         { path: '/login',  meta: { title: '登录系统' },  component: () => import('../views/login.vue') },
         { path: '/regist', meta: { title: '欢迎注册' },  component: () => import('../views/regist.vue') },
@@ -23,6 +32,23 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     document.title = to.meta.title
+    if (to.matched.some(record => record.meta.requiresAuth)) {
+        const token = localStorage.getItem('token')
+        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+
+        if (!token) {
+            next({
+                path: '/hzsca/login',
+                query: { redirect: to.fullPath }
+            })
+            return
+        }
+
+        if (to.meta.role && userInfo.role !== to.meta.role) {
+            next('/404')
+            return
+        }
+    }
     next()
 })
 export default router
