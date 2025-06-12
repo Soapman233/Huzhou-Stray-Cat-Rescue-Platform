@@ -12,7 +12,7 @@
         </div>
       </div>
       <div class="info-section">
-        <h1><img src="/src/assets/paw.png" class="paw"> {{ cat.Name || '暂无名字' }}</h1>
+        <h1><img src="/src/assets/paw.png" class="paw" alt=""> {{ cat.Name || '暂无名字' }}</h1>
         <div class="info-grid">
           <div class="info-item">
             <strong>编号：</strong> {{ cat.AnimalID }}

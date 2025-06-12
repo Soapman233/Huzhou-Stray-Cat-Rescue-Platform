@@ -15,7 +15,11 @@ const router = createRouter({
                 {path: 'login', component: ()=> import('../views/login.vue'),meta: {title: '登录'}},
                 {path: 'regist', component: ()=> import('../views/regist.vue'),meta: {title: '注册'}},
                 {path: 'admin/users', component: ()=> import('../views/admin/UserManagement.vue'),meta: {title: '用户管理', requiresAuth: true, role: 'admin'}},
-                {path: 'admin/cats', component: ()=> import('../views/admin/CatManagement.vue'),meta: {title: '猫咪管理', requiresAuth: true, role: 'admin'}}
+                {path: 'admin/cats', component: ()=> import('../views/admin/CatManagement.vue'),meta: {title: '猫咪管理', requiresAuth: true, role: 'admin'}},
+                {path: 'activity', component: ()=> import('../views//activity.vue'),meta: {title: '活动'}},
+                {path: 'activity/activityall', component: ()=> import('../views/activity/activityall.vue'),meta: {title: '所有活动'}},
+                {path: 'activity/activityback', component: ()=> import('../views/activity/activityback.vue'),meta: {title: '活动回顾'}},
+
             ]},
         { path: '/login', redirect: '/hzsca/login' },
         { path: '/regist', redirect: '/hzsca/regist' },

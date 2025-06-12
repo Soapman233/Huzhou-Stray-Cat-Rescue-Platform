@@ -10,7 +10,22 @@
           <div style="display: flex; gap: 15px;">
             <router-link to="/" class="nav-link">主页</router-link>
             <router-link to="/hzsca/adopt" class="nav-link">领养</router-link>
-            <router-link to="/hzsca/activity" class="nav-link">活动</router-link>
+
+            <!-- 活动 -->
+            <el-dropdown trigger="click" @command="handleActivityCommand">
+              <router-link to="/hzsca/activity" class="nav-link">活动</router-link>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="activityback" >
+                    活动回顾
+                  </el-dropdown-item>
+                  <el-dropdown-item command="activityall" >
+                    所有活动
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+
             <router-link to="/hzsca/report" class="nav-link">工作报告</router-link>
             <router-link to="/hzsca/donate" class="nav-link">捐助我们</router-link>
             <!-- 管理员菜单 -->
@@ -32,6 +47,7 @@
                 </template>
               </el-dropdown>
             </template>
+
           </div>
         </div>
         <div class="right-section">
@@ -207,6 +223,19 @@ const handleAdminCommand = (command) => {
       break;
   }
 };
+
+// 活动菜单命令
+const handleActivityCommand = (command) => {
+  switch (command) {
+    case 'activityback':
+      router.push('/hzsca/activity/activityback');
+      break;
+    case 'activityall':
+      router.push('/hzsca/activity/activityall');
+      break;
+  }
+};
+
 
 // 跳转到登录页
 const goToLogin = () => {
