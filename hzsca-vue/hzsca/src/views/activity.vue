@@ -99,11 +99,9 @@
           </div>
 
           <div class="info-row">
-            el-icon>
+            <el-icon>
               <Location/>
-<el-icon>
-  <Location/>
-</el-icon>
+            </el-icon>
             <span class="label">活动地点：</span>
             <span>{{ currentActivity.location }}</span>
           </div>
@@ -121,10 +119,10 @@
             }[currentActivity.status] || 'info'">
               {{
                 currentActivity.status === 'ongoing' ? '正在进行' :
-                currentActivity.status === 'upcoming' ? '即将开始' :
-                currentActivity.status === 'finished' ? '已结束' :
-                currentActivity.status === 'cancelled' ? '已取消' :
-                '未知状态'
+                    currentActivity.status === 'upcoming' ? '即将开始' :
+                        currentActivity.status === 'finished' ? '已结束' :
+                            currentActivity.status === 'cancelled' ? '已取消' :
+                                '未知状态'
               }}
             </el-tag>
           </div>
@@ -163,10 +161,19 @@ const fetchActivities = async () => {
       throw new Error('获取活动数据失败')
     }
     const data = await response.json()
-    activities.value = data
+    // 确保数据是数组
+    activities.value = Array.isArray(data) ? data : []
+
+    // 格式化日期
+    activities.value = activities.value.map(activity => ({
+      ...activity,
+      date: activity.date ? new Date(activity.date).toLocaleString() : '',
+      activityTime: activity.activityTime ? new Date(activity.activityTime).toLocaleString() : ''
+    }))
   } catch (error) {
     console.error('获取活动数据时出错:', error)
     ElMessage.error('获取活动数据失败，请稍后重试')
+    activities.value = [] // 确保发生错误时设置为空数组
   }
 }
 
@@ -174,12 +181,7 @@ import { onMounted } from 'vue'
 
 // 组件挂载时获取数据
 onMounted(() => {
-  try {
-    fetchActivities()
-  } catch (error) {
-    console.error('组件挂载时出错:', error)
-    ElMessage.error('初始化失败，请刷新页面重试')
-  }
+  fetchActivities()
 })
 
 // 详情弹窗控制
@@ -188,13 +190,17 @@ const currentActivity = ref(null)
 
 // 获取图片URL
 const getImageUrl = (name) => {
-  return `/images/${name}`; // 假设图片放在 public/images/ 目录下
+  if (!name) return ''
+  return name.startsWith('http') ? name : `/images/${name}`
 }
 
 // 查看详情
 const goToDetail = (id) => {
-  currentActivity.value = activities.value.find(item => item.id === id)
-  detailVisible.value = true
+  const activity = activities.value.find(item => item.id === id)
+  if (activity) {
+    currentActivity.value = activity
+    detailVisible.value = true
+  }
 }
 </script>
 

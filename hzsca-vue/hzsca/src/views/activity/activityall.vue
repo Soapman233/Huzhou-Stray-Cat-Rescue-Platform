@@ -124,7 +124,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import {
   StarFilled,
   Picture,
@@ -151,10 +152,19 @@ const fetchActivities = async () => {
       throw new Error('获取活动数据失败')
     }
     const data = await response.json()
-    activities.value = data
+    // 确保数据是数组
+    activities.value = Array.isArray(data) ? data : []
+
+    // 格式化日期
+    activities.value = activities.value.map(activity => ({
+      ...activity,
+      date: activity.date ? new Date(activity.date).toLocaleString() : '',
+      activityTime: activity.activityTime ? new Date(activity.activityTime).toLocaleString() : ''
+    }))
   } catch (error) {
     console.error('获取活动数据时出错:', error)
     ElMessage.error('获取活动数据失败，请稍后重试')
+    activities.value = [] // 确保发生错误时设置为空数组
   }
 }
 
