@@ -140,72 +140,28 @@ import {
 const currentPage = ref(1)
 const pageSize = ref(5)
 
-// 活动数据 - 包含进行中、即将开始和已结束的活动
-const activities = ref([
-  {
-    id: 1,
-    title: '湖州学院猫猫救助活动',
-    date: '2025-06-10 至 2025-06-15',
-    location: '湖州学院东校区广场',
-    imageUrl: 'catactivity1.webp',
-    detail: '湖州学院将于2025年6月10日举办猫猫救助活动。活动内容包括为流浪猫提供食物、医疗援助和领养机会。旨在提高公众对流浪猫的关注，并为它们提供温暖的家。欢迎志愿者和领养者参与，共同为流浪猫创造更好的生活条件。',
-    status: 'ongoing'
-  },
-  {
-    id: 2,
-    title: '流浪猫TNR计划',
-    date: '2025-06-20 09:00-17:00',
-    location: '湖州学院动物保护中心',
-    imageUrl: 'catactivity2.webp',
-    detail: '2025年6月20日，湖州学院将开展流浪猫TNR项目，即捕捉、绝育、放归。通过科学方法控制流浪猫数量，减少其对生态环境的影响。活动需要志愿者协助，共同为流浪猫的未来努力。',
-    status: 'upcoming'
-  },
-  {
-    id: 3,
-    title: '猫咪健康检查与疫苗接种',
-    date: '2025-06-25 13:00-16:00',
-    location: '湖州学院动物医疗中心',
-    imageUrl: 'catactivity3.webp',
-    detail: '湖州学院于2025年6月25日组织猫咪健康检查与疫苗接种活动，为流浪猫提供全面健康检查和必要的疫苗接种服务。活动旨在预防疾病，保障猫咪健康，欢迎志愿者和动物保护组织参与。',
-    status: 'upcoming'
-  },
-  {
-    id: 4,
-    title: '流浪猫救助知识讲座与工作坊',
-    date: '2025-07-05 14:00-16:30',
-    location: '湖州学院学术报告厅',
-    imageUrl: 'catactivity4.webp',
-    detail: '2025年7月5日，湖州学院将举办流浪猫救助知识讲座与工作坊，分享流浪猫救助的基本知识和实用技巧。活动旨在提高公众对流浪猫问题的认识和救助能力，适合动物爱好者和潜在志愿者参加。',
-    status: 'upcoming'
-  },
-  {
-    id: 5,
-    title: '春季猫咪领养日',
-    date: '2025-03-15 10:00-16:00',
-    location: '湖州学院中央广场',
-    imageUrl: 'catactivity5.webp',
-    detail: '2025年春季猫咪领养日活动，为校园流浪猫寻找温暖的家。活动现场提供猫咪健康检查、咨询服务和领养手续办理。',
-    status: 'ended'
-  },
-  {
-    id: 6,
-    title: '冬季猫咪保暖物资发放',
-    date: '2024-12-10 至 2024-12-20',
-    location: '湖州学院动物保护中心',
-    imageUrl: 'catactivity6.webp',
-    detail: '为校园流浪猫提供冬季保暖物资，包括猫窝、保暖垫等，帮助它们度过寒冷的冬天。',
-    status: 'ended'
-  },
-  {
-    id: 7,
-    title: '猫咪健康义诊',
-    date: '2024-11-05 09:00-17:00',
-    location: '湖州学院动物医疗中心',
-    imageUrl: 'catactivity7.webp',
-    detail: '为校园流浪猫提供免费健康检查和基础治疗服务，包括驱虫、伤口处理等。',
-    status: 'ended'
+// 活动数据 - 从后端API获取
+const activities = ref([])
+
+// 获取活动数据
+const fetchActivities = async () => {
+  try {
+    const response = await fetch('http://localhost:8080/api/events')
+    if (!response.ok) {
+      throw new Error('获取活动数据失败')
+    }
+    const data = await response.json()
+    activities.value = data
+  } catch (error) {
+    console.error('获取活动数据时出错:', error)
+    ElMessage.error('获取活动数据失败，请稍后重试')
   }
-])
+}
+
+// 组件挂载时获取数据
+onMounted(() => {
+  fetchActivities()
+})
 
 // 计算当前页显示的活动
 const paginatedActivities = computed(() => {

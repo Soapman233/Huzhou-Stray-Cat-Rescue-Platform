@@ -1,3 +1,5 @@
+USE tpch;
+
 -- 创建管理员表
 CREATE TABLE Admins (
     id INT AUTO_INCREMENT PRIMARY KEY,  -- 管理员ID，自动递增，主键
@@ -65,21 +67,14 @@ CREATE TABLE AdoptionAssessment (
 );
 
 -- 创建活动管理表
-CREATE TABLE Events (
-    EventID INT AUTO_INCREMENT PRIMARY KEY,  -- 活动ID，自动递增，主键
+CREATE TABLE activity (
+    id INT AUTO_INCREMENT PRIMARY KEY,  -- 活动ID，自动递增，主键
+    title VARCHAR(255) NOT NULL,           -- 活动标题，不能为空
+    date DATETIME NOT NULL,                   -- 活动时间，不能为空
     Location VARCHAR(255) NOT NULL,           -- 活动地点，不能为空
-    Time DATETIME NOT NULL,                   -- 活动时间，不能为空
-    Content TEXT NOT NULL                     -- 活动内容，不能为空
-);
-
--- 创建义工申请表
-CREATE TABLE VolunteerApplications (
-    ApplicationID INT AUTO_INCREMENT PRIMARY KEY,  -- 申请ID，自动递增，主键
-    Name VARCHAR(50) NOT NULL,                      -- 义工姓名，不能为空
-    Gender ENUM('男', '女', '其他') NOT NULL,       -- 义工性别，不能为空
-    Age INT NOT NULL,                               -- 义工年龄，不能为空
-    Phone VARCHAR(15) NOT NULL,                     -- 义工电话号码，不能为空
-    AvailableTime VARCHAR(255) NOT NULL              -- 义工空闲时间，不能为空
+    imgurl VARCHAR(255) NOT NULL,           -- 活动图片，不能为空
+    detail TEXT NOT NULL,                     -- 活动内容，不能为空
+    status ENUM('upcoming','ended','ongoing') NOT NULL DEFAULT 'upcoming' -- 活动状态，只能为 'upcoming'、'ended'、'ongoing'，不能为空
 );
 
 
@@ -140,3 +135,16 @@ INSERT INTO Animals (AnimalID, Name, Species, Breed, Age, Gender, HealthStatus, 
 (36, '粽子', '猫', '家猫', 0.3, '雌性', '良好', '无', '/cats/36.jpeg', '流浪'),
 (37, '云朵', '猫', '孟买猫', 0.3, '雌性', '良好', '无', '/cats/37.jpeg', '流浪'),
 (38, '糖糖', '猫', '豹猫', 2.0, '雌性', '良好', '无', '/cats/38.jpeg', '流浪');
+
+
+INSERT INTO activity (title, date, Location, imgurl, detail, status) VALUES
+('关爱流浪动物宣传活动', '2024-06-01 10:00:00', '城市广场', 'https://example.com/event1.jpg', '宣传保护流浪动物知识', 'ongoing'),
+('领养开放日', '2024-06-10 13:00:00', '动物收容所', 'https://example.com/event2.jpg', '提供多种动物供领养', 'ongoing'),
+('宠物健康讲座', '2024-06-15 14:30:00', '社区中心', 'https://example.com/event3.jpg', '邀请兽医讲解宠物健康知识', 'upcoming'),
+('宠物摄影大赛', '2024-06-20 09:00:00', '公园', 'https://example.com/event4.jpg', '展示宠物可爱瞬间', 'ended'),
+('动物志愿者招募会', '2024-06-25 15:00:00', '志愿者中心', 'https://example.com/event5.jpg', '招募动物保护志愿者', 'ended'),
+('宠物趣味运动会', '2024-07-01 11:00:00', '体育场', 'https://example.com/event6.jpg', '举办宠物运动比赛', 'ended'),
+('流浪动物救助培训', '2024-07-10 14:00:00', '培训中心', 'https://example.com/event7.jpg', '培训救助流浪动物技能', 'ended'),
+('宠物环保活动', '2024-07-15 10:30:00', '环保公园', 'https://example.com/event8.jpg', '宣传宠物环保理念', 'ended'),
+('动物主题市集', '2024-07-20 12:00:00', '商业街', 'https://example.com/event9.jpg', '售卖动物周边产品', 'ended'),
+('宠物才艺表演', '2024-07-25 13:30:00', '剧院', 'https://example.com/event10.jpg', '展示宠物才艺', 'ended');
