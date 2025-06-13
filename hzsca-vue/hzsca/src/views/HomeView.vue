@@ -83,9 +83,9 @@
     <!-- 主体开始 -->
     <el-main>
       <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
+        <keep-alive>
+          <component :is="Component" :key="$route.fullPath" />
+        </keep-alive>
       </router-view>
     </el-main>
     <!-- 主体结束 -->
