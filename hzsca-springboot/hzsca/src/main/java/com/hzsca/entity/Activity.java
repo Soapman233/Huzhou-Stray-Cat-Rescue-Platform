@@ -10,7 +10,7 @@ public class Activity {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
 
-    private String location;
+    private String Location;
     private String status;
     private String detail;
     private String imgurl;
@@ -29,7 +29,7 @@ public class Activity {
     }
 
     public String getLocation() {
-        return location;
+        return Location;
     }
 
     public String getStatus() {
@@ -57,8 +57,8 @@ public class Activity {
         this.date = date;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setLocation(String Location) {
+        this.Location = Location;
     }
 
     public void setStatus(String status) {
