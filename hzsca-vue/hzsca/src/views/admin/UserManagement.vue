@@ -172,13 +172,17 @@ const rules = {
 
 // 计算属性：过滤后的用户列表
 const filteredUsers = computed(() => {
-  if (!searchQuery.value) return users.value
+  if (!searchQuery.value) {
+    const start = (currentPage.value - 1) * pageSize.value
+    const end = start + pageSize.value
+    return users.value.slice(start, end)
+  }
   const query = searchQuery.value.toLowerCase()
   return users.value.filter(user =>
-      (user.Username || '').toLowerCase().includes(query) ||
-      (user.Name || '').toLowerCase().includes(query) ||
-      (user.Phone || '').includes(query)
-  )
+    (user.Username || '').toLowerCase().includes(query) ||
+    (user.Name || '').toLowerCase().includes(query) ||
+    (user.Phone || '').includes(query)
+  ).slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
 })
 
 // 获取用户列表

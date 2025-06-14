@@ -77,6 +77,16 @@ const router = createRouter({
                     meta: {title: '活动回顾'}
                 },
                 {
+                    path: 'donate',
+                    component: () => import('../views/donate.vue'),
+                    meta: {title: '捐助我们'}
+                },
+                {
+                    path: 'report',
+                    component: () => import('../views/report.vue'),
+                    meta: {title: '工作报告'}
+                },
+                {
                     path: 'admin/adoptions',
                     name: 'adoptions',
                     component: AdoptionManagement,

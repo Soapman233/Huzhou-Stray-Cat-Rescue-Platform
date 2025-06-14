@@ -230,11 +230,15 @@ const getStatusText = (status) => {
 
 // 计算属性：过滤后的活动列表
 const filteredActivities = computed(() => {
-  if (!searchQuery.value) return activities.value
+  if (!searchQuery.value) {
+    const start = (currentPage.value - 1) * pageSize.value
+    const end = start + pageSize.value
+    return activities.value.slice(start, end)
+  }
   const query = searchQuery.value.toLowerCase()
   return activities.value.filter(activity =>
-      activity.title.toLowerCase().includes(query)
-  )
+    activity.title.toLowerCase().includes(query)
+  ).slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
 })
 
 // 获取活动列表

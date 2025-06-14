@@ -224,12 +224,16 @@ const rules = {
 
 // 计算属性：过滤后的猫咪列表
 const filteredCats = computed(() => {
-  if (!searchQuery.value) return cats.value
+  if (!searchQuery.value) {
+    const start = (currentPage.value - 1) * pageSize.value
+    const end = start + pageSize.value
+    return cats.value.slice(start, end)
+  }
   const query = searchQuery.value.toLowerCase()
   return cats.value.filter(cat =>
-      (cat.Name || '').toLowerCase().includes(query) ||
-      (cat.Breed || '').toLowerCase().includes(query)
-  )
+    (cat.Name || '').toLowerCase().includes(query) ||
+    (cat.Breed || '').toLowerCase().includes(query)
+  ).slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
 })
 
 // 获取猫咪列表
