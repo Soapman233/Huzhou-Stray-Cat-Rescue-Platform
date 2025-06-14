@@ -183,24 +183,33 @@ const activities = ref([]);
 // 获取活动数据
 const fetchActivities = async () => {
   try {
-    const response = await fetch('http://localhost:8080/api/events');
+    const response = await fetch(`${config.baseURL}/api/activity/list`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
     if (!response.ok) {
       throw new Error('获取活动数据失败');
     }
-    const data = await response.json();
-    // 确保数据是数组
-    activities.value = Array.isArray(data) ? data : [];
-
-    // 格式化日期并按时间排序
-    activities.value = activities.value.slice(0, 3).map((activity) => ({
-      ...activity,
-      date: activity.date ? new Date(activity.date).toLocaleString() : '',
-      activityTime: activity.activityTime ? new Date(activity.activityTime).toLocaleString() : ''
-    })).sort(((a, b) => new Date(a.date) - new Date(b.date)));
+    const result = await response.json();
+    if (result.code === '200' && Array.isArray(result.data)) {
+      // 只取前三个活动
+      activities.value = result.data
+          .map(activity => ({
+            ...activity,
+            date: activity.date ? new Date(activity.date).toLocaleString() : ''
+          }))
+          .sort((a, b) => new Date(b.date) - new Date(a.date))
+          .slice(0, 3);
+    } else {
+      activities.value = [];
+    }
   } catch (error) {
     console.error('获取活动数据时出错:', error);
     ElMessage.error('获取活动数据失败，请稍后重试');
-    activities.value = []; // 确保发生错误时设置为空数组
+    activities.value = [];
   }
 };
 
@@ -211,7 +220,9 @@ onMounted(() => {
 
 // 计算当前页显示的活动
 const paginatedActivities = computed(() => {
-  return activities.value;
+  const start = (currentPage.value - 1) * pageSize.value;
+  const end = start + pageSize.value;
+  return activities.value.slice(start, end);
 });
 
 // 详情弹窗控制
@@ -219,72 +230,37 @@ const detailVisible = ref(false);
 const currentActivity = ref(null);
 
 // 获取图片URL
-const getImageUrl = (imageUrl) => {
-  try {
-    console.log('Processing image URL:', imageUrl);
-
-    if (!imageUrl) {
-      console.log('No image URL provided, using default image');
-      return new URL(DEFAULT_IMAGE, import.meta.url).href;
-    }
-
-    // 检查是否是完整的 URL
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      console.log('Using full URL:', imageUrl);
-      return imageUrl;
-    }
-
-    // 检查是否是 Base64 数据
-    if (imageUrl.startsWith('data:image')) {
-      console.log('Using Base64 image data');
-      return imageUrl;
-    }
-
-    // 处理相对路径
-    const baseUrl = config?.imageBaseURL || 'http://localhost:8080';
-    // 确保路径格式正确
-    const cleanImageUrl = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
-    const fullUrl = `${baseUrl}/${cleanImageUrl}`;
-    console.log('Generated full URL:', fullUrl);
-    return fullUrl;
-  } catch (err) {
-    console.error('Error processing image URL:', err);
-    return new URL(DEFAULT_IMAGE, import.meta.url).href;
-  }
-}
+const getImageUrl = (url) => {
+  if (!url) return DEFAULT_IMAGE;
+  if (url.startsWith('http')) return url;
+  if (url.startsWith('data:image')) return url;
+  const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+  return `${config.imageBaseURL}/${cleanUrl}`;
+};
 
 // 处理图片加载错误
 const handleImageError = (e) => {
-  console.log('Image load error, using default image');
-  e.target.src = new URL(DEFAULT_IMAGE, import.meta.url).href;
-}
+  e.target.src = DEFAULT_IMAGE;
+};
 
 // 获取状态标签类型
 const getStatusTagType = (status) => {
-  switch (status) {
-    case 'ongoing':
-      return 'danger';
-    case 'upcoming':
-      return 'success';
-    case 'ended':
-      return 'info';
-    default:
-      return '';
-  }
+  const types = {
+    'upcoming': 'warning',
+    'ongoing': 'success',
+    'ended': 'info'
+  };
+  return types[status] || 'info';
 };
 
 // 获取状态文本
 const getStatusText = (status) => {
-  switch (status) {
-    case 'ongoing':
-      return '正在进行';
-    case 'upcoming':
-      return '即将开始';
-    case 'ended':
-      return '已结束';
-    default:
-      return '未知状态';
-  }
+  const texts = {
+    'upcoming': '即将开始',
+    'ongoing': '进行中',
+    'ended': '已结束'
+  };
+  return texts[status] || status;
 };
 
 // 查看详情

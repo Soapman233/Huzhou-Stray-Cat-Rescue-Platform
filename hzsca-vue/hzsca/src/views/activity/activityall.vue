@@ -178,26 +178,31 @@ const activities = ref([])
 // 获取活动数据
 const fetchActivities = async () => {
   try {
-    const response = await fetch('http://localhost:8080/api/events')
+    const response = await fetch(`${config.baseURL}/api/activity/list`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      }
+    });
     if (!response.ok) {
-      throw new Error('获取活动数据失败')
+      throw new Error('获取活动数据失败');
     }
-    const data = await response.json()
-    // 确保数据是数组
-    activities.value = Array.isArray(data) ? data : []
-
-    // 格式化日期并按时间排序（最新在前）
-    activities.value = activities.value.map(activity => ({
-      ...activity,
-      date: activity.date ? new Date(activity.date).toLocaleString() : '',
-      activityTime: activity.activityTime ? new Date(activity.activityTime).toLocaleString() : ''
-    })).sort((a, b) => new Date(b.date) - new Date(a.date))
+    const result = await response.json();
+    if (result.code === '200' && Array.isArray(result.data)) {
+      activities.value = result.data.map(activity => ({
+        ...activity,
+        date: activity.date ? new Date(activity.date).toLocaleString() : ''
+      })).sort((a, b) => new Date(b.date) - new Date(a.date));
+    } else {
+      activities.value = [];
+    }
   } catch (error) {
-    console.error('获取活动数据时出错:', error)
-    ElMessage.error('获取活动数据失败，请稍后重试')
-    activities.value = [] // 确保发生错误时设置为空数组
+    console.error('获取活动数据时出错:', error);
+    ElMessage.error('获取活动数据失败，请稍后重试');
+    activities.value = [];
   }
-}
+};
 
 // 组件挂载时获取数据
 onMounted(() => {
@@ -206,15 +211,14 @@ onMounted(() => {
 
 // 计算过滤后的活动
 const filteredActivities = computed(() => {
-  const keywords = searchQuery.value.split(/\s+/).filter(Boolean);
-  if (keywords.length === 0) return activities.value;
-  return activities.value.filter(activity => {
-    return keywords.every(keyword => {
-      return activity.title.includes(keyword) || activity.detail.includes(keyword);
-    });
-  });
-});
-
+  if (!searchQuery.value) return activities.value
+  const query = searchQuery.value.toLowerCase()
+  return activities.value.filter(activity =>
+      activity.title.toLowerCase().includes(query) ||
+      activity.detail.toLowerCase().includes(query) ||
+      activity.Location.toLowerCase().includes(query)
+  )
+})
 
 // 计算当前页显示的活动
 const paginatedActivities = computed(() => {
@@ -227,81 +231,43 @@ const paginatedActivities = computed(() => {
 const detailVisible = ref(false)
 const currentActivity = ref(null)
 
-// 默认图片路径
-const DEFAULT_IMAGE = '/static/activity/default.png'
-// 获取图片URL
-const getImageUrl = (imageUrl) => {
-  try {
-    console.log('Processing image URL:', imageUrl);
-
-    if (!imageUrl) {
-      console.log('No image URL provided, using default image');
-      return new URL(DEFAULT_IMAGE, import.meta.url).href;
-    }
-
-    // 检查是否是完整的 URL
-    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
-      console.log('Using full URL:', imageUrl);
-      return imageUrl;
-    }
-
-    // 检查是否是 Base64 数据
-    if (imageUrl.startsWith('data:image')) {
-      console.log('Using Base64 image data');
-      return imageUrl;
-    }
-
-    // 处理相对路径
-    const baseUrl = config?.imageBaseURL || 'http://localhost:8080';
-    // 确保路径格式正确
-    const cleanImageUrl = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
-    const fullUrl = `${baseUrl}/${cleanImageUrl}`;
-    console.log('Generated full URL:', fullUrl);
-    return fullUrl;
-  } catch (err) {
-    console.error('Error processing image URL:', err);
-    return new URL(DEFAULT_IMAGE, import.meta.url).href;
-  }
-}
+// 图片URL处理
+const getImageUrl = (url) => {
+  if (!url) return '';
+  if (url.startsWith('http')) return url;
+  if (url.startsWith('data:image')) return url;
+  const cleanUrl = url.startsWith('/') ? url.substring(1) : url;
+  return `${config.imageBaseURL}/${cleanUrl}`;
+};
 
 // 处理图片加载错误
 const handleImageError = (e) => {
-  console.log('Image load error, using default image');
-  e.target.src = new URL(DEFAULT_IMAGE, import.meta.url).href;
+  e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJh+WbvueJhzwvdGV4dD48L3N2Zz4='
 }
-
 
 // 获取状态标签类型
 const getStatusTagType = (status) => {
-  switch (status) {
-    case 'ongoing':
-      return 'danger'
-    case 'upcoming':
-      return 'success'
-    case 'ended':
-      return 'info'
-    default:
-      return ''
+  const types = {
+    'upcoming': 'warning',
+    'ongoing': 'success',
+    'ended': 'info'
   }
+  return types[status] || 'info'
 }
 
 // 获取状态文本
 const getStatusText = (status) => {
-  switch (status) {
-    case 'ongoing':
-      return '正在进行'
-    case 'upcoming':
-      return '即将开始'
-    case 'ended':
-      return '已结束'
-    default:
-      return '未知状态'
+  const texts = {
+    'upcoming': '即将开始',
+    'ongoing': '进行中',
+    'ended': '已结束'
   }
+  return texts[status] || status
 }
 
 // 查看详情
 const goToDetail = (id) => {
-  currentActivity.value = activities.value.find(item => item.id === id)
+  currentActivity.value = activities.value.find(a => a.id === id)
   detailVisible.value = true
 }
 </script>

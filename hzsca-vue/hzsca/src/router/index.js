@@ -56,6 +56,11 @@ const router = createRouter({
                     meta: {title: '猫咪管理', requiresAuth: true, role: 'admin'}
                 },
                 {
+                    path: 'admin/activities',
+                    component: () => import('../views/admin/ActivityManagement.vue'),
+                    meta: {title: '活动管理', requiresAuth: true, role: 'admin'}
+                },
+                {
                     path: 'activity',
                     component: () => import('../views/activity.vue'),
                     meta: {title: '活动'}

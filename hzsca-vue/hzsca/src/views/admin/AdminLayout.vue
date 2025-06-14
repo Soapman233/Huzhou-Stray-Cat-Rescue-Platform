@@ -23,6 +23,10 @@
             <el-icon><House /></el-icon>
             <span>猫咪管理</span>
           </el-menu-item>
+          <el-menu-item index="/hzsca/admin/activities">
+            <el-icon><Calendar /></el-icon>
+            <span>活动管理</span>
+          </el-menu-item>
         </el-menu>
       </div>
       <div class="right-section">
@@ -64,7 +68,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { User, House } from '@element-plus/icons-vue'
+import { User, House, Calendar } from '@element-plus/icons-vue'
 import { ElMessageBox } from 'element-plus'
 
 const route = useRoute()
@@ -81,6 +85,8 @@ const currentPage = computed(() => {
       return '用户管理'
     case '/hzsca/admin/cats':
       return '猫咪管理'
+    case '/hzsca/admin/activities':
+      return '活动管理'
     default:
       return '管理后台'
   }

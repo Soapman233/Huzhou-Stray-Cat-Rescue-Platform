@@ -35,6 +35,13 @@ export default defineConfig({
     host: true,
     open: true,
     cors: true,
+    hmr: {
+      overlay: true,
+      timeout: 30000
+    },
+    watch: {
+      usePolling: true
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
