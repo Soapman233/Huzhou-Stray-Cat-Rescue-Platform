@@ -12,6 +12,7 @@ public class AdoptionApplication {
     private String livingSpace;   // 居住空间
     private Boolean petFriendly;  // 是否宠物友好
     private String createTime;    // 创建时间
+    private String status;        // 申请状态：PENDING-待审核, APPROVED-已通过, REJECTED-已拒绝
 
     public AdoptionApplication() {
     }
@@ -102,5 +103,13 @@ public class AdoptionApplication {
 
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

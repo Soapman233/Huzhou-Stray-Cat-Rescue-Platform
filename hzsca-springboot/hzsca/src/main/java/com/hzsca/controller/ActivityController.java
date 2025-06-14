@@ -3,6 +3,7 @@ package com.hzsca.controller;
 import com.hzsca.common.Result;
 import com.hzsca.entity.Activity;
 import com.hzsca.mapper.ActivityMapper;
+import com.hzsca.service.FileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,9 @@ public class ActivityController {
     @Autowired
     private ActivityMapper activityMapper;
 
+    @Autowired
+    private FileService fileService;
+
     @GetMapping("/list")
     public Result getAllActivities() {
         try {
@@ -33,20 +37,30 @@ public class ActivityController {
     @PostMapping("/add")
     public Result addActivity(@RequestBody Activity activity) {
         try {
+            if (activity.getTitle() == null || activity.getDate() == null ||
+                    activity.getLocation() == null || activity.getDetail() == null ||
+                    activity.getImgurl() == null) {
+                return Result.error("400", "缺少必要字段");
+            }
             activityMapper.insertActivity(activity);
             return Result.success();
         } catch (Exception e) {
-            return Result.error("500", "添加活动失败");
+            e.printStackTrace(); // 添加错误日志
+            return Result.error("500", "添加活动失败: " + e.getMessage());
         }
     }
 
     @PutMapping("/update")
     public Result updateActivity(@RequestBody Activity activity) {
         try {
+            if (activity.getId() == null) {
+                return Result.error("400", "缺少活动ID");
+            }
             activityMapper.updateActivity(activity);
             return Result.success();
         } catch (Exception e) {
-            return Result.error("500", "更新活动失败");
+            e.printStackTrace(); // 添加错误日志
+            return Result.error("500", "更新活动失败: " + e.getMessage());
         }
     }
 
@@ -56,25 +70,22 @@ public class ActivityController {
             activityMapper.deleteActivity(id);
             return Result.success();
         } catch (Exception e) {
-            return Result.error("500", "删除活动失败");
+            e.printStackTrace(); // 添加错误日志
+            return Result.error("500", "删除活动失败: " + e.getMessage());
         }
     }
 
     @PostMapping("/upload")
     public Result uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            String fileName = UUID.randomUUID().toString() +
-                    file.getOriginalFilename().substring(file.getOriginalFilename().lastIndexOf("."));
-            String uploadPath = "uploads/activity/";
-            File dir = new File(uploadPath);
-            if (!dir.exists()) {
-                dir.mkdirs();
+            if (file.isEmpty()) {
+                return Result.error("400", "文件为空");
             }
-            File dest = new File(uploadPath + fileName);
-            file.transferTo(dest);
-            return Result.success("activity/" + fileName);
-        } catch (IOException e) {
-            return Result.error("500", "图片上传失败");
+            String imageUrl = fileService.uploadFile(file);
+            return Result.success(imageUrl);
+        } catch (Exception e) {
+            e.printStackTrace(); // 添加错误日志
+            return Result.error("500", "图片上传失败: " + e.getMessage());
         }
     }
 }

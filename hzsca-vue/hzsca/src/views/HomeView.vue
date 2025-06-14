@@ -43,6 +43,12 @@
                     <el-dropdown-item command="cats">
                       <el-icon><House /></el-icon>猫咪管理
                     </el-dropdown-item>
+                    <el-dropdown-item command="activities">
+                      <el-icon><Calendar /></el-icon>活动管理
+                    </el-dropdown-item>
+                    <el-dropdown-item command="adoptions">
+                      <el-icon><Document /></el-icon>领养申请管理
+                    </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
@@ -99,7 +105,7 @@
 </template>
 
 <script setup>
-import { Avatar, User, House, Setting, ArrowDown, SwitchButton } from '@element-plus/icons-vue';
+import { Avatar, User, House, Setting, ArrowDown, SwitchButton, Calendar, Document } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -207,7 +213,8 @@ const handleCommand = (command) => {
         handleLogout();
         ElMessage.success('已退出登录');
         router.push('/hzsca/home');
-      }).catch(() => {});
+      }).catch(() => {
+      });
       break;
   }
 };
@@ -220,6 +227,12 @@ const handleAdminCommand = (command) => {
       break;
     case 'cats':
       router.push('/hzsca/admin/cats');
+      break;
+    case 'activities':
+      router.push('/hzsca/admin/activities');
+      break;
+    case 'adoptions':
+      router.push('/hzsca/admin/adoptions');
       break;
   }
 };

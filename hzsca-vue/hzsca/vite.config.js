@@ -1,4 +1,5 @@
 import { fileURLToPath, URL } from 'node:url'
+import path from 'path'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
@@ -9,7 +10,14 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    vue(),
+    vue({
+      template: {
+        compilerOptions: {
+          whitespace: 'preserve',
+        },
+      },
+      reactivityTransform: true,
+    }),
     AutoImport({
       resolvers: [ElementPlusResolver()],
     }),
@@ -19,7 +27,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': path.resolve(__dirname, 'src')
     }
   },
   css: {
@@ -31,23 +39,32 @@ export default defineConfig({
     }
   },
   server: {
+    host: '0.0.0.0',
     port: 5173,
-    host: true,
     open: true,
     cors: true,
+    force: true, // 强制依赖预构建
     hmr: {
-      overlay: true,
-      timeout: 30000
+      protocol: 'ws',
+      host: 'localhost',
+      port: 5173,
+      clientPort: 5173,
+      timeout: 5000,
+      overlay: false,
+      path: '@hmr',
     },
     watch: {
-      usePolling: true
+      usePolling: true,
+      interval: 50,
+      followSymlinks: true,
+      ignored: ['**/node_modules/**', '**/.git/**'],
     },
     proxy: {
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '')
+        rewrite: (path) => path.replace(/^\/api/, '/api')  // 保持/api前缀
       }
     }
   }

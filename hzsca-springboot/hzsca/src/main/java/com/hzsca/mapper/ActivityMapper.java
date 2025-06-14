@@ -15,14 +15,15 @@ public interface ActivityMapper {
     @Select("SELECT * FROM activity WHERE status = 'ended' ORDER BY date DESC")
     List<Activity> findEndedActivities();
 
-    @Insert("INSERT INTO activity (title, date, Location, status, detail, imgurl) " +
-            "VALUES (#{title}, #{date}, #{Location}, #{status}, #{detail}, #{imgurl})")
-    void insertActivity(Activity activity);
+    @Insert("INSERT INTO activity (title, date, Location, imgurl, detail, status) " +
+            "VALUES (#{title}, #{date}, #{Location}, #{imgurl}, #{detail}, #{status})")
+    @Options(useGeneratedKeys = true, keyProperty = "id")
+    int insertActivity(Activity activity);
 
     @Update("UPDATE activity SET title=#{title}, date=#{date}, Location=#{Location}, " +
-            "status=#{status}, detail=#{detail}, imgurl=#{imgurl} WHERE id=#{id}")
-    void updateActivity(Activity activity);
+            "imgurl=#{imgurl}, detail=#{detail}, status=#{status} WHERE id=#{id}")
+    int updateActivity(Activity activity);
 
     @Delete("DELETE FROM activity WHERE id=#{id}")
-    void deleteActivity(Integer id);
+    int deleteActivity(Integer id);
 }

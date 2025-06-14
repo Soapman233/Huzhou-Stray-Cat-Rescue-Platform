@@ -186,18 +186,18 @@ const fetchUsers = async () => {
   loading.value = true
   try {
     const response = await request.get('/api/users')
-    console.log('User list response:', response)  // 添加日志
+    console.log('User list response:', response)  // 调试日志
     if (response.data && response.data.code === '200') {
       // 适配后端返回的数据格式
       const userList = Array.isArray(response.data.data) ? response.data.data :
           (response.data.data && Array.isArray(response.data.data.data) ? response.data.data.data : [])
       users.value = userList
       total.value = userList.length
-      console.log('Processed user list:', users.value)  // 添加日志
+      console.log('Processed user list:', users.value)  // 调试日志
     } else {
       users.value = []
       total.value = 0
-      console.error('Invalid response format:', response.data)  // 添加日志
+      console.error('Invalid response format:', response.data)  // 调试日志
     }
   } catch (error) {
     ElMessage.error('获取用户列表失败')
@@ -267,17 +267,53 @@ const handleSubmit = async () => {
     if (valid) {
       try {
         if (dialogType.value === 'add') {
-          await request.post('/api/auth/register', form.value)
-          ElMessage.success('添加成功')
+          // 创建注册请求数据，不包含role字段
+          const registerData = {
+            username: form.value.username,
+            password: form.value.password,
+            name: form.value.name,
+            phone: form.value.phone,
+            gender: form.value.gender,
+            profile: form.value.profile
+          }
+
+          const response = await request.post('/api/auth/register', registerData)
+          console.log('Add user response:', response)  // 调试日志
+
+          // 检查响应格式
+          if (response.data) {
+            if (response.data.code === '200' || response.data.success) {
+              ElMessage.success('添加成功')
+              dialogVisible.value = false
+              // 确保在添加成功后重新获取用户列表
+              await fetchUsers()
+            } else {
+              throw new Error(response.data.message || '添加失败')
+            }
+          } else {
+            throw new Error('服务器响应格式错误')
+          }
         } else {
-          await request.put('/api/users/update', form.value)
-          ElMessage.success('更新成功')
+          const response = await request.put('/api/users/update', form.value)
+          console.log('Update user response:', response)  // 调试日志
+
+          // 检查响应格式
+          if (response.data) {
+            if (response.data.code === '200' || response.data.success) {
+              ElMessage.success('更新成功')
+              dialogVisible.value = false
+              // 确保在更新成功后重新获取用户列表
+              await fetchUsers()
+            } else {
+              throw new Error(response.data.message || '更新失败')
+            }
+          } else {
+            throw new Error('服务器响应格式错误')
+          }
         }
-        dialogVisible.value = false
-        fetchUsers()
       } catch (error) {
-        ElMessage.error(dialogType.value === 'add' ? '添加失败' : '更新失败')
         console.error('Failed to submit form:', error)
+        ElMessage.error(error.message || (dialogType.value === 'add' ? '添加失败' : '更新失败'))
       }
     }
   })

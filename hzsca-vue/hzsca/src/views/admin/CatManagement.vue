@@ -336,7 +336,8 @@ const handleDelete = (row) => {
       }
   ).then(async () => {
     try {
-      await request.delete(`/api/cats/delete?id=${row.AnimalID}`)
+      // 修改删除请求的URL格式
+      await request.delete(`/api/cats/${row.AnimalID}`)
       ElMessage.success('删除成功')
       fetchCats()
     } catch (error) {
@@ -353,7 +354,6 @@ const handleSubmit = async () => {
   await formRef.value.validate(async (valid) => {
     if (valid) {
       try {
-        // 构建提交数据，确保字段名与后端一致
         const submitData = {
           Name: form.value.name,
           Breed: form.value.breed,
@@ -363,28 +363,34 @@ const handleSubmit = async () => {
           HealthStatus: form.value.healthStatus,
           Description: form.value.description,
           ImageURL: form.value.imageUrl,
-          Species: form.value.species
+          Species: '猫'
         }
 
-        if (dialogType.value === 'add') {
-          console.log('Adding new cat:', submitData)
-          await request.post('/api/cats/add', submitData)
-          ElMessage.success('添加成功')
+        let response;
+        if (dialogType.value === 'edit') {
+          // 编辑模式：使用PUT请求更新现有猫咪
+          submitData.AnimalID = form.value.animalId;
+          console.log('Updating cat:', submitData);
+          response = await request.put(`/api/cats/${form.value.animalId}`, submitData);
         } else {
-          // 编辑时添加 AnimalID
-          submitData.AnimalID = form.value.animalId // 使用保存的 animalId
-          console.log('Updating cat:', submitData)
-          await request.put('/api/cats/update', submitData)
-          ElMessage.success('更新成功')
+          // 添加模式：使用POST请求创建新猫咪
+          console.log('Adding new cat:', submitData);
+          response = await request.post('/api/cats', submitData);
         }
-        dialogVisible.value = false
-        fetchCats()
+
+        console.log('API response:', response);
+
+        if (response.data && response.data.code === '200') {
+          ElMessage.success(dialogType.value === 'edit' ? '更新成功' : '添加成功');
+          dialogVisible.value = false;
+          await fetchCats();
+        } else {
+          throw new Error(response.data?.message || (dialogType.value === 'edit' ? '更新失败' : '添加失败'));
+        }
       } catch (error) {
-        console.error('Submit error:', error.response?.data || error)
-        ElMessage.error(dialogType.value === 'add' ? '添加失败' : '更新失败')
+        console.error('Submit error:', error);
+        ElMessage.error(error.message || (dialogType.value === 'edit' ? '更新失败' : '添加失败'));
       }
-    } else {
-      console.log('Form validation failed')
     }
   })
 }

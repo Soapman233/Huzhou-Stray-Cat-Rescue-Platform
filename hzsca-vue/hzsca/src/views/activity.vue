@@ -82,20 +82,6 @@
       </el-empty>
     </div>
 
-    <!-- 分页组件 -->
-    <div class="pagination-container">
-      <el-pagination
-          v-model:currentPage="currentPage"
-          v-model:page-size="pageSize"
-          :page-sizes="[3]"
-          :small="false"
-          :disabled="false"
-          :background="true"
-          layout="total, prev, pager, next, jumper"
-          :total="activities.length"
-      />
-    </div>
-
     <!-- 活动详情弹窗 -->
     <el-dialog
         v-model="detailVisible"
@@ -201,8 +187,8 @@ const fetchActivities = async () => {
             ...activity,
             date: activity.date ? new Date(activity.date).toLocaleString() : ''
           }))
-          .sort((a, b) => new Date(b.date) - new Date(a.date))
-          .slice(0, 3);
+          .slice(0, 3)
+          .sort((a, b) => new Date(a.date) - new Date(b.date));
     } else {
       activities.value = [];
     }

@@ -10,9 +10,9 @@ import java.util.List;
 @Mapper
 public interface AdoptionApplicationMapper {
     @Insert("INSERT INTO AdoptionAssessment (AdopterID, Name, FamilyIncome, HasOwnedPets, " +
-            "Smoker, Asthma, Allergy, LivingSpace, PetFriendly) " +
+            "Smoker, Asthma, Allergy, LivingSpace, PetFriendly, Status) " +
             "VALUES (#{adopterId}, #{name}, #{familyIncome}, #{hasOwnedPets}, " +
-            "#{smoker}, #{asthma}, #{allergy}, #{livingSpace}, #{petFriendly})")
+            "#{smoker}, #{asthma}, #{allergy}, #{livingSpace}, #{petFriendly}, #{status})")
     int insert(AdoptionApplication application);
 
     @Select("SELECT * FROM AdoptionAssessment WHERE AssessmentID = #{assessmentId}")
@@ -21,10 +21,22 @@ public interface AdoptionApplicationMapper {
     @Select("SELECT * FROM AdoptionAssessment WHERE AdopterID = #{adopterId}")
     List<AdoptionApplication> selectByAdopterId(Integer adopterId);
 
+    @Select("<script>" +
+            "SELECT * FROM AdoptionAssessment " +
+            "<where>" +
+            "<if test='name != null and name != \"\"'>" +
+            "AND Name LIKE CONCAT('%', #{name}, '%')" +
+            "</if>" +
+            "</where>" +
+            "ORDER BY AssessmentID DESC" +
+            "</script>")
+    List<AdoptionApplication> selectAllWithName(String name);
+
     @Update("UPDATE AdoptionAssessment SET " +
             "FamilyIncome = #{familyIncome}, HasOwnedPets = #{hasOwnedPets}, " +
             "Smoker = #{smoker}, Asthma = #{asthma}, Allergy = #{allergy}, " +
-            "LivingSpace = #{livingSpace}, PetFriendly = #{petFriendly} " +
+            "LivingSpace = #{livingSpace}, PetFriendly = #{petFriendly}, " +
+            "Status = #{status} " +
             "WHERE AssessmentID = #{assessmentId}")
     int update(AdoptionApplication application);
 }

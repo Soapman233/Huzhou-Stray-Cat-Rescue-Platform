@@ -56,7 +56,7 @@
           {{ new Date(row.date).toLocaleString() }}
         </template>
       </el-table-column>
-      <el-table-column prop="Location" label="地点" min-width="120" />
+      <el-table-column prop="location" label="地点" min-width="120" />
       <el-table-column prop="status" label="状态" width="100">
         <template #default="{ row }">
           <el-tag :type="getStatusType(row.status)">
@@ -112,8 +112,8 @@
               value-format="YYYY-MM-DD HH:mm:ss"
           />
         </el-form-item>
-        <el-form-item label="地点" prop="Location">
-          <el-input v-model="form.Location" />
+        <el-form-item label="地点" prop="location">
+          <el-input v-model="form.location" />
         </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-select v-model="form.status" placeholder="请选择活动状态">
@@ -131,6 +131,7 @@
               :action="baseUrl + '/api/activity/upload'"
               :show-file-list="false"
               :on-success="handleUploadSuccess"
+              :on-error="handleUploadError"
               :before-upload="beforeUpload"
               :headers="getAuthHeaders()"
           >
@@ -163,8 +164,7 @@ const getImageUrl = (url) => {
   if (!url) return ''
   if (url.startsWith('http')) return url
   if (url.startsWith('data:image')) return url
-  const cleanUrl = url.startsWith('/') ? url.substring(1) : url
-  return `${baseUrl}/${cleanUrl}`
+  return `${baseUrl}/${url}`
 }
 
 // 状态变量
@@ -184,7 +184,7 @@ const form = ref({
   id: null,
   title: '',
   date: '',
-  Location: '',
+  location: '',
   status: 'upcoming',
   detail: '',
   imgurl: ''
@@ -198,7 +198,7 @@ const rules = {
   date: [
     { required: true, message: '请选择活动时间', trigger: 'change' }
   ],
-  Location: [
+  location: [
     { required: true, message: '请输入活动地点', trigger: 'blur' }
   ],
   status: [
@@ -242,8 +242,12 @@ const fetchActivities = async () => {
   loading.value = true
   try {
     const response = await request.get('/api/activity/list')
+    console.log('Fetched activities response:', response)
     if (response.data && response.data.code === '200') {
-      activities.value = response.data.data || []
+      activities.value = response.data.data.map(activity => ({
+        ...activity,
+        date: activity.date ? new Date(activity.date).toISOString().slice(0, 19).replace('T', ' ') : ''
+      }))
       total.value = activities.value.length
     } else {
       activities.value = []
@@ -265,7 +269,7 @@ const handleAdd = () => {
     id: null,
     title: '',
     date: '',
-    Location: '',
+    location: '',
     status: 'upcoming',
     detail: '',
     imgurl: ''
@@ -275,12 +279,13 @@ const handleAdd = () => {
 
 // 处理编辑活动
 const handleEdit = (row) => {
+  console.log('Editing activity:', row)
   dialogType.value = 'edit'
   form.value = {
     id: row.id,
     title: row.title,
     date: row.date,
-    Location: row.Location,
+    location: row.location,
     status: row.status,
     detail: row.detail,
     imgurl: row.imgurl
@@ -300,70 +305,73 @@ const handleDelete = (row) => {
       }
   ).then(async () => {
     try {
+      console.log('Deleting activity:', row.id)
       await request.delete(`/api/activity/delete/${row.id}`)
       ElMessage.success('删除成功')
       fetchActivities()
     } catch (error) {
-      ElMessage.error('删除失败')
-      console.error('Failed to delete activity:', error)
+      console.error('Delete error:', error.response?.data || error)
+      ElMessage.error('删除失败：' + (error.response?.data?.message || '未知错误'))
     }
-  }).catch(() => {})
+  }).catch(() => {
+    // 用户取消删除操作
+    console.log('User cancelled deletion')
+  })
 }
 
 // 处理表单提交
 const handleSubmit = async () => {
-  if (!formRef.value) return
+  if (!form.value.imgurl) {
+    ElMessage.error('请先上传活动图片')
+    return
+  }
 
-  await formRef.value.validate(async (valid) => {
-    if (valid) {
-      try {
-        const submitData = {
-          id: form.value.id,
-          title: form.value.title,
-          date: form.value.date,
-          Location: form.value.Location,
-          status: form.value.status,
-          detail: form.value.detail,
-          imgurl: form.value.imgurl
-        }
+  try {
+    const response = await request.post('/api/activity/add', form.value)
+    console.log('Submit response:', response.data)
 
-        if (dialogType.value === 'add') {
-          await request.post('/api/activity/add', submitData)
-          ElMessage.success('添加成功')
-        } else {
-          await request.put('/api/activity/update', submitData)
-          ElMessage.success('更新成功')
-        }
-        dialogVisible.value = false
-        fetchActivities()
-      } catch (error) {
-        console.error('Submit error:', error.response?.data || error)
-        ElMessage.error(dialogType.value === 'add' ? '添加失败' : '更新失败')
-      }
+    if (response.data.code === '200') {
+      ElMessage.success(dialogType.value === 'add' ? '添加成功' : '更新成功')
+      dialogVisible.value = false
+      await fetchActivities()
+    } else {
+      console.error('Submit failed:', response.data)
+      ElMessage.error(response.data.msg || (dialogType.value === 'add' ? '添加失败' : '更新失败'))
     }
-  })
+  } catch (error) {
+    console.error('Submit error:', error)
+    ElMessage.error(dialogType.value === 'add' ? '添加失败' : '更新失败')
+  }
 }
 
 // 处理图片上传
 const handleUploadSuccess = (response) => {
+  console.log('Upload response:', response)
   if (response.code === '200') {
     form.value.imgurl = response.data
-    ElMessage.success('上传成功')
+    ElMessage.success('图片上传成功')
   } else {
-    ElMessage.error('上传失败')
+    console.error('Upload failed:', response)
+    ElMessage.error(response.msg || '图片上传失败')
   }
 }
 
+const handleUploadError = (error) => {
+  console.error('Upload error:', error)
+  ElMessage.error('图片上传失败，请重试')
+}
+
 const beforeUpload = (file) => {
+  console.log('Uploading file:', file)
   const isImage = file.type.startsWith('image/')
   const isLt2M = file.size / 1024 / 1024 < 2
 
   if (!isImage) {
-    ElMessage.error('只能上传图片文件！')
+    ElMessage.error('只能上传图片文件!')
     return false
   }
   if (!isLt2M) {
-    ElMessage.error('图片大小不能超过 2MB！')
+    ElMessage.error('图片大小不能超过 2MB!')
     return false
   }
   return true

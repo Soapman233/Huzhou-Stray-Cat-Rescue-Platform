@@ -3,7 +3,7 @@ import { ElMessage } from "element-plus";
 import router from '../router'
 
 const request = axios.create({
-    baseURL: '/api',  // API 的基础URL
+    baseURL: '',  // 移除baseURL，因为我们在请求时会直接使用完整路径
     timeout: 5000,  // 请求超时时间
     headers: {
         'Content-Type': 'application/json'
@@ -14,10 +14,16 @@ const request = axios.create({
 // request 拦截器
 // 可以自请求发送前对请求做一些处理
 request.interceptors.request.use(config => {
+    // 确保URL以/api开头
+    if (!config.url.startsWith('/api')) {
+        config.url = `/api${config.url}`;
+    }
+
     console.log('Request Config:', {
         url: config.url,
         method: config.method,
-        data: config.data
+        data: config.data,
+        params: config.params
     });
 
     // 从 localStorage 获取 token（如果有的话）
@@ -37,7 +43,8 @@ request.interceptors.response.use(
     response => {
         console.log('Response:', {
             status: response.status,
-            data: response.data
+            data: response.data,
+            config: response.config
         });
         return response;
     },
@@ -62,8 +69,29 @@ request.interceptors.response.use(
                 case 404:
                     ElMessage.error('请求的资源不存在');
                     break;
+                case 405:
+                    ElMessage.error('请求方法未允许');
+                    break;
+                case 408:
+                    ElMessage.error('请求超时');
+                    break;
                 case 500:
                     ElMessage.error('服务器错误，请稍后重试');
+                    break;
+                case 501:
+                    ElMessage.error('网络未实现');
+                    break;
+                case 502:
+                    ElMessage.error('网络错误');
+                    break;
+                case 503:
+                    ElMessage.error('服务不可用');
+                    break;
+                case 504:
+                    ElMessage.error('网络超时');
+                    break;
+                case 505:
+                    ElMessage.error('http版本不支持该请求');
                     break;
                 default:
                     ElMessage.error(error.response.data.message || '请求失败');

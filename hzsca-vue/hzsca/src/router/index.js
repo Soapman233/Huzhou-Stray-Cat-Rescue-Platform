@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import { ElMessage } from 'element-plus'
+import AdoptionManagement from '@/views/admin/AdoptionManagement.vue'
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -74,6 +75,15 @@ const router = createRouter({
                     path: 'activity/activityback',
                     component: () => import('../views/activity/activityback.vue'),
                     meta: {title: '活动回顾'}
+                },
+                {
+                    path: 'admin/adoptions',
+                    name: 'adoptions',
+                    component: AdoptionManagement,
+                    meta: {
+                        requiresAuth: true,
+                        requiresAdmin: true
+                    }
                 }
             ]
         },
