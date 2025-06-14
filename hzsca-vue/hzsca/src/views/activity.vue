@@ -2,51 +2,58 @@
   <div class="app-container">
     <!-- 头部区域 -->
     <div class="header">
-      <h1><el-icon><StarFilled /></el-icon> 湖州学院猫咪关爱活动——最新活动</h1>
+      <h1>
+        <el-icon>
+          <star-filled/>
+        </el-icon>
+        湖州拯救流浪猫协会——最新活动
+      </h1>
       <p>我们致力于校园流浪猫救助、绝育和领养服务，为校园猫咪创造更好的生活环境</p>
     </div>
 
     <!-- 活动列表 -->
     <div class="activity-container">
-      <!-- 活动卡片 -->
+      <!-- 活动卡片 - 只显示前三个活动 -->
       <div
-          v-for="activity in activities"
+          v-for="activity in paginatedActivities"
           :key="activity.id"
           class="activity-card-wrapper"
           @click="goToDetail(activity.id)"
       >
         <div class="image-section">
-          <img :src="getImageUrl(activity.imageUrl)" :alt="activity.title">
+          <!-- 使用 :src 绑定图片 URL，并添加 @error 事件处理图片加载失败的情况 -->
+          <img :src="getImageUrl(activity.imgurl)" :alt="activity.title" @error="handleImageError">
         </div>
 
         <div class="content-section">
           <div>
             <h3 class="card-title">
               <el-icon>
-                <Calendar/>
+                <calendar/>
               </el-icon>
               {{ activity.title }}
               <span v-if="activity.status === 'ongoing'" class="badge badge-new">正在进行</span>
               <span v-if="activity.status === 'upcoming'" class="badge badge-upcoming">即将开始</span>
+              <span v-if="activity.status === 'ended'" class="badge badge-ended">已结束</span>
             </h3>
 
             <div class="info-item date">
               <el-icon>
-                <Clock/>
+                <clock/>
               </el-icon>
               <div class="info-text">时间：{{ activity.date }}</div>
             </div>
 
             <div class="info-item location">
               <el-icon>
-                <Location/>
+                <location/>
               </el-icon>
               <div class="info-text">地点：{{ activity.location }}</div>
             </div>
 
             <div class="detail-text">
               <el-icon>
-                <InfoFilled/>
+                <info-filled/>
               </el-icon>
               {{ activity.detail }}
             </div>
@@ -57,7 +64,7 @@
             <button class="view-btn" @click.stop="goToDetail(activity.id)">
               查看详情
               <el-icon>
-                <ArrowRight/>
+                <arrow-right/>
               </el-icon>
             </button>
           </div>
@@ -68,12 +75,25 @@
       <el-empty v-if="activities.length === 0" description="暂无活动信息">
         <template #image>
           <el-icon :size="60">
-            <Picture/>
+            <picture/>
           </el-icon>
         </template>
-        <p>当前没有即将举行的猫咪关爱活动，请稍后再来查看</p>
-        <el-button @click="fetchActivities">重试</el-button>
+        <p>当前没有活动记录</p>
       </el-empty>
+    </div>
+
+    <!-- 分页组件 -->
+    <div class="pagination-container">
+      <el-pagination
+          v-model:currentPage="currentPage"
+          v-model:page-size="pageSize"
+          :page-sizes="[3]"
+          :small="false"
+          :disabled="false"
+          :background="true"
+          layout="total, prev, pager, next, jumper"
+          :total="activities.length"
+      />
     </div>
 
     <!-- 活动详情弹窗 -->
@@ -82,17 +102,16 @@
         :title="currentActivity?.title"
         width="70%"
         top="5vh"
-        @close="detailVisible = false"
     >
       <div class="detail-content" v-if="currentActivity">
         <div class="image-section">
-          <img :src="getImageUrl(currentActivity.imageUrl)" :alt="currentActivity.title" class="main-image">
+          <img :src="getImageUrl(currentActivity.imgurl)" :alt="currentActivity.title" class="main-image" @error="handleImageError">
         </div>
 
         <div class="info-section">
           <div class="info-row">
             <el-icon>
-              <Clock/>
+              <clock/>
             </el-icon>
             <span class="label">活动时间：</span>
             <span>{{ currentActivity.date }}</span>
@@ -100,7 +119,7 @@
 
           <div class="info-row">
             <el-icon>
-              <Location/>
+              <location/>
             </el-icon>
             <span class="label">活动地点：</span>
             <span>{{ currentActivity.location }}</span>
@@ -108,29 +127,18 @@
 
           <div class="info-row">
             <el-icon>
-              <CollectionTag/>
+              <collection-tag/>
             </el-icon>
             <span class="label">活动状态：</span>
-            <el-tag :type="{
-              'danger': currentActivity.status === 'ongoing',
-              'success': currentActivity.status === 'upcoming',
-              'info': currentActivity.status === 'finished',
-              'warning': currentActivity.status === 'cancelled'
-            }[currentActivity.status] || 'info'">
-              {{
-                currentActivity.status === 'ongoing' ? '正在进行' :
-                    currentActivity.status === 'upcoming' ? '即将开始' :
-                        currentActivity.status === 'finished' ? '已结束' :
-                            currentActivity.status === 'cancelled' ? '已取消' :
-                                '未知状态'
-              }}
+            <el-tag :type="getStatusTagType(currentActivity.status)">
+              {{ getStatusText(currentActivity.status) }}
             </el-tag>
           </div>
 
           <div class="detail-text">
             <h3>
               <el-icon>
-                <InfoFilled/>
+                <info-filled/>
               </el-icon>
               活动详情
             </h3>
@@ -147,61 +155,143 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import {ref, computed, onMounted} from 'vue';
+import {ElMessage} from 'element-plus';
+import {
+  StarFilled,
+  Picture,
+  Calendar,
+  Clock,
+  Location,
+  InfoFilled,
+  ArrowRight,
+  CollectionTag
+} from '@element-plus/icons-vue';
+import config from "@/config/config.js";
 
-// 活动数据
-const activities = ref([])
+// 默认图片（使用本地图片）
+const DEFAULT_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJh+WbvueJhzwvdGV4dD48L3N2Zz4='
 
-// 获取最新的三个活动数据
+
+// 分页相关数据
+const currentPage = ref(1);
+const pageSize = ref(3); // 只展示前三个活动
+
+// 活动数据 - 从后端API获取
+const activities = ref([]);
+
+// 获取活动数据
 const fetchActivities = async () => {
   try {
-    const response = await fetch('http://localhost:8080/api/events/latest?limit=3')
+    const response = await fetch('http://localhost:8080/api/events');
     if (!response.ok) {
-      throw new Error('获取活动数据失败')
+      throw new Error('获取活动数据失败');
     }
-    const data = await response.json()
+    const data = await response.json();
     // 确保数据是数组
-    activities.value = Array.isArray(data) ? data : []
+    activities.value = Array.isArray(data) ? data : [];
 
-    // 格式化日期
-    activities.value = activities.value.map(activity => ({
+    // 格式化日期并按时间排序
+    activities.value = activities.value.slice(0, 3).map((activity) => ({
       ...activity,
       date: activity.date ? new Date(activity.date).toLocaleString() : '',
       activityTime: activity.activityTime ? new Date(activity.activityTime).toLocaleString() : ''
-    }))
+    })).sort(((a, b) => new Date(a.date) - new Date(b.date)));
   } catch (error) {
-    console.error('获取活动数据时出错:', error)
-    ElMessage.error('获取活动数据失败，请稍后重试')
-    activities.value = [] // 确保发生错误时设置为空数组
+    console.error('获取活动数据时出错:', error);
+    ElMessage.error('获取活动数据失败，请稍后重试');
+    activities.value = []; // 确保发生错误时设置为空数组
   }
-}
-
-import { onMounted } from 'vue'
+};
 
 // 组件挂载时获取数据
 onMounted(() => {
-  fetchActivities()
-})
+  fetchActivities();
+});
+
+// 计算当前页显示的活动
+const paginatedActivities = computed(() => {
+  return activities.value;
+});
 
 // 详情弹窗控制
-const detailVisible = ref(false)
-const currentActivity = ref(null)
+const detailVisible = ref(false);
+const currentActivity = ref(null);
 
 // 获取图片URL
-const getImageUrl = (name) => {
-  if (!name) return ''
-  return name.startsWith('http') ? name : `/images/${name}`
+const getImageUrl = (imageUrl) => {
+  try {
+    console.log('Processing image URL:', imageUrl);
+
+    if (!imageUrl) {
+      console.log('No image URL provided, using default image');
+      return new URL(DEFAULT_IMAGE, import.meta.url).href;
+    }
+
+    // 检查是否是完整的 URL
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      console.log('Using full URL:', imageUrl);
+      return imageUrl;
+    }
+
+    // 检查是否是 Base64 数据
+    if (imageUrl.startsWith('data:image')) {
+      console.log('Using Base64 image data');
+      return imageUrl;
+    }
+
+    // 处理相对路径
+    const baseUrl = config?.imageBaseURL || 'http://localhost:8080';
+    // 确保路径格式正确
+    const cleanImageUrl = imageUrl.startsWith('/') ? imageUrl.substring(1) : imageUrl;
+    const fullUrl = `${baseUrl}/${cleanImageUrl}`;
+    console.log('Generated full URL:', fullUrl);
+    return fullUrl;
+  } catch (err) {
+    console.error('Error processing image URL:', err);
+    return new URL(DEFAULT_IMAGE, import.meta.url).href;
+  }
 }
+
+// 处理图片加载错误
+const handleImageError = (e) => {
+  console.log('Image load error, using default image');
+  e.target.src = new URL(DEFAULT_IMAGE, import.meta.url).href;
+}
+
+// 获取状态标签类型
+const getStatusTagType = (status) => {
+  switch (status) {
+    case 'ongoing':
+      return 'danger';
+    case 'upcoming':
+      return 'success';
+    case 'ended':
+      return 'info';
+    default:
+      return '';
+  }
+};
+
+// 获取状态文本
+const getStatusText = (status) => {
+  switch (status) {
+    case 'ongoing':
+      return '正在进行';
+    case 'upcoming':
+      return '即将开始';
+    case 'ended':
+      return '已结束';
+    default:
+      return '未知状态';
+  }
+};
 
 // 查看详情
 const goToDetail = (id) => {
-  const activity = activities.value.find(item => item.id === id)
-  if (activity) {
-    currentActivity.value = activity
-    detailVisible.value = true
-  }
-}
+  currentActivity.value = activities.value.find((item) => item.id === id);
+  detailVisible.value = true;
+};
 </script>
 
 <style scoped>
@@ -246,6 +336,7 @@ const goToDetail = (id) => {
   display: flex;
   flex-direction: column;
   gap: 25px;
+  min-height: 1200px; /* 保持高度一致，避免分页跳动 */
 }
 
 .activity-card-wrapper {
@@ -363,6 +454,11 @@ const goToDetail = (id) => {
   color: white;
 }
 
+.badge-ended {
+  background: #9e9e9e;
+  color: white;
+}
+
 .footer {
   display: flex;
   justify-content: space-between;
@@ -406,6 +502,13 @@ const goToDetail = (id) => {
 .el-empty p {
   color: #90a4ae;
   margin-top: 10px;
+}
+
+/* 分页样式 */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
 }
 
 /* 详情弹窗样式 */

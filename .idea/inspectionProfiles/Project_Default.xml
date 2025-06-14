@@ -4,7 +4,7 @@
     <inspection_tool class="HtmlUnknownAttribute" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="12">
+          <list size="13">
             <item index="0" class="java.lang.String" itemvalue="v-if" />
             <item index="1" class="java.lang.String" itemvalue="v-else-if" />
             <item index="2" class="java.lang.String" itemvalue="v-else" />
@@ -17,6 +17,7 @@
             <item index="9" class="java.lang.String" itemvalue="justify" />
             <item index="10" class="java.lang.String" itemvalue="text" />
             <item index="11" class="java.lang.String" itemvalue="@click" />
+            <item index="12" class="java.lang.String" itemvalue="@error" />
           </list>
         </value>
       </option>
@@ -25,7 +26,7 @@
     <inspection_tool class="HtmlUnknownTag" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="myValues">
         <value>
-          <list size="42">
+          <list size="43">
             <item index="0" class="java.lang.String" itemvalue="nobr" />
             <item index="1" class="java.lang.String" itemvalue="noembed" />
             <item index="2" class="java.lang.String" itemvalue="comment" />
@@ -68,6 +69,7 @@
             <item index="39" class="java.lang.String" itemvalue="CollectionTag" />
             <item index="40" class="java.lang.String" itemvalue="el-tag" />
             <item index="41" class="java.lang.String" itemvalue="StarFilled" />
+            <item index="42" class="java.lang.String" itemvalue="el-input" />
           </list>
         </value>
       </option>
