@@ -4,6 +4,9 @@ import com.hzsca.common.Result;
 import com.hzsca.entity.Activity;
 import com.hzsca.mapper.ActivityMapper;
 import com.hzsca.service.FileService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "活动管理", description = "活动的增删改查接口")
 @RestController
 @RequestMapping("/api/activity")
 @CrossOrigin(origins = "*")
@@ -24,6 +28,7 @@ public class ActivityController {
     @Autowired
     private FileService fileService;
 
+    @Operation(summary = "获取所有活动", description = "获取系统中所有活动的列表")
     @GetMapping("/list")
     public Result getAllActivities() {
         try {
@@ -34,6 +39,7 @@ public class ActivityController {
         }
     }
 
+    @Operation(summary = "添加活动", description = "添加一个新的活动")
     @PostMapping("/add")
     public Result addActivity(@RequestBody Activity activity) {
         try {
@@ -50,6 +56,7 @@ public class ActivityController {
         }
     }
 
+    @Operation(summary = "更新活动", description = "根据活动ID更新活动信息")
     @PutMapping("/update")
     public Result updateActivity(@RequestBody Activity activity) {
         try {
@@ -64,8 +71,9 @@ public class ActivityController {
         }
     }
 
+    @Operation(summary = "删除活动", description = "根据活动ID删除活动")
     @DeleteMapping("/delete/{id}")
-    public Result deleteActivity(@PathVariable Integer id) {
+    public Result deleteActivity(@Parameter(description = "活动ID") @PathVariable Integer id) {
         try {
             activityMapper.deleteActivity(id);
             return Result.success();
@@ -75,8 +83,9 @@ public class ActivityController {
         }
     }
 
+    @Operation(summary = "上传活动图片", description = "上传活动相关的图片文件")
     @PostMapping("/upload")
-    public Result uploadImage(@RequestParam("file") MultipartFile file) {
+    public Result uploadImage(@Parameter(description = "图片文件") @RequestParam("file") MultipartFile file) {
         try {
             if (file.isEmpty()) {
                 return Result.error("400", "文件为空");

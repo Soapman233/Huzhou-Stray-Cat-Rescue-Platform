@@ -6,6 +6,11 @@ import com.hzsca.entity.Users;
 import com.hzsca.entity.Admin;
 import com.hzsca.mapper.UserMapper;
 import com.hzsca.mapper.AdminMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
@@ -13,6 +18,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Tag(name = "认证管理", description = "用户登录、注册等认证相关接口")
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -24,7 +30,11 @@ public class AuthController {
     @Autowired
     private AdminMapper adminMapper;
 
-    // 登录
+    @Operation(summary = "用户登录", description = "处理用户和管理员的登录请求")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "登录成功"),
+            @ApiResponse(responseCode = "401", description = "用户名或密码错误")
+    })
     @PostMapping("/login")
     public Map<String, Object> login(@RequestBody LoginRequest request) {
         Map<String, Object> result = new HashMap<>();
@@ -69,7 +79,11 @@ public class AuthController {
         return result;
     }
 
-    // 注册
+    @Operation(summary = "用户注册", description = "处理新用户的注册请求")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "注册成功"),
+            @ApiResponse(responseCode = "400", description = "用户名已存在")
+    })
     @PostMapping("/register")
     public Map<String, Object> register(@RequestBody RegisterRequest request) {
         Map<String, Object> result = new HashMap<>();
@@ -103,7 +117,7 @@ public class AuthController {
         return result;
     }
 
-    // 检查用户名是否存在
+    @Operation(summary = "检查用户名", description = "检查用户名是否已被使用")
     @PostMapping("/check-username")
     public Map<String, Object> checkUsername(@RequestBody Map<String, String> request) {
         Map<String, Object> result = new HashMap<>();

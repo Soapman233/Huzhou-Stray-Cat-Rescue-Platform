@@ -4,12 +4,18 @@ import com.hzsca.entity.Animals;
 import com.hzsca.service.CatsService;
 import com.hzsca.service.FileService;
 import com.hzsca.common.Result;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
+@Tag(name = "猫咪管理", description = "猫咪信息的增删改查接口")
 @RestController
 @RequestMapping("/api/cats")
 public class CatsController {
@@ -20,6 +26,11 @@ public class CatsController {
     @Autowired
     private FileService fileService;
 
+    @Operation(summary = "获取所有猫咪", description = "获取系统中所有猫咪的列表")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "500", description = "服务器错误")
+    })
     @GetMapping
     public Result getAllCats() {
         try {
@@ -30,8 +41,14 @@ public class CatsController {
         }
     }
 
+    @Operation(summary = "获取猫咪详情", description = "根据ID获取猫咪详细信息")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "404", description = "猫咪不存在"),
+            @ApiResponse(responseCode = "500", description = "服务器错误")
+    })
     @GetMapping("/{id}")
-    public Result getCatById(@PathVariable Integer id) {
+    public Result getCatById(@Parameter(description = "猫咪ID") @PathVariable Integer id) {
         try {
             Animals cat = catsService.getCatById(id);
             if (cat != null) {
@@ -43,6 +60,12 @@ public class CatsController {
         }
     }
 
+    @Operation(summary = "添加猫咪", description = "添加新的猫咪信息")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "添加成功"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误"),
+            @ApiResponse(responseCode = "500", description = "服务器错误")
+    })
     @PostMapping
     public Result addCat(@RequestBody Animals cat) {
         try {
@@ -58,8 +81,17 @@ public class CatsController {
         }
     }
 
+    @Operation(summary = "更新猫咪信息", description = "更新指定猫咪的信息")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "更新成功"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误"),
+            @ApiResponse(responseCode = "404", description = "猫咪不存在"),
+            @ApiResponse(responseCode = "500", description = "服务器错误")
+    })
     @PutMapping("/{id}")
-    public Result updateCat(@PathVariable Integer id, @RequestBody Animals cat) {
+    public Result updateCat(
+            @Parameter(description = "猫咪ID") @PathVariable Integer id,
+            @RequestBody Animals cat) {
         try {
             cat.setAnimalId(id);
             boolean success = catsService.updateCat(cat);
@@ -74,8 +106,14 @@ public class CatsController {
         }
     }
 
+    @Operation(summary = "删除猫咪", description = "删除指定的猫咪信息")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "删除成功"),
+            @ApiResponse(responseCode = "404", description = "猫咪不存在"),
+            @ApiResponse(responseCode = "500", description = "服务器错误")
+    })
     @DeleteMapping("/{id}")
-    public Result deleteCat(@PathVariable Integer id) {
+    public Result deleteCat(@Parameter(description = "猫咪ID") @PathVariable Integer id) {
         try {
             boolean success = catsService.deleteCat(id);
             if (success) {
@@ -87,6 +125,11 @@ public class CatsController {
         }
     }
 
+    @Operation(summary = "获取可领养猫咪", description = "获取所有可以被领养的猫咪列表")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "500", description = "服务器错误")
+    })
     @GetMapping("/adoptable")
     public Result getAdoptableCats() {
         try {
@@ -97,8 +140,13 @@ public class CatsController {
         }
     }
 
+    @Operation(summary = "上传猫咪图片", description = "上传猫咪的照片")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "上传成功"),
+            @ApiResponse(responseCode = "500", description = "上传失败")
+    })
     @PostMapping("/upload")
-    public Result uploadImage(@RequestParam("file") MultipartFile file) {
+    public Result uploadImage(@Parameter(description = "图片文件") @RequestParam("file") MultipartFile file) {
         try {
             String imageUrl = fileService.uploadFile(file);
             return Result.success(imageUrl);

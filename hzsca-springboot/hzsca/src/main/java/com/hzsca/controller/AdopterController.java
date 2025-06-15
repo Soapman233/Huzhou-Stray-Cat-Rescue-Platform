@@ -2,6 +2,11 @@ package com.hzsca.controller;
 
 import com.hzsca.entity.Adopter;
 import com.hzsca.mapper.AdopterMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
@@ -9,6 +14,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Tag(name = "领养人管理", description = "领养人信息的增删改查接口")
 @RestController
 @RequestMapping("/api")
 public class AdopterController {
@@ -17,7 +23,12 @@ public class AdopterController {
     @Autowired
     private AdopterMapper adopterMapper;
 
-    // 创建领养人信息
+    @Operation(summary = "创建领养人", description = "创建新的领养人信息")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "创建成功"),
+            @ApiResponse(responseCode = "400", description = "请求参数错误"),
+            @ApiResponse(responseCode = "409", description = "领养人信息已存在")
+    })
     @PostMapping("/adopters")
     public Map<String, Object> createAdopter(@RequestBody Adopter adopter) {
         Map<String, Object> result = new HashMap<>();
@@ -70,9 +81,13 @@ public class AdopterController {
         return result;
     }
 
-    // 根据ID获取领养人信息
+    @Operation(summary = "获取领养人", description = "根据ID获取领养人信息")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "404", description = "领养人不存在")
+    })
     @GetMapping("/adopters/{id}")
-    public Map<String, Object> getAdopter(@PathVariable Integer id) {
+    public Map<String, Object> getAdopter(@Parameter(description = "领养人ID") @PathVariable Integer id) {
         Map<String, Object> result = new HashMap<>();
         try {
             Adopter adopter = adopterMapper.selectById(id);
@@ -91,9 +106,13 @@ public class AdopterController {
         return result;
     }
 
-    // 根据用户ID获取领养人信息
+    @Operation(summary = "根据用户ID获取领养人", description = "根据用户ID获取对应的领养人信息")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "获取成功"),
+            @ApiResponse(responseCode = "404", description = "领养人不存在")
+    })
     @GetMapping("/adopters/user/{userId}")
-    public Map<String, Object> getAdopterByUserId(@PathVariable Integer userId) {
+    public Map<String, Object> getAdopterByUserId(@Parameter(description = "用户ID") @PathVariable Integer userId) {
         Map<String, Object> result = new HashMap<>();
         try {
             Adopter adopter = adopterMapper.selectByUserId(userId);

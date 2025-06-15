@@ -53,3 +53,16 @@ jackson:
 # 允许循环引用
 main:
   allow-circular-references: true
+
+# Springdoc-OpenAPI 配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.hzsca.controller
