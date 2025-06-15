@@ -237,7 +237,7 @@ const filteredActivities = computed(() => {
   }
   const query = searchQuery.value.toLowerCase()
   return activities.value.filter(activity =>
-    activity.title.toLowerCase().includes(query)
+      activity.title.toLowerCase().includes(query)
   ).slice((currentPage.value - 1) * pageSize.value, currentPage.value * pageSize.value)
 })
 
@@ -331,7 +331,12 @@ const handleSubmit = async () => {
   }
 
   try {
-    const response = await request.post('/api/activity/add', form.value)
+    let response;
+    if (dialogType.value === 'add') {
+      response = await request.post('/api/activity/add', form.value);
+    } else {
+      response = await request.put('/api/activity/update', form.value);
+    }
     console.log('Submit response:', response.data)
 
     if (response.data.code === '200') {
