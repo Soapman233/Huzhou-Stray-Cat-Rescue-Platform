@@ -43,11 +43,20 @@
                     <el-dropdown-item command="cats">
                       <el-icon><House /></el-icon>猫咪管理
                     </el-dropdown-item>
+                    <el-dropdown-item command="catTraits">
+                      <el-icon><CollectionTag /></el-icon>猫咪特征管理
+                    </el-dropdown-item>
                     <el-dropdown-item command="activities">
                       <el-icon><Calendar /></el-icon>活动管理
                     </el-dropdown-item>
                     <el-dropdown-item command="adoptions">
                       <el-icon><Document /></el-icon>领养申请管理
+                    </el-dropdown-item>
+                    <el-dropdown-item command="rescues">
+                      <el-icon><Warning /></el-icon>救助上报管理
+                    </el-dropdown-item>
+                    <el-dropdown-item command="dataset">
+                      <el-icon><Download /></el-icon>数据导出
                     </el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
@@ -62,7 +71,7 @@
           </template>
           <template v-else>
             <el-dropdown trigger="click" @command="handleCommand">
-              <div class="avatar-container">
+        <div class="avatar-container">
                 <el-avatar v-if="userInfo.avatar" :src="getAvatarUrl(userInfo.avatar)" />
                 <el-icon v-else><Avatar /></el-icon>
               </div>
@@ -105,7 +114,7 @@
 </template>
 
 <script setup>
-import { Avatar, User, House, Setting, ArrowDown, SwitchButton, Calendar, Document } from '@element-plus/icons-vue';
+import { Avatar, User, House, Setting, ArrowDown, SwitchButton, Calendar, Document, Warning, Download, CollectionTag } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
@@ -157,7 +166,7 @@ const checkLoginStatus = () => {
   const storedUserInfo = localStorage.getItem('userInfo');
   const username = localStorage.getItem('username');
 
-  if (token && storedUserInfo && username) {
+  if (token && storedUserInfo) {
     isLoggedIn.value = true;
     userInfo.value = JSON.parse(storedUserInfo);
   } else {
@@ -198,7 +207,7 @@ const handleCommand = (command) => {
       router.push('/hzsca/personalInfo');
       break;
     case 'admin':
-      router.push('/hzsca/admin/users');
+      router.push('/hzsca/admin/dashboard');
       break;
     case 'logout':
       ElMessageBox.confirm(
@@ -228,11 +237,20 @@ const handleAdminCommand = (command) => {
     case 'cats':
       router.push('/hzsca/admin/cats');
       break;
+    case 'catTraits':
+      router.push('/hzsca/admin/cat-traits');
+      break;
     case 'activities':
       router.push('/hzsca/admin/activities');
       break;
     case 'adoptions':
       router.push('/hzsca/admin/adoptions');
+      break;
+    case 'rescues':
+      router.push('/hzsca/admin/rescues');
+      break;
+    case 'dataset':
+      router.push('/hzsca/admin/dataset');
       break;
   }
 };

@@ -1,0 +1,26 @@
+<view class="page">
+  <view class="card header-card">
+    <view class="section-title">提交救助上报</view>
+    <view class="sub">发现需要帮助的猫咪，提交位置与描述</view>
+  </view>
+  <view class="card">
+    <view class="field">
+      <text>地址</text>
+      <input data-field="address" bindinput="handleInput" placeholder="请输入地点" />
+    </view>
+    <view class="field">
+      <text>描述</text>
+      <textarea data-field="description" bindinput="handleInput" placeholder="请输入流浪猫情况"></textarea>
+    </view>
+    <view class="field">
+      <text>图片链接</text>
+      <input data-field="imageUrls" bindinput="handleInput" placeholder="可填写逗号分隔的图片链接" />
+    </view>
+    <view class="field">
+      <text>紧急程度</text>
+      <input type="number" data-field="urgency" bindinput="handleInput" placeholder="1-5" />
+    </view>
+    <button bindtap="chooseLocation">选择当前位置</button>
+    <button class="primary-btn" bindtap="submitReport">提交上报</button>
+  </view>
+</view>

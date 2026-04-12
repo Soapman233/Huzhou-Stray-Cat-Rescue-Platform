@@ -1,0 +1,102 @@
+.hero {
+  border-radius: 24rpx;
+  padding: 28rpx 24rpx;
+  margin-bottom: 24rpx;
+  background: #E6DCC8;
+  box-shadow: 0 10rpx 26rpx rgba(0, 0, 0, 0.06);
+}
+
+.brand {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #333333;
+}
+
+.slogan {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #4b5563;
+}
+
+.hero-actions {
+  margin-top: 18rpx;
+  display: flex;
+  gap: 16rpx;
+  flex-wrap: wrap;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+}
+
+.grid-item {
+  background: #f7f7f7;
+  border-radius: 16rpx;
+  padding: 18rpx 16rpx;
+}
+
+.grid-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #333333;
+}
+
+.grid-sub {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #64748b;
+}
+
+.cat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  margin-bottom: 18rpx;
+}
+
+.cat-item {
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #f7f7f7;
+}
+
+.cat-img {
+  width: 100%;
+  height: 240rpx;
+  background: #eeeeee;
+}
+
+.cat-name {
+  padding: 12rpx 12rpx 0;
+  font-size: 28rpx;
+  font-weight: 700;
+}
+
+.cat-sub {
+  padding: 6rpx 12rpx 14rpx;
+  font-size: 22rpx;
+  color: #64748b;
+}
+
+.tips {
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.tip {
+  background: #f7f7f7;
+  border-radius: 14rpx;
+  padding: 12rpx 14rpx;
+  color: #334155;
+  font-size: 24rpx;
+}
+
+.more-links {
+  margin-top: 18rpx;
+  display: flex;
+  gap: 16rpx;
+  flex-wrap: wrap;
+}

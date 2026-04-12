@@ -1,0 +1,20 @@
+<view class="page">
+  <view class="card header-card">
+    <view class="section-title">待领养猫咪</view>
+    <view class="top-actions">
+      <button class="primary-btn" size="mini" bindtap="goRecommend">智能推荐</button>
+      <button class="ghost-btn" size="mini" bindtap="goProfile">领养档案</button>
+      <button size="mini" bindtap="fetchCats">刷新列表</button>
+    </view>
+  </view>
+
+  <view class="card cat-card" wx:for="{{cats}}" wx:key="AnimalID">
+    <image class="cat-image" src="{{baseImageUrl}}{{item.ImageURL}}" mode="aspectFill"></image>
+    <view class="cat-name">{{item.Name}}</view>
+    <view class="cat-desc">{{item.Breed}} · {{item.Age}}岁 · {{item.Status}}</view>
+    <view class="actions">
+      <button size="mini" bindtap="goDetail" data-id="{{item.AnimalID}}">查看详情</button>
+      <button class="primary-btn" size="mini" bindtap="goApply" data-id="{{item.AnimalID}}">申请领养</button>
+    </view>
+  </view>
+</view>

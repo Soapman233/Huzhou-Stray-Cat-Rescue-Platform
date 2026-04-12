@@ -61,7 +61,7 @@ request.interceptors.response.use(
                     localStorage.removeItem('token');
                     localStorage.removeItem('userInfo');
                     ElMessage.error('登录已过期，请重新登录');
-                    router.push('/login');
+                    router.push('/hzsca/login');
                     break;
                 case 403:
                     ElMessage.error('没有权限访问该资源');

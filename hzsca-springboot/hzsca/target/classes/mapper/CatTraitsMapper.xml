@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzsca.mapper.CatTraitsMapper">
+    <resultMap id="BaseResultMap" type="com.hzsca.entity.CatTraits">
+        <id column="cat_id" property="catId"/>
+        <result column="personality" property="personality"/>
+        <result column="activity_level" property="activityLevel"/>
+        <result column="affection_level" property="affectionLevel"/>
+        <result column="child_friendly" property="childFriendly"/>
+        <result column="pet_friendly" property="petFriendly"/>
+        <result column="shedding_level" property="sheddingLevel"/>
+        <result column="nocturnal" property="nocturnal"/>
+        <result column="space_need_level" property="spaceNeedLevel"/>
+        <result column="beginner_friendly" property="beginnerFriendly"/>
+        <result column="special_care_needed" property="specialCareNeeded"/>
+        <result column="environment_preference" property="environmentPreference"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectByCatId" resultMap="BaseResultMap">
+        SELECT
+            cat_id,
+            personality,
+            activity_level,
+            affection_level,
+            child_friendly,
+            pet_friendly,
+            shedding_level,
+            nocturnal,
+            space_need_level,
+            beginner_friendly,
+            special_care_needed,
+            environment_preference,
+            create_time,
+            update_time
+        FROM cat_traits
+        WHERE cat_id = #{catId}
+    </select>
+
+    <select id="selectByCatIds" resultMap="BaseResultMap">
+        SELECT
+            cat_id,
+            personality,
+            activity_level,
+            affection_level,
+            child_friendly,
+            pet_friendly,
+            shedding_level,
+            nocturnal,
+            space_need_level,
+            beginner_friendly,
+            special_care_needed,
+            environment_preference,
+            create_time,
+            update_time
+        FROM cat_traits
+        WHERE cat_id IN
+        <foreach collection="catIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+            cat_id,
+            personality,
+            activity_level,
+            affection_level,
+            child_friendly,
+            pet_friendly,
+            shedding_level,
+            nocturnal,
+            space_need_level,
+            beginner_friendly,
+            special_care_needed,
+            environment_preference,
+            create_time,
+            update_time
+        FROM cat_traits
+        ORDER BY cat_id
+    </select>
+
+    <insert id="upsert" parameterType="com.hzsca.entity.CatTraits">
+        INSERT INTO cat_traits(
+            cat_id,
+            personality,
+            activity_level,
+            affection_level,
+            child_friendly,
+            pet_friendly,
+            shedding_level,
+            nocturnal,
+            space_need_level,
+            beginner_friendly,
+            special_care_needed,
+            environment_preference,
+            update_time
+        ) VALUES (
+            #{catId},
+            #{personality},
+            #{activityLevel},
+            #{affectionLevel},
+            #{childFriendly},
+            #{petFriendly},
+            #{sheddingLevel},
+            #{nocturnal},
+            #{spaceNeedLevel},
+            #{beginnerFriendly},
+            #{specialCareNeeded},
+            #{environmentPreference},
+            NOW()
+        )
+        ON DUPLICATE KEY UPDATE
+            personality = VALUES(personality),
+            activity_level = VALUES(activity_level),
+            affection_level = VALUES(affection_level),
+            child_friendly = VALUES(child_friendly),
+            pet_friendly = VALUES(pet_friendly),
+            shedding_level = VALUES(shedding_level),
+            nocturnal = VALUES(nocturnal),
+            space_need_level = VALUES(space_need_level),
+            beginner_friendly = VALUES(beginner_friendly),
+            special_care_needed = VALUES(special_care_needed),
+            environment_preference = VALUES(environment_preference),
+            update_time = NOW()
+    </insert>
+
+    <delete id="deleteByCatId">
+        DELETE FROM cat_traits WHERE cat_id = #{catId}
+    </delete>
+</mapper>

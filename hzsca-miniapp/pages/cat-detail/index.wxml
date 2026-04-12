@@ -1,0 +1,11 @@
+<view class="page" wx:if="{{cat}}">
+  <view class="card">
+    <image class="cat-image" src="{{baseImageUrl}}{{cat.ImageURL}}" mode="aspectFill"></image>
+    <view class="section-title">{{cat.Name}}</view>
+    <view class="info">{{cat.Breed}} · {{cat.Age}}岁 · {{cat.Gender}}</view>
+    <view class="info">状态：{{cat.Status}}</view>
+    <view class="info">来源：{{cat.Source}}</view>
+    <view class="desc">{{cat.Description || '暂无描述'}}</view>
+    <button class="primary-btn" bindtap="goApply">申请领养</button>
+  </view>
+</view>

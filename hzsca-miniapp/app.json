@@ -1,0 +1,52 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/login/index",
+    "pages/cats/index",
+    "pages/cat-detail/index",
+    "pages/apply/index",
+    "pages/profile/index",
+    "pages/recommend/index",
+    "pages/my-applications/index",
+    "pages/report/index",
+    "pages/activity/index",
+    "pages/activity-detail/index",
+    "pages/volunteer-apply/index",
+    "pages/mine/index",
+    "pages/me/index",
+    "pages/donate/index",
+    "pages/work-report/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "流浪猫领养系统",
+    "navigationBarBackgroundColor": "#E6DCC8",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "custom": true,
+    "color": "#666666",
+    "selectedColor": "#333333",
+    "backgroundColor": "#E6DCC8",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/cats/index",
+        "text": "领养"
+      },
+      {
+        "pagePath": "pages/activity/index",
+        "text": "活动"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

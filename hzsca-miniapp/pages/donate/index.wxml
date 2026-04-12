@@ -1,0 +1,32 @@
+<view class="page">
+  <view class="hero">
+    <view class="title">流浪猫救助捐助</view>
+    <view class="sub">您的每一份爱心都能改变一只流浪猫的命运</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">救助目的</view>
+    <view class="p">我们致力于为无家可归的流浪猫提供：</view>
+    <view class="list">
+      <view class="li">日常食物和清洁饮水</view>
+      <view class="li">必要的医疗救助</view>
+      <view class="li">绝育手术控制数量</view>
+      <view class="li">寻找合适的领养家庭</view>
+      <view class="li">冬季避寒场所建设</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">我们的承诺</view>
+    <view class="tag">每一分钱都会用在猫咪身上</view>
+    <view class="tag">定期公布资金使用情况</view>
+    <view class="tag">持续更新救助猫咪照片与进展</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">联系我们</view>
+    <view class="contact">电话：0572-2888 9999</view>
+    <view class="contact">邮箱：rescue@hzcats.org</view>
+    <view class="contact">地址：湖州市吴兴区爱猫路88号</view>
+  </view>
+</view>

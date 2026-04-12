@@ -1,0 +1,53 @@
+<view class="page">
+  <view class="hero">
+    <view class="title">2023年度流浪猫领餐工作报告</view>
+    <view class="sub">湖州流浪猫救助协会 · 为流浪猫提供温暖的食物和关爱</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">关键数据</view>
+    <view class="stats">
+      <view class="stat">
+        <view class="num">428</view>
+        <view class="label">成功领餐总数</view>
+      </view>
+      <view class="stat">
+        <view class="num">1,284</view>
+        <view class="label">提供餐食总数</view>
+      </view>
+      <view class="stat">
+        <view class="num">62</view>
+        <view class="label">志愿者人数</view>
+      </view>
+      <view class="stat">
+        <view class="num">365</view>
+        <view class="label">服务天数</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">月度统计</view>
+    <view class="table">
+      <view class="tr head">
+        <view class="td month">月份</view>
+        <view class="td">成功</view>
+        <view class="td">待领</view>
+        <view class="td">助餐区</view>
+      </view>
+      <view class="tr" wx:for="{{monthlyData}}" wx:key="month">
+        <view class="td month">{{item.month}}</view>
+        <view class="td">{{item.success}}</view>
+        <view class="td">{{item.pending}}</view>
+        <view class="td">{{item.assistance}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">总结与展望</view>
+    <view class="p">2023年，我们共为流浪猫提供了 <text class="hl">1,284 份餐食</text>，成功领餐 <text class="hl">428 次</text>。</view>
+    <view class="p">感谢 <text class="hl">62 名志愿者</text> 的辛勤付出，以及所有爱心人士的支持。</view>
+    <view class="p">2024年，我们将扩大助餐区覆盖范围，目标提升 <text class="hl">30%</text> 的服务能力。</view>
+  </view>
+</view>

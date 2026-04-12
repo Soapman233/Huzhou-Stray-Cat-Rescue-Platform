@@ -25,11 +25,11 @@ public class CatsServiceImpl implements CatsService {
     private static final String CATS_CACHE_KEY = "cats:";
     private static final String ALL_CATS_KEY = CATS_CACHE_KEY + "all";
     private static final String ADOPTABLE_CATS_KEY = CATS_CACHE_KEY + "adoptable";
-    private static final long CACHE_DURATION = 86400; // 24 hours in seconds
+    private static final long CACHE_DURATION = 86400; // 24 h
 
     @Override
     public List<Animals> getAllCats() {
-        // Try to get from cache first
+        // 尝试从缓存获取猫咪列表
         try {
             List<Animals> cats = (List<Animals>) redisUtil.get(ALL_CATS_KEY);
             if (cats != null) {
@@ -40,10 +40,10 @@ public class CatsServiceImpl implements CatsService {
             logger.warn("Failed to get cats from cache: {}", e.getMessage());
         }
 
-        // If not in cache or cache failed, get from database
+        //如果缓存中没有猫咪列表，则从数据库中获取
         List<Animals> cats = animalsMapper.getAllCats();
 
-        // Try to store in cache
+        //尝试存储猫咪列表到缓存
         if (cats != null && !cats.isEmpty()) {
             try {
                 redisUtil.set(ALL_CATS_KEY, cats, CACHE_DURATION);
@@ -60,7 +60,7 @@ public class CatsServiceImpl implements CatsService {
     public Animals getCatById(Integer id) {
         String cacheKey = CATS_CACHE_KEY + id;
 
-        // Try to get from cache first
+
         try {
             Animals cat = (Animals) redisUtil.get(cacheKey);
             if (cat != null) {
@@ -71,10 +71,10 @@ public class CatsServiceImpl implements CatsService {
             logger.warn("Failed to get cat {} from cache: {}", id, e.getMessage());
         }
 
-        // If not in cache or cache failed, get from database
+
         Animals cat = animalsMapper.getCatById(id);
 
-        // Try to store in cache if found
+
         if (cat != null) {
             try {
                 redisUtil.set(cacheKey, cat, CACHE_DURATION);
@@ -89,7 +89,7 @@ public class CatsServiceImpl implements CatsService {
 
     @Override
     public List<Animals> getAdoptableCats() {
-        // Try to get from cache first
+
         try {
             List<Animals> cats = (List<Animals>) redisUtil.get(ADOPTABLE_CATS_KEY);
             if (cats != null) {
@@ -100,10 +100,10 @@ public class CatsServiceImpl implements CatsService {
             logger.warn("Failed to get adoptable cats from cache: {}", e.getMessage());
         }
 
-        // If not in cache or cache failed, get from database
+
         List<Animals> cats = animalsMapper.getAdoptableCats();
 
-        // Try to store in cache
+
         if (cats != null && !cats.isEmpty()) {
             try {
                 redisUtil.set(ADOPTABLE_CATS_KEY, cats, CACHE_DURATION);
@@ -122,7 +122,7 @@ public class CatsServiceImpl implements CatsService {
         int result = animalsMapper.updateCat(cat);
         if (result > 0) {
             try {
-                // Try to clear related caches
+
                 clearCatCaches(cat.getAnimalId());
                 logger.debug("Cleared cache for cat {}", cat.getAnimalId());
             } catch (Exception e) {
@@ -197,10 +197,10 @@ public class CatsServiceImpl implements CatsService {
     }
 
     private void clearCatCaches(Integer catId) {
-        // Clear individual cat cache
+
         redisUtil.delete(CATS_CACHE_KEY + catId);
 
-        // Clear list caches
+
         redisUtil.delete(ALL_CATS_KEY);
         redisUtil.delete(ADOPTABLE_CATS_KEY);
     }

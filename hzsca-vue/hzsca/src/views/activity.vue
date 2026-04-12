@@ -9,6 +9,11 @@
         湖州拯救流浪猫协会——最新活动
       </h1>
       <p>我们致力于校园流浪猫救助、绝育和领养服务，为校园猫咪创造更好的生活环境</p>
+      <div class="header-actions">
+        <el-button v-if="!isLoggedIn" @click="goLogin">登录后申请志愿者</el-button>
+        <el-button v-else-if="!isVolunteer" type="primary" @click="openVolunteerDialog">成为志愿者</el-button>
+        <el-tag v-else type="success">志愿者</el-tag>
+      </div>
     </div>
 
     <!-- 活动列表 -->
@@ -134,7 +139,36 @@
       </div>
 
       <template #footer>
+        <el-button v-if="isVolunteer && currentActivity?.status !== 'ended'" type="primary" @click="joinCurrentActivity">预约参加</el-button>
         <el-button @click="detailVisible = false">关闭</el-button>
+      </template>
+    </el-dialog>
+
+    <el-dialog
+        v-model="volunteerDialogVisible"
+        title="成为志愿者申请"
+        width="520px"
+    >
+      <el-form :model="volunteerForm" label-width="90px">
+        <el-form-item label="姓名">
+          <el-input v-model="volunteerForm.name" placeholder="请输入姓名" />
+        </el-form-item>
+        <el-form-item label="手机号">
+          <el-input v-model="volunteerForm.phone" placeholder="请输入手机号" />
+        </el-form-item>
+        <el-form-item label="年龄">
+          <el-input-number v-model="volunteerForm.age" :min="1" :max="120" />
+        </el-form-item>
+        <el-form-item label="爱心经历">
+          <el-input v-model="volunteerForm.experience" type="textarea" :rows="3" placeholder="例如：参与救助/投喂/领养回访等" />
+        </el-form-item>
+        <el-form-item label="申请原因">
+          <el-input v-model="volunteerForm.motivation" type="textarea" :rows="3" placeholder="你想成为志愿者的原因" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="volunteerDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="volunteerSubmitting" @click="submitVolunteer">提交申请</el-button>
       </template>
     </el-dialog>
   </div>
@@ -143,6 +177,8 @@
 <script setup>
 import {ref, computed, onMounted} from 'vue';
 import {ElMessage} from 'element-plus';
+import { useRouter } from 'vue-router'
+import request from '@/utils/request'
 import {
   StarFilled,
   Picture,
@@ -157,6 +193,27 @@ import config from "@/config/config.js";
 
 // 默认图片（使用本地图片）
 const DEFAULT_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmNWY1Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuWbvueJh+WbvueJhzwvdGV4dD48L3N2Zz4='
+
+const router = useRouter()
+const userInfo = computed(() => {
+  try {
+    return JSON.parse(localStorage.getItem('userInfo') || '{}')
+  } catch (e) {
+    return {}
+  }
+})
+const isLoggedIn = computed(() => !!localStorage.getItem('token'))
+const isVolunteer = computed(() => (userInfo.value?.role || '') === 'volunteer')
+
+const volunteerDialogVisible = ref(false)
+const volunteerSubmitting = ref(false)
+const volunteerForm = ref({
+  name: '',
+  phone: '',
+  age: 18,
+  experience: '',
+  motivation: ''
+})
 
 
 // 分页相关数据
@@ -254,6 +311,58 @@ const goToDetail = (id) => {
   currentActivity.value = activities.value.find((item) => item.id === id);
   detailVisible.value = true;
 };
+
+const goLogin = () => {
+  router.push('/hzsca/login')
+}
+
+const openVolunteerDialog = () => {
+  const u = userInfo.value || {}
+  volunteerForm.value = {
+    name: u.name || u.username || '',
+    phone: u.phone || '',
+    age: 18,
+    experience: '',
+    motivation: ''
+  }
+  volunteerDialogVisible.value = true
+}
+
+const submitVolunteer = async () => {
+  if (!volunteerForm.value.name) {
+    ElMessage.error('请填写姓名')
+    return
+  }
+  volunteerSubmitting.value = true
+  try {
+    const res = await request.post('/api/volunteer/apply', volunteerForm.value)
+    if (res.data?.code === '200') {
+      ElMessage.success('申请已提交，请等待管理员审核')
+      volunteerDialogVisible.value = false
+      return
+    }
+    ElMessage.error(res.data?.msg || '提交失败')
+  } catch (e) {
+    ElMessage.error('提交失败')
+  } finally {
+    volunteerSubmitting.value = false
+  }
+}
+
+const joinCurrentActivity = async () => {
+  const id = currentActivity.value?.id
+  if (!id) return
+  try {
+    const res = await request.post(`/api/activity/join/${id}`)
+    if (res.data?.code === '200') {
+      ElMessage.success('已提交报名，等待审核')
+      return
+    }
+    ElMessage.error(res.data?.msg || '预约失败')
+  } catch (e) {
+    ElMessage.error('预约失败')
+  }
+}
 </script>
 
 <style scoped>
@@ -270,6 +379,14 @@ const goToDetail = (id) => {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.header-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .header h1 {

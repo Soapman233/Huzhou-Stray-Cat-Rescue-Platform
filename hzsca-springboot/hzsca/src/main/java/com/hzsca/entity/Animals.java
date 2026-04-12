@@ -23,6 +23,8 @@ public class Animals {
     private String imageUrl;
     @JsonProperty("Source")
     private String source;
+    @JsonProperty("Status")
+    private String status;
 
     public Animals() {
     }
@@ -127,6 +129,14 @@ public class Animals {
         this.source = source;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     @Override
     public String toString() {
         return "Animals{" +
@@ -140,6 +150,7 @@ public class Animals {
                 ", description='" + description + '\'' +
                 ", imageUrl='" + imageUrl + '\'' +
                 ", source='" + source + '\'' +
+                ", status='" + status + '\'' +
                 '}';
     }
 }

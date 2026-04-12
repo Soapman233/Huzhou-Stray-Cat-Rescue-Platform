@@ -1,0 +1,112 @@
+<view class="page">
+  <view class="card header-card">
+    <view class="title">完善领养档案</view>
+    <view class="sub">用于为你匹配更合适的猫咪，并生成可解释的推荐理由</view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">基础信息</view>
+    <view class="form-item">
+      <view class="label">所在城市*</view>
+      <input class="input" placeholder="例如：杭州" value="{{form.residenceCity}}" bindinput="onCityInput" />
+    </view>
+
+    <view class="form-item">
+      <view class="label">住房类型*</view>
+      <radio-group class="radio-row" bindchange="onHousingChange">
+        <label class="radio-item"><radio value="RENT" checked="{{form.housingType==='RENT'}}" />租房</label>
+        <label class="radio-item"><radio value="OWN" checked="{{form.housingType==='OWN'}}" />自有</label>
+        <label class="radio-item"><radio value="OTHER" checked="{{form.housingType==='OTHER'}}" />其他</label>
+      </radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="label">居住空间</view>
+      <radio-group class="radio-row" bindchange="onHomeSizeChange">
+        <label class="radio-item"><radio value="1" checked="{{form.homeSizeLevel===1}}" />小</label>
+        <label class="radio-item"><radio value="2" checked="{{form.homeSizeLevel===2}}" />中</label>
+        <label class="radio-item"><radio value="3" checked="{{form.homeSizeLevel===3}}" />大</label>
+      </radio-group>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">家庭与时间</view>
+
+    <view class="form-item switch-item">
+      <view class="label">家中有孩子</view>
+      <switch checked="{{form.hasChildren}}" bindchange="onHasChildrenChange" />
+    </view>
+
+    <view class="form-item switch-item">
+      <view class="label">家中有其他宠物</view>
+      <switch checked="{{form.hasOtherPets}}" bindchange="onHasOtherPetsChange" />
+    </view>
+
+    <view class="form-item">
+      <view class="label">每日可陪伴时长(小时)*</view>
+      <view class="row">
+        <slider min="0" max="24" step="1" value="{{form.dailyCompanionshipHours}}" show-value bindchange="onHoursChange" />
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="label">工作作息</view>
+      <radio-group class="radio-row" bindchange="onScheduleChange">
+        <label class="radio-item"><radio value="DAY" checked="{{form.workSchedule==='DAY'}}" />白天</label>
+        <label class="radio-item"><radio value="NIGHT" checked="{{form.workSchedule==='NIGHT'}}" />夜班</label>
+        <label class="radio-item"><radio value="FLEX" checked="{{form.workSchedule==='FLEX'}}" />不固定</label>
+      </radio-group>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">健康与偏好</view>
+
+    <view class="form-item switch-item">
+      <view class="label">动物毛过敏</view>
+      <switch checked="{{form.allergy}}" bindchange="onAllergyChange" />
+    </view>
+
+    <view class="form-item" wx:if="{{form.allergy}}">
+      <view class="label">可接受掉毛等级(1-5)</view>
+      <slider min="1" max="5" step="1" value="{{form.maxSheddingLevel}}" show-value bindchange="onMaxSheddingChange" />
+    </view>
+
+    <view class="form-item">
+      <view class="label">预算水平</view>
+      <radio-group class="radio-row" bindchange="onBudgetChange">
+        <label class="radio-item"><radio value="1" checked="{{form.budgetLevel===1}}" />低</label>
+        <label class="radio-item"><radio value="2" checked="{{form.budgetLevel===2}}" />中</label>
+        <label class="radio-item"><radio value="3" checked="{{form.budgetLevel===3}}" />高</label>
+      </radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="label">养猫经验</view>
+      <radio-group class="radio-row" bindchange="onExperienceChange">
+        <label class="radio-item"><radio value="0" checked="{{form.experienceLevel===0}}" />无</label>
+        <label class="radio-item"><radio value="1" checked="{{form.experienceLevel===1}}" />有</label>
+        <label class="radio-item"><radio value="2" checked="{{form.experienceLevel===2}}" />熟练</label>
+      </radio-group>
+    </view>
+
+    <view class="form-item">
+      <view class="label">性格偏好</view>
+      <radio-group class="radio-row" bindchange="onPreferenceChange">
+        <label class="radio-item"><radio value="ANY" checked="{{form.personalityPreference==='ANY'}}" />任意</label>
+        <label class="radio-item"><radio value="CUDDLY" checked="{{form.personalityPreference==='CUDDLY'}}" />粘人</label>
+        <label class="radio-item"><radio value="INDEPENDENT" checked="{{form.personalityPreference==='INDEPENDENT'}}" />独立</label>
+      </radio-group>
+    </view>
+
+    <view class="form-item switch-item">
+      <view class="label">可接受特殊照护</view>
+      <switch checked="{{form.acceptSpecialCare}}" bindchange="onAcceptSpecialCareChange" />
+    </view>
+  </view>
+
+  <view class="footer">
+    <button class="primary-btn" bindtap="save">保存档案</button>
+  </view>
+</view>

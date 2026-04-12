@@ -3,8 +3,13 @@
     <div class="page-header">
       <h2>领养申请管理</h2>
       <el-form :inline="true" :model="searchForm" class="search-form">
-        <el-form-item label="申请人">
-          <el-input v-model="searchForm.name" placeholder="请输入申请人姓名" clearable />
+        <el-form-item label="申请状态">
+          <el-select v-model="searchForm.status" placeholder="全部状态" clearable style="width: 160px">
+            <el-option label="待审核" value="PENDING" />
+            <el-option label="已通过" value="APPROVED" />
+            <el-option label="已拒绝" value="REJECTED" />
+            <el-option label="已取消" value="CANCELED" />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
@@ -14,60 +19,43 @@
     </div>
 
     <div class="table-container">
-      <el-table
-          v-loading="loading"
-          :data="adoptionList"
-          border
-          style="width: 100%"
-      >
-        <el-table-column prop="assessmentId" label="申请ID" min-width="90" />
-        <el-table-column prop="name" label="申请人" min-width="100" />
-        <el-table-column prop="familyIncome" label="家庭收入" min-width="120">
+      <el-table v-loading="loading" :data="adoptionList" border style="width: 100%">
+        <el-table-column prop="requestId" label="申请ID" min-width="90" />
+        <el-table-column prop="wxNickname" label="申请人" min-width="120" />
+        <el-table-column prop="animalName" label="猫咪" min-width="120" />
+        <el-table-column prop="animalStatus" label="猫咪状态" min-width="110">
           <template #default="{ row }">
-            {{ formatIncome(row.familyIncome) }}
-          </template>
-        </el-table-column>
-        <el-table-column prop="hasOwnedPets" label="养过宠物" min-width="90">
-          <template #default="{ row }">
-            <el-tag :type="row.hasOwnedPets ? 'success' : 'info'">
-              {{ row.hasOwnedPets ? '是' : '否' }}
+            <el-tag :type="getAnimalStatusType(row.animalStatus)">
+              {{ getAnimalStatusText(row.animalStatus) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="livingSpace" label="居住空间" min-width="100" />
-        <el-table-column prop="petFriendly" label="宠物友好" min-width="90">
+        <el-table-column prop="score" label="评分" min-width="90" />
+        <el-table-column prop="riskLevel" label="风险等级" min-width="100">
           <template #default="{ row }">
-            <el-tag :type="row.petFriendly ? 'success' : 'warning'">
-              {{ row.petFriendly ? '是' : '否' }}
+            <el-tag :type="getRiskLevelType(row.riskLevel)">
+              {{ row.riskLevel || '未计算' }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="status" label="状态" min-width="90">
+        <el-table-column prop="status" label="申请状态" min-width="100">
           <template #default="{ row }">
             <el-tag :type="getStatusType(row.status)">
               {{ getStatusText(row.status) }}
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="createTime" label="申请时间" min-width="160">
+        <el-table-column prop="applyTime" label="申请时间" min-width="170">
           <template #default="{ row }">
-            {{ row.createTime ? new Date(row.createTime).toLocaleString() : '未知' }}
+            {{ formatDateTime(row.applyTime) }}
           </template>
         </el-table-column>
-        <el-table-column label="操作" min-width="200">
+        <el-table-column label="操作" min-width="210" fixed="right">
           <template #default="{ row }">
             <div class="operation-buttons">
               <el-button type="primary" size="small" @click="handleView(row)">查看</el-button>
-              <template v-if="row.status === 'PENDING'">
-                <el-button type="success" size="small" @click="handleApprove(row)">通过</el-button>
-                <el-button type="danger" size="small" @click="handleReject(row)">拒绝</el-button>
-              </template>
-              <template v-else-if="row.status === 'APPROVED'">
-                <el-button type="danger" size="small" @click="handleReject(row)">拒绝</el-button>
-              </template>
-              <template v-else-if="row.status === 'REJECTED'">
-                <el-button type="success" size="small" @click="handleApprove(row)">重新通过</el-button>
-              </template>
+              <el-button v-if="row.status === 'PENDING'" type="success" size="small" @click="handleApprove(row)">通过</el-button>
+              <el-button v-if="row.status === 'PENDING'" type="danger" size="small" @click="handleReject(row)">拒绝</el-button>
             </div>
           </template>
         </el-table-column>
@@ -75,74 +63,57 @@
     </div>
 
     <el-pagination
-        v-model:current-page="currentPage"
-        v-model:page-size="pageSize"
-        :total="total"
-        :page-sizes="[10, 20, 50, 100]"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        class="pagination"
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
+      :total="total"
+      :page-sizes="[10, 20, 50, 100]"
+      layout="total, sizes, prev, pager, next, jumper"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      class="pagination"
     />
 
-    <!-- 查看详情对话框 -->
-    <el-dialog
-        v-model="dialogVisible"
-        title="申请详情"
-        width="50%"
-    >
+    <el-dialog v-model="dialogVisible" title="申请详情" width="70%">
       <div v-if="currentApplication" class="application-detail">
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="申请ID">{{ currentApplication.assessmentId }}</el-descriptions-item>
-          <el-descriptions-item label="申请人">{{ currentApplication.name }}</el-descriptions-item>
-          <el-descriptions-item label="家庭收入">{{ formatIncome(currentApplication.familyIncome) }}</el-descriptions-item>
-          <el-descriptions-item label="养过宠物">
-            <el-tag :type="currentApplication.hasOwnedPets ? 'success' : 'info'">
-              {{ currentApplication.hasOwnedPets ? '是' : '否' }}
+          <el-descriptions-item label="申请ID">{{ currentApplication.request?.id }}</el-descriptions-item>
+          <el-descriptions-item label="申请状态">
+            <el-tag :type="getStatusType(currentApplication.request?.status)">
+              {{ getStatusText(currentApplication.request?.status) }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="家中吸烟">
-            <el-tag :type="currentApplication.smoker ? 'danger' : 'success'">
-              {{ currentApplication.smoker ? '是' : '否' }}
+          <el-descriptions-item label="申请人">{{ currentApplication.wxUser?.nickname || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="猫咪名称">{{ currentApplication.cat?.Name || currentApplication.cat?.name || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="评分">{{ currentApplication.request?.score ?? '-' }}</el-descriptions-item>
+          <el-descriptions-item label="风险等级">
+            <el-tag :type="getRiskLevelType(currentApplication.request?.riskLevel)">
+              {{ currentApplication.request?.riskLevel || '未计算' }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="家中哮喘">
-            <el-tag :type="currentApplication.asthma ? 'danger' : 'success'">
-              {{ currentApplication.asthma ? '是' : '否' }}
-            </el-tag>
+          <el-descriptions-item label="风险解释" :span="2">
+            {{ currentApplication.request?.riskReasons || '无' }}
           </el-descriptions-item>
-          <el-descriptions-item label="动物毛过敏">
-            <el-tag :type="currentApplication.allergy ? 'danger' : 'success'">
-              {{ currentApplication.allergy ? '是' : '否' }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="居住空间">{{ currentApplication.livingSpace }}</el-descriptions-item>
-          <el-descriptions-item label="宠物友好">
-            <el-tag :type="currentApplication.petFriendly ? 'success' : 'warning'">
-              {{ currentApplication.petFriendly ? '是' : '否' }}
-            </el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="申请时间">{{ currentApplication.createTime }}</el-descriptions-item>
+          <el-descriptions-item label="家庭收入">{{ formatIncome(currentApplication.form?.familyIncome) }}</el-descriptions-item>
+          <el-descriptions-item label="养宠经验">{{ formatBoolean(currentApplication.form?.hasOwnedPets) }}</el-descriptions-item>
+          <el-descriptions-item label="吸烟">{{ formatBoolean(currentApplication.form?.smoker) }}</el-descriptions-item>
+          <el-descriptions-item label="哮喘">{{ formatBoolean(currentApplication.form?.asthma) }}</el-descriptions-item>
+          <el-descriptions-item label="过敏">{{ formatBoolean(currentApplication.form?.allergy) }}</el-descriptions-item>
+          <el-descriptions-item label="居住空间">{{ currentApplication.form?.livingSpace || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="工作时长">{{ currentApplication.form?.workHours ?? '-' }}</el-descriptions-item>
+          <el-descriptions-item label="接受回访">{{ formatBoolean(currentApplication.form?.acceptReturnVisit) }}</el-descriptions-item>
+          <el-descriptions-item label="备注" :span="2">{{ currentApplication.form?.remarks || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="审核原因" :span="2">{{ currentApplication.request?.auditReason || '-' }}</el-descriptions-item>
         </el-descriptions>
       </div>
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">关闭</el-button>
-          <template v-if="currentApplication">
-            <template v-if="currentApplication.status === 'PENDING'">
-              <el-button type="success" @click="handleApprove(currentApplication)">通过申请</el-button>
-              <el-button type="danger" @click="handleReject(currentApplication)">拒绝申请</el-button>
-            </template>
-            <template v-else-if="currentApplication.status === 'APPROVED'">
-              <el-button type="danger" @click="handleReject(currentApplication)">拒绝申请</el-button>
-            </template>
-            <template v-else-if="currentApplication.status === 'REJECTED'">
-              <el-button type="success" @click="handleApprove(currentApplication)">重新通过</el-button>
-            </template>
-            <el-tag :type="getStatusType(currentApplication.status)">
-              {{ getStatusText(currentApplication.status) }}
-            </el-tag>
-          </template>
+          <el-button v-if="currentApplication?.request?.status === 'PENDING'" type="success" @click="handleApprove(currentApplication.request)">
+            通过申请
+          </el-button>
+          <el-button v-if="currentApplication?.request?.status === 'PENDING'" type="danger" @click="handleReject(currentApplication.request)">
+            拒绝申请
+          </el-button>
         </span>
       </template>
     </el-dialog>
@@ -154,7 +125,6 @@ import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '@/utils/request'
 
-// 数据
 const loading = ref(false)
 const adoptionList = ref([])
 const currentPage = ref(1)
@@ -163,169 +133,112 @@ const total = ref(0)
 const dialogVisible = ref(false)
 const currentApplication = ref(null)
 const searchForm = ref({
-  name: ''
+  status: ''
 })
 
-// 获取领养申请列表
 const fetchAdoptionList = async () => {
   loading.value = true
   try {
-    const response = await request.get('/api/adoption-assessments', {
+    const response = await request.get('/admin/adoption-requests', {
       params: {
+        status: searchForm.value.status || '',
         page: currentPage.value,
-        size: pageSize.value,
-        name: searchForm.value.name || ''
+        size: pageSize.value
       }
     })
-    console.log('Response data:', response.data); // 调试日志
 
-    if (response.data.code === '200' && response.data.data) {
-      const { records, total: totalCount, current, size } = response.data.data;
-
-      // 确保records是数组
-      if (Array.isArray(records)) {
-        adoptionList.value = records;
-        total.value = totalCount || 0;
-        currentPage.value = current || 1;
-        pageSize.value = size || 10;
-      } else {
-        console.error('Invalid records format:', records);
-        ElMessage.error('数据格式错误');
-      }
-    } else {
-      console.error('Invalid response format:', response.data);
-      ElMessage.error(response.data.message || '获取数据失败');
+    if (response.data?.code === '200') {
+      const data = response.data.data || {}
+      adoptionList.value = data.records || []
+      total.value = data.total || 0
+      currentPage.value = data.current || 1
+      pageSize.value = data.size || 10
+      return
     }
+
+    ElMessage.error(response.data?.msg || '获取领养申请列表失败')
   } catch (error) {
-    console.error('获取领养申请列表失败:', error);
-    if (error.response) {
-      ElMessage.error(error.response.data.message || '获取领养申请列表失败');
-    } else {
-      ElMessage.error('网络错误，请稍后重试');
-    }
+    ElMessage.error(error.response?.data?.msg || error.message || '获取领养申请列表失败')
   } finally {
-    loading.value = false;
+    loading.value = false
   }
 }
 
-// 格式化收入
-const formatIncome = (income) => {
-  return income ? `¥${income.toLocaleString()}` : '未填写'
+const fetchDetail = async (requestId) => {
+  const response = await request.get(`/admin/adoption-requests/${requestId}`)
+  if (response.data?.code === '200') {
+    currentApplication.value = response.data.data
+    dialogVisible.value = true
+    return
+  }
+  ElMessage.error(response.data?.msg || '获取详情失败')
 }
 
-// 查看详情
-const handleView = (row) => {
-  currentApplication.value = row
-  dialogVisible.value = true
+const handleView = async (row) => {
+  await fetchDetail(row.requestId)
 }
 
-// 通过申请
 const handleApprove = async (row) => {
+  const requestId = row.requestId || row.id
   try {
-    const confirmMessage = row.status === 'REJECTED'
-        ? '确定要重新通过该领养申请吗？'
-        : '确定要通过该领养申请吗？';
-
-    await ElMessageBox.confirm(confirmMessage, '提示', {
+    const { value } = await ElMessageBox.prompt('请输入审核备注（可选）', '通过申请', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
-      type: 'success'
+      inputPlaceholder: '通过原因/备注'
     })
-
-    const response = await request.put(`/api/adoption-assessments/${row.assessmentId}/approve`, {
-      status: 'APPROVED',
-      assessmentId: row.assessmentId
-    });
-
-    if (response.data.code === '200') {
-      ElMessage.success(row.status === 'REJECTED' ? '已重新通过申请' : '已通过申请');
-      // 更新本地状态
-      if (currentApplication.value && currentApplication.value.assessmentId === row.assessmentId) {
-        currentApplication.value.status = 'APPROVED';
-      }
-      await fetchAdoptionList();
-      dialogVisible.value = false;
-    } else {
-      console.error('通过申请失败:', response.data);
-      ElMessage.error(response.data.message || '通过申请失败');
+    const response = await request.post(`/admin/adoption-requests/${requestId}/approve`, {
+      reason: value || ''
+    })
+    if (response.data?.code === '200') {
+      ElMessage.success('已通过申请')
+      dialogVisible.value = false
+      await fetchAdoptionList()
+      return
     }
+    ElMessage.error(response.data?.msg || '通过申请失败')
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('通过申请出错:', error);
-      if (error.response) {
-        console.error('错误响应:', error.response.data);
-        ElMessage.error(error.response.data.message || '通过申请失败');
-      } else if (error.request) {
-        console.error('请求未收到响应');
-        ElMessage.error('网络错误，请稍后重试');
-      } else {
-        console.error('请求配置错误:', error.message);
-        ElMessage.error('请求配置错误');
-      }
+      ElMessage.error(error.response?.data?.msg || error.message || '通过申请失败')
     }
   }
 }
 
-// 拒绝申请
 const handleReject = async (row) => {
+  const requestId = row.requestId || row.id
   try {
-    const confirmMessage = row.status === 'APPROVED'
-        ? '确定要撤销通过并拒绝该领养申请吗？'
-        : '确定要拒绝该领养申请吗？';
-
-    await ElMessageBox.confirm(confirmMessage, '提示', {
+    const { value } = await ElMessageBox.prompt('请输入拒绝原因', '拒绝申请', {
       confirmButtonText: '确定',
       cancelButtonText: '取消',
-      type: 'warning'
+      inputPlaceholder: '拒绝原因',
+      inputValidator: (val) => !!val || '请填写拒绝原因'
     })
-
-    const response = await request.put(`/api/adoption-assessments/${row.assessmentId}/reject`, {
-      status: 'REJECTED',
-      assessmentId: row.assessmentId
-    });
-
-    if (response.data.code === '200') {
-      ElMessage.success(row.status === 'APPROVED' ? '已撤销通过并拒绝申请' : '已拒绝申请');
-      // 更新本地状态
-      if (currentApplication.value && currentApplication.value.assessmentId === row.assessmentId) {
-        currentApplication.value.status = 'REJECTED';
-      }
-      await fetchAdoptionList();
-      dialogVisible.value = false;
-    } else {
-      console.error('拒绝申请失败:', response.data);
-      ElMessage.error(response.data.message || '拒绝申请失败');
+    const response = await request.post(`/admin/adoption-requests/${requestId}/reject`, {
+      reason: value
+    })
+    if (response.data?.code === '200') {
+      ElMessage.success('已拒绝申请')
+      dialogVisible.value = false
+      await fetchAdoptionList()
+      return
     }
+    ElMessage.error(response.data?.msg || '拒绝申请失败')
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('拒绝申请出错:', error);
-      if (error.response) {
-        console.error('错误响应:', error.response.data);
-        ElMessage.error(error.response.data.message || '拒绝申请失败');
-      } else if (error.request) {
-        console.error('请求未收到响应');
-        ElMessage.error('网络错误，请稍后重试');
-      } else {
-        console.error('请求配置错误:', error.message);
-        ElMessage.error('请求配置错误');
-      }
+      ElMessage.error(error.response?.data?.msg || error.message || '拒绝申请失败')
     }
   }
 }
 
-// 搜索
 const handleSearch = () => {
   currentPage.value = 1
   fetchAdoptionList()
 }
 
-// 重置搜索
 const resetSearch = () => {
-  searchForm.value.name = ''
+  searchForm.value.status = ''
   handleSearch()
 }
 
-// 分页
 const handleSizeChange = (val) => {
   pageSize.value = val
   fetchAdoptionList()
@@ -336,35 +249,53 @@ const handleCurrentChange = (val) => {
   fetchAdoptionList()
 }
 
-// 获取状态标签类型
+const formatIncome = (income) => {
+  if (income === null || income === undefined || income === '') return '未填写'
+  return `¥${Number(income).toLocaleString()}`
+}
+
+const formatBoolean = (value) => value === true ? '是' : value === false ? '否' : '-'
+
+const formatDateTime = (value) => value ? new Date(value).toLocaleString() : '-'
+
 const getStatusType = (status) => {
-  switch (status) {
-    case 'PENDING':
-      return 'warning';
-    case 'APPROVED':
-      return 'success';
-    case 'REJECTED':
-      return 'danger';
-    default:
-      return 'info';
-  }
-};
+  if (status === 'APPROVED') return 'success'
+  if (status === 'REJECTED') return 'danger'
+  if (status === 'PENDING') return 'warning'
+  return 'info'
+}
 
-// 获取状态显示文本
 const getStatusText = (status) => {
-  switch (status) {
-    case 'PENDING':
-      return '待审核';
-    case 'APPROVED':
-      return '已通过';
-    case 'REJECTED':
-      return '已拒绝';
-    default:
-      return '未知';
-  }
-};
+  if (status === 'APPROVED') return '已通过'
+  if (status === 'REJECTED') return '已拒绝'
+  if (status === 'PENDING') return '待审核'
+  if (status === 'CANCELED') return '已取消'
+  return '未知'
+}
 
-// 初始化
+const getAnimalStatusType = (status) => {
+  if (status === 'ADOPTED') return 'success'
+  if (status === 'PENDING') return 'warning'
+  if (status === 'MEDICAL' || status === 'HOLD') return 'danger'
+  return 'info'
+}
+
+const getAnimalStatusText = (status) => {
+  if (status === 'ADOPTABLE') return '可领养'
+  if (status === 'PENDING') return '申请中'
+  if (status === 'ADOPTED') return '已领养'
+  if (status === 'MEDICAL') return '治疗中'
+  if (status === 'HOLD') return '暂缓'
+  return status || '未知'
+}
+
+const getRiskLevelType = (level) => {
+  if (level === 'LOW') return 'success'
+  if (level === 'MEDIUM') return 'warning'
+  if (level === 'HIGH') return 'danger'
+  return 'info'
+}
+
 onMounted(() => {
   fetchAdoptionList()
 })
@@ -414,14 +345,6 @@ onMounted(() => {
 
 .application-detail {
   padding: 20px;
-}
-
-:deep(.el-descriptions) {
-  margin-bottom: 20px;
-}
-
-:deep(.el-tag) {
-  margin: 0 4px;
 }
 
 .dialog-footer {

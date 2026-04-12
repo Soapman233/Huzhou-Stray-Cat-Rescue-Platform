@@ -38,8 +38,8 @@
       </el-table-column>
       <el-table-column prop="Role" label="角色" width="100">
         <template #default="{ row }">
-          <el-tag :type="row.Role === 'admin' ? 'danger' : 'success'">
-            {{ row.Role === 'admin' ? '管理员' : '普通用户' }}
+          <el-tag :type="row.Role === 'admin' ? 'danger' : (row.Role === 'volunteer' ? 'warning' : 'success')">
+            {{ row.Role === 'admin' ? '管理员' : (row.Role === 'volunteer' ? '志愿者' : '普通用户') }}
           </el-tag>
         </template>
       </el-table-column>
@@ -100,6 +100,7 @@
         <el-form-item label="角色" prop="role">
           <el-select v-model="form.role" placeholder="请选择角色">
             <el-option value="user" label="普通用户" />
+            <el-option value="volunteer" label="志愿者" />
             <el-option value="admin" label="管理员" />
           </el-select>
         </el-form-item>

@@ -1,0 +1,63 @@
+.header-card {
+  background: #E6DCC8;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.sub {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #4b5563;
+}
+
+.loading,
+.empty {
+  text-align: center;
+  color: #666666;
+  padding: 22rpx 0;
+}
+
+.recommend-card {
+  border-left: 10rpx solid #333333;
+}
+
+.row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.name {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.score {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #111827;
+}
+
+.desc {
+  margin-top: 10rpx;
+  color: #666666;
+}
+
+.reasons {
+  margin-top: 14rpx;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.tag {
+  padding: 8rpx 12rpx;
+  border-radius: 999rpx;
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 22rpx;
+}

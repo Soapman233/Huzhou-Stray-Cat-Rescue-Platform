@@ -14,6 +14,7 @@
         <result column="Description" property="description"/>
         <result column="ImageURL" property="imageUrl"/>
         <result column="Source" property="source"/>
+        <result column="Status" property="status"/>
     </resultMap>
 
     <select id="getAllCats" resultMap="CatResultMap">
@@ -27,8 +28,9 @@
             HealthStatus,
             Description,
             ImageURL,
-            Source
-        FROM Animals
+            Source,
+            Status
+        FROM animals
         WHERE Species = '猫'
     </select>
 
@@ -43,8 +45,9 @@
             HealthStatus,
             Description,
             ImageURL,
-            Source
-        FROM Animals
+            Source,
+            Status
+        FROM animals
         WHERE AnimalID = #{id} AND Species = '猫'
     </select>
 </mapper>

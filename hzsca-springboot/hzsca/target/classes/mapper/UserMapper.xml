@@ -14,24 +14,24 @@
     </resultMap>
 
     <select id="selectAll" resultMap="BaseResultMap">
-        SELECT * FROM Users ORDER BY UserID
+        SELECT * FROM users ORDER BY UserID
     </select>
 
     <select id="selectByUsername" resultMap="BaseResultMap">
-        SELECT * FROM Users WHERE Username = #{username}
+        SELECT * FROM users WHERE Username = #{username}
     </select>
 
     <select id="selectById" resultMap="BaseResultMap">
-        SELECT * FROM Users WHERE UserID = #{UserID}
+        SELECT * FROM users WHERE UserID = #{UserID}
     </select>
 
     <insert id="insert" parameterType="com.hzsca.entity.Users" useGeneratedKeys="true" keyProperty="userID">
-        INSERT INTO Users (Username, Password, Name, Phone, Gender, Profile, Avatar, Role)
+        INSERT INTO users (Username, Password, Name, Phone, Gender, Profile, Avatar, Role)
         VALUES (#{username}, #{password}, #{name}, #{phone}, #{gender}, #{profile}, #{avatar}, #{role})
     </insert>
 
     <update id="updateProfile" parameterType="com.hzsca.entity.Users">
-        UPDATE Users
+        UPDATE users
         SET Phone = #{phone},
             Name = #{name},
             Gender = #{gender},
@@ -41,12 +41,18 @@
     </update>
 
     <update id="updatePassword">
-        UPDATE Users
+        UPDATE users
         SET Password = #{password}
         WHERE Username = #{username}
     </update>
 
+    <update id="updateRoleById">
+        UPDATE users
+        SET Role = #{role}
+        WHERE UserID = #{UserID}
+    </update>
+
     <delete id="deleteByUsername">
-        DELETE FROM Users WHERE Username = #{username}
+        DELETE FROM users WHERE Username = #{username}
     </delete>
 </mapper>

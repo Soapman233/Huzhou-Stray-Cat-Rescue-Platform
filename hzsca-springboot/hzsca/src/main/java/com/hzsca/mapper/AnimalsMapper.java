@@ -38,4 +38,8 @@ public interface AnimalsMapper {
      * 删除猫咪
      */
     int deleteCat(@Param("id") Integer id);
+
+    int updateAnimalStatus(@Param("id") Integer id, @Param("status") String status);
+
+    int updateAnimalStatusIfCurrent(@Param("id") Integer id, @Param("fromStatus") String fromStatus, @Param("toStatus") String toStatus);
 }

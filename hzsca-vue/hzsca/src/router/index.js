@@ -8,6 +8,23 @@ const router = createRouter({
     routes: [
         {path: '/', redirect: '/hzsca/home'},
         {
+            path: '/hzsca/admin',
+            component: () => import('../views/admin/AdminLayout.vue'),
+            meta: { requiresAuth: true, role: 'admin' },
+            children: [
+                { path: '', redirect: '/hzsca/admin/dashboard' },
+                { path: 'dashboard', component: () => import('../views/admin/AdminDashboard.vue'), meta: { title: '仪表盘', requiresAuth: true, role: 'admin' } },
+                { path: 'users', component: () => import('../views/admin/UserManagement.vue'), meta: { title: '用户管理', requiresAuth: true, role: 'admin' } },
+                { path: 'cats', component: () => import('../views/admin/CatManagement.vue'), meta: { title: '猫咪管理', requiresAuth: true, role: 'admin' } },
+                { path: 'cat-traits', component: () => import('../views/admin/CatTraitsManagement.vue'), meta: { title: '猫咪特征管理', requiresAuth: true, role: 'admin' } },
+                { path: 'activities', component: () => import('../views/admin/ActivityManagement.vue'), meta: { title: '活动管理', requiresAuth: true, role: 'admin' } },
+                { path: 'volunteers', component: () => import('../views/admin/VolunteerReview.vue'), meta: { title: '志愿者审核', requiresAuth: true, role: 'admin' } },
+                { path: 'adoptions', name: 'adoptions', component: AdoptionManagement, meta: { title: '领养申请管理', requiresAuth: true, role: 'admin' } },
+                { path: 'rescues', component: () => import('../views/admin/RescueManagement.vue'), meta: { title: '救助上报管理', requiresAuth: true, role: 'admin' } },
+                { path: 'dataset', component: () => import('../views/admin/DatasetExport.vue'), meta: { title: '数据导出', requiresAuth: true, role: 'admin' } }
+            ]
+        },
+        {
             path: '/hzsca',
             component: HomeView,
             children: [
@@ -47,19 +64,8 @@ const router = createRouter({
                     meta: {title: '注册'}
                 },
                 {
-                    path: 'admin/users',
-                    component: () => import('../views/admin/UserManagement.vue'),
-                    meta: {title: '用户管理', requiresAuth: true, role: 'admin'}
-                },
-                {
-                    path: 'admin/cats',
-                    component: () => import('../views/admin/CatManagement.vue'),
-                    meta: {title: '猫咪管理', requiresAuth: true, role: 'admin'}
-                },
-                {
-                    path: 'admin/activities',
-                    component: () => import('../views/admin/ActivityManagement.vue'),
-                    meta: {title: '活动管理', requiresAuth: true, role: 'admin'}
+                    path: 'admin',
+                    redirect: '/hzsca/admin/dashboard'
                 },
                 {
                     path: 'activity',
@@ -86,21 +92,13 @@ const router = createRouter({
                     component: () => import('../views/report.vue'),
                     meta: {title: '工作报告'}
                 },
-                {
-                    path: 'admin/adoptions',
-                    name: 'adoptions',
-                    component: AdoptionManagement,
-                    meta: {
-                        requiresAuth: true,
-                        requiresAdmin: true
-                    }
-                }
+                
             ]
         },
         { path: '/login', redirect: '/hzsca/login' },
         { path: '/regist', redirect: '/hzsca/regist' },
         { path: '/personalInfo', redirect: '/hzsca/personalInfo' },
-        { path: '/admin', redirect: '/hzsca/admin/users' },
+        { path: '/admin', redirect: '/hzsca/admin/dashboard' },
         { path: '/404', name: 'NotFound', component: () => import('../views/404.vue'), meta: { title: '404' }},
         { path: '/:pathMatch(.*)*', redirect: '/404' }
     ]
@@ -108,10 +106,13 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
     document.title = to.meta.title || 'HZSCA'
+    const token = localStorage.getItem('token')
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+    if (token && userInfo.role === 'admin' && to.path.startsWith('/hzsca') && !to.path.startsWith('/hzsca/admin') && to.path !== '/hzsca/login') {
+        next('/hzsca/admin/dashboard')
+        return
+    }
     if (to.matched.some(record => record.meta.requiresAuth)) {
-        const token = localStorage.getItem('token')
-        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
-
         if (!token) {
             ElMessage.warning('请先登录')
             next({
@@ -121,7 +122,8 @@ router.beforeEach((to, from, next) => {
             return
         }
 
-        if (to.meta.role && userInfo.role !== to.meta.role) {
+        const requiredRole = to.meta.role || (to.meta.requiresAdmin ? 'admin' : null)
+        if (requiredRole && userInfo.role !== requiredRole) {
             ElMessage.error('没有权限访问该页面')
             next('/hzsca/home')
             return

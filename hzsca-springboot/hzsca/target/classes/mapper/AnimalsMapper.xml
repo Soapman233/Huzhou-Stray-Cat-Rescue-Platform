@@ -12,22 +12,23 @@
         <result column="Description" property="description" />
         <result column="ImageURL" property="imageUrl" />
         <result column="Source" property="source" />
+        <result column="Status" property="status" />
     </resultMap>
 
     <select id="getAllCats" resultMap="BaseResultMap">
-        SELECT * FROM Animals WHERE Species = '猫'
+        SELECT * FROM animals WHERE Species = '猫'
     </select>
 
     <select id="getCatById" resultMap="BaseResultMap">
-        SELECT * FROM Animals WHERE AnimalID = #{id} AND Species = '猫'
+        SELECT * FROM animals WHERE AnimalID = #{id} AND Species = '猫'
     </select>
 
     <select id="getAdoptableCats" resultMap="BaseResultMap">
-        SELECT * FROM Animals WHERE Species = '猫' AND Source = '流浪'
+        SELECT * FROM animals WHERE Species = '猫' AND Source = '流浪'
     </select>
 
     <update id="updateCat" parameterType="com.hzsca.entity.Animals">
-        UPDATE Animals
+        UPDATE animals
         SET Name = #{name},
             Species = '猫',
             Breed = #{breed},
@@ -41,11 +42,23 @@
     </update>
 
     <insert id="insertCat" parameterType="com.hzsca.entity.Animals" useGeneratedKeys="true" keyProperty="animalId">
-        INSERT INTO Animals (Name, Species, Breed, Age, Gender, HealthStatus, Description, ImageURL, Source)
+        INSERT INTO animals (Name, Species, Breed, Age, Gender, HealthStatus, Description, ImageURL, Source)
         VALUES (#{name}, '猫', #{breed}, #{age}, #{gender}, #{healthStatus}, #{description}, #{imageUrl}, #{source})
     </insert>
 
     <delete id="deleteCat">
-        DELETE FROM Animals WHERE AnimalID = #{id} AND Species = '猫'
+        DELETE FROM animals WHERE AnimalID = #{id} AND Species = '猫'
     </delete>
+
+    <update id="updateAnimalStatus">
+        UPDATE animals
+        SET Status = #{status}
+        WHERE AnimalID = #{id} AND Species = '猫'
+    </update>
+
+    <update id="updateAnimalStatusIfCurrent">
+        UPDATE animals
+        SET Status = #{toStatus}
+        WHERE AnimalID = #{id} AND Species = '猫' AND Status = #{fromStatus}
+    </update>
 </mapper>

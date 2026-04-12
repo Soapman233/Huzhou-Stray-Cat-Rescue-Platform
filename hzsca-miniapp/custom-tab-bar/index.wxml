@@ -1,0 +1,40 @@
+<view class="tabbar">
+  <view class="tabbar-inner">
+    <view
+        class="tab-item {{selected===0 ? 'active' : ''}}"
+        bindtap="onSwitch"
+        data-index="0"
+        data-path="pages/home/index"
+    >
+      <view class="icon">H</view>
+      <view class="label">首页</view>
+    </view>
+    <view
+        class="tab-item {{selected===1 ? 'active' : ''}}"
+        bindtap="onSwitch"
+        data-index="1"
+        data-path="pages/cats/index"
+    >
+      <view class="icon">C</view>
+      <view class="label">领养</view>
+    </view>
+    <view
+        class="tab-item {{selected===2 ? 'active' : ''}}"
+        bindtap="onSwitch"
+        data-index="2"
+        data-path="pages/activity/index"
+    >
+      <view class="icon">A</view>
+      <view class="label">活动</view>
+    </view>
+    <view
+        class="tab-item {{selected===3 ? 'active' : ''}}"
+        bindtap="onSwitch"
+        data-index="3"
+        data-path="pages/mine/index"
+    >
+      <view class="icon">M</view>
+      <view class="label">我的</view>
+    </view>
+  </view>
+</view>

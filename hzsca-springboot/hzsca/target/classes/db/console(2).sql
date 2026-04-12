@@ -1,6 +1,7 @@
-USE hzsca_db;
+CREATE DATABASE IF NOT EXISTS hzsca DEFAULT CHARACTER SET utf8mb4;
+USE hzsca;
 -- 创建管理员表
-CREATE TABLE Admins (
+CREATE TABLE admins (
                         id INT AUTO_INCREMENT PRIMARY KEY,  -- 管理员ID，自动递增，主键
                         username VARCHAR(50) NOT NULL,        -- 管理员用户名，不能为空
                         password VARCHAR(255) NOT NULL,        -- 管理员密码，不能为空
@@ -10,7 +11,7 @@ CREATE TABLE Admins (
 );
 
 -- 创建普通用户表
-CREATE TABLE Users (
+CREATE TABLE users (
                        UserID INT AUTO_INCREMENT PRIMARY KEY,  -- 用户ID，自动递增，主键
                        Username VARCHAR(50) NOT NULL,        -- 用户名，不能为空
                        Password VARCHAR(255) NOT NULL,        -- 密码，不能为空
@@ -22,8 +23,24 @@ CREATE TABLE Users (
                        avatar VARCHAR(255) NULL                     -- 用户头像
 );
 
+-- 创建小程序用户表
+CREATE TABLE wx_user (
+                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                         openid VARCHAR(64) NOT NULL,
+                         unionid VARCHAR(64),
+                         nickname VARCHAR(100),
+                         avatar VARCHAR(255),
+                         gender TINYINT,
+                         city VARCHAR(50),
+                         province VARCHAR(50),
+                         country VARCHAR(50),
+                         create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                         last_login_time TIMESTAMP NULL DEFAULT NULL,
+                         UNIQUE KEY uk_wx_user_openid (openid)
+);
+
 -- 创建领养人表
-CREATE TABLE Adopters (
+CREATE TABLE adopters (
                           AdopterID INT AUTO_INCREMENT PRIMARY KEY,  -- 领养人ID，自动递增，主键
                           UserID INT NOT NULL,                        -- 关联的普通用户ID
                           Name VARCHAR(50) NOT NULL,                -- 领养人姓名，不能为空
@@ -33,11 +50,11 @@ CREATE TABLE Adopters (
                           Email VARCHAR(100),                       -- 领养人电子邮件地址
                           Address VARCHAR(255) NOT NULL,            -- 领养人地址，不能为空
                           BirthDate DATE,                           -- 领养人出生日期
-                          FOREIGN KEY (UserID) REFERENCES Users(UserID)  -- 外键，关联普通用户表
+                          FOREIGN KEY (UserID) REFERENCES users(UserID)  -- 外键，关联普通用户表
 );
 
 -- 创建动物表
-CREATE TABLE Animals (
+CREATE TABLE animals (
                          AnimalID INT AUTO_INCREMENT PRIMARY KEY,  -- 动物ID，自动递增，主键
                          Name VARCHAR(50) NOT NULL,                -- 动物名字，不能为空
                          Species VARCHAR(50) NOT NULL,             -- 动物种类，不能为空
@@ -47,11 +64,107 @@ CREATE TABLE Animals (
                          HealthStatus VARCHAR(100),                -- 动物健康状况
                          Description TEXT,                         -- 动物详细描述
                          ImageURL VARCHAR(255),                    -- 动物图片URL
-                         Source VARCHAR(100)                        -- 动物来源
+                         Source VARCHAR(100),                        -- 动物来源
+                         Status ENUM('ADOPTABLE','PENDING','ADOPTED','MEDICAL','HOLD') NOT NULL DEFAULT 'ADOPTABLE'
+);
+
+-- 创建领养申请表（绑定具体猫）
+CREATE TABLE adoption_request (
+                                  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                  animal_id INT NOT NULL,
+                                  wx_user_id BIGINT NOT NULL,
+                                  status ENUM('PENDING','APPROVED','REJECTED','CANCELED') NOT NULL DEFAULT 'PENDING',
+                                  apply_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                  audit_time TIMESTAMP NULL DEFAULT NULL,
+                                  auditor_id BIGINT NULL DEFAULT NULL,
+                                  audit_reason VARCHAR(500),
+                                  score INT,
+                                  risk_level VARCHAR(10),
+                                  risk_reasons TEXT,
+                                  INDEX idx_adoption_request_animal (animal_id),
+                                  INDEX idx_adoption_request_user (wx_user_id),
+                                  CONSTRAINT fk_adoption_request_animal FOREIGN KEY (animal_id) REFERENCES animals(AnimalID),
+                                  CONSTRAINT fk_adoption_request_user FOREIGN KEY (wx_user_id) REFERENCES wx_user(id)
+);
+
+-- 创建领养申请表单（申请详情）
+CREATE TABLE adoption_form (
+                               request_id BIGINT PRIMARY KEY,
+                               family_income DECIMAL(10,2),
+                               has_owned_pets BOOLEAN,
+                               smoker BOOLEAN,
+                               asthma BOOLEAN,
+                               allergy BOOLEAN,
+                               living_space VARCHAR(100),
+                               pet_friendly BOOLEAN,
+                               work_hours INT,
+                               rent_or_own VARCHAR(20),
+                               family_members INT,
+                               child_in_home BOOLEAN,
+                               accept_return_visit BOOLEAN,
+                               remarks TEXT,
+                               CONSTRAINT fk_adoption_form_request FOREIGN KEY (request_id) REFERENCES adoption_request(id)
+);
+
+-- 创建领养记录（通过后归档）
+CREATE TABLE adoption_record (
+                                 id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                                 request_id BIGINT NOT NULL,
+                                 animal_id INT NOT NULL,
+                                 wx_user_id BIGINT NOT NULL,
+                                 adopt_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                 contract_url VARCHAR(255),
+                                 followup_plan TEXT,
+                                 UNIQUE KEY uk_adoption_record_request (request_id),
+                                 INDEX idx_adoption_record_animal (animal_id),
+                                 INDEX idx_adoption_record_user (wx_user_id),
+                                 CONSTRAINT fk_adoption_record_request FOREIGN KEY (request_id) REFERENCES adoption_request(id),
+                                 CONSTRAINT fk_adoption_record_animal FOREIGN KEY (animal_id) REFERENCES animals(AnimalID),
+                                 CONSTRAINT fk_adoption_record_user FOREIGN KEY (wx_user_id) REFERENCES wx_user(id)
+);
+
+-- 创建救助上报表
+CREATE TABLE rescue_report (
+                               id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                               wx_user_id BIGINT NOT NULL,
+                               lat DECIMAL(10,6),
+                               lng DECIMAL(10,6),
+                               address VARCHAR(255),
+                               description TEXT,
+                               image_urls TEXT,
+                               urgency TINYINT DEFAULT 1,
+                               status ENUM('OPEN','IN_PROGRESS','CLOSED') NOT NULL DEFAULT 'OPEN',
+                               handler_id BIGINT NULL DEFAULT NULL,
+                               handle_result VARCHAR(500),
+                               create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                               update_time TIMESTAMP NULL DEFAULT NULL,
+                               INDEX idx_rescue_report_user (wx_user_id),
+                               INDEX idx_rescue_report_status (status),
+                               CONSTRAINT fk_rescue_report_user FOREIGN KEY (wx_user_id) REFERENCES wx_user(id)
+);
+
+-- 创建用户行为埋点表
+CREATE TABLE user_behavior (
+                               id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                               wx_user_id BIGINT NOT NULL,
+                               event VARCHAR(30) NOT NULL,
+                               animal_id INT NULL DEFAULT NULL,
+                               request_id BIGINT NULL DEFAULT NULL,
+                               report_id BIGINT NULL DEFAULT NULL,
+                               extra TEXT,
+                               create_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                               INDEX idx_user_behavior_user (wx_user_id),
+                               INDEX idx_user_behavior_event (event),
+                               INDEX idx_user_behavior_animal (animal_id),
+                               INDEX idx_user_behavior_request (request_id),
+                               CONSTRAINT fk_user_behavior_user FOREIGN KEY (wx_user_id) REFERENCES wx_user(id),
+                               CONSTRAINT fk_user_behavior_animal FOREIGN KEY (animal_id) REFERENCES animals(AnimalID),
+                               CONSTRAINT fk_user_behavior_request FOREIGN KEY (request_id) REFERENCES adoption_request(id),
+                               CONSTRAINT fk_user_behavior_report FOREIGN KEY (report_id) REFERENCES rescue_report(id)
 );
 
 -- 创建领养评估表
-CREATE TABLE AdoptionAssessment (
+CREATE TABLE adoption_assessment (
                                     AssessmentID INT AUTO_INCREMENT PRIMARY KEY,  -- 评估ID，自动递增，主键
                                     AdopterID INT NOT NULL,                        -- 关联的领养人ID
                                     Name VARCHAR(50) NOT NULL,                    -- 领养人的姓名
@@ -64,7 +177,7 @@ CREATE TABLE AdoptionAssessment (
                                     PetFriendly BOOLEAN,                          -- 是否宠物友好
                                     Status ENUM('PENDING', 'APPROVED', 'REJECTED') NOT NULL DEFAULT 'PENDING',  -- 申请状态
                                     CreateTime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- 创建时间
-                                    FOREIGN KEY (AdopterID) REFERENCES Adopters(AdopterID)  -- 外键，关联领养人表
+                                    FOREIGN KEY (AdopterID) REFERENCES adopters(AdopterID)  -- 外键，关联领养人表
 );
 
 -- 创建活动管理表
@@ -81,7 +194,7 @@ CREATE TABLE activity (
 
 
 INSERT
-INTO Admins
+INTO admins
 VALUES (1,'admin',123,'管理员1','admin','https://example.com/avatar.jpg');
 
 INSERT
@@ -97,7 +210,7 @@ VALUES (1,'user1',123456,18854673428,'u1',1,'无','user','https://example.com/av
        (9,'user9',123456,15099615688,'u9',1,'无','user','https://example.com/avatar.jpg'),
        (10,'user10',123456,15022895543,'u10',2,'无','user','https://example.com/avatar.jpg');
 
-INSERT INTO Animals (AnimalID, Name, Species, Breed, Age, Gender, HealthStatus, Description, ImageURL, Source) VALUES
+INSERT INTO animals (AnimalID, Name, Species, Breed, Age, Gender, HealthStatus, Description, ImageURL, Source) VALUES
                                                                                                                    (1, '奶糖', '猫', '美国短毛猫', 1.0, '雄性', '健康', '无', '/cats/1.jpeg', '流浪'),
                                                                                                                    (2, '古甜甜', '猫', '家猫', 1.0, '雄性', '健康', '无', '/cats/2.jpeg', '流浪'),
                                                                                                                    (3, 'Sumi', '猫', '狸花猫', 0.5, '雄性', '健康', '无', '/cats/3.jpeg', '家养'),

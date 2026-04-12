@@ -32,6 +32,8 @@ public interface UserMapper {
      */
     int updateProfile(Users user);
 
+    int updateRoleById(@Param("UserID") Integer UserID, @Param("role") String role);
+
     /**
      * 删除用户
      */

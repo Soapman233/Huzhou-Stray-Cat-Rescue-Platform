@@ -8,6 +8,10 @@ spring:
     username: root
     password: 1234
     url: jdbc:mysql://localhost:3306/hzsca?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
   data:
     redis:
       host: localhost
@@ -37,11 +41,6 @@ mybatis:
 file:
   upload:
     path: uploads
-  # 文件上传配置
-  servlet:
-    multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
 
 # Jackson配置
 jackson:
@@ -66,3 +65,14 @@ springdoc:
     - group: 'default'
       paths-to-match: '/**'
       packages-to-scan: com.hzsca.controller
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:}
+    issuer: hzsca
+    expire-seconds: 604800
+
+wechat:
+  miniapp:
+    appid: ${WECHAT_APPID:}
+    secret: ${WECHAT_SECRET:}

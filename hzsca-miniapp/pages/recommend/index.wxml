@@ -1,0 +1,26 @@
+<view class="page">
+  <view class="card header-card">
+    <view class="title">为你推荐</view>
+    <view class="sub">基于你的领养档案与猫咪特征进行匹配</view>
+  </view>
+
+  <view class="card" wx:if="{{loading}}">
+    <view class="loading">加载中...</view>
+  </view>
+
+  <view class="card" wx:if="{{!loading && list.length===0}}">
+    <view class="empty">暂无推荐</view>
+    <button class="primary-btn" bindtap="goProfile">去完善领养档案</button>
+  </view>
+
+  <view class="card recommend-card" wx:for="{{list}}" wx:key="index" bindtap="goDetail" data-id="{{item.cat.AnimalID}}">
+    <view class="row-top">
+      <view class="name">{{item.cat.Name}}</view>
+      <view class="score">{{item.score}}%</view>
+    </view>
+    <view class="desc">{{item.cat.Breed}} · {{item.cat.Age}}岁</view>
+    <view class="reasons" wx:if="{{item.reasons && item.reasons.length}}">
+      <view class="tag" wx:for="{{item.reasons}}" wx:key="*this">{{item}}</view>
+    </view>
+  </view>
+</view>

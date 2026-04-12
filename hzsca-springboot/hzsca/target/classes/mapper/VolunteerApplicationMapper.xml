@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzsca.mapper.VolunteerApplicationMapper">
+    <resultMap id="BaseResultMap" type="com.hzsca.entity.VolunteerApplication">
+        <id column="id" property="id"/>
+        <result column="applicant_type" property="applicantType"/>
+        <result column="applicant_id" property="applicantId"/>
+        <result column="name" property="name"/>
+        <result column="phone" property="phone"/>
+        <result column="age" property="age"/>
+        <result column="experience" property="experience"/>
+        <result column="motivation" property="motivation"/>
+        <result column="status" property="status"/>
+        <result column="apply_time" property="applyTime"/>
+        <result column="audit_time" property="auditTime"/>
+        <result column="auditor_id" property="auditorId"/>
+        <result column="audit_reason" property="auditReason"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.hzsca.entity.VolunteerApplication" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO volunteer_application
+        (applicant_type, applicant_id, name, phone, age, experience, motivation, status, apply_time)
+        VALUES
+        (#{applicantType}, #{applicantId}, #{name}, #{phone}, #{age}, #{experience}, #{motivation}, #{status}, NOW())
+    </insert>
+
+    <select id="selectLatestByApplicant" resultMap="BaseResultMap">
+        SELECT *
+        FROM volunteer_application
+        WHERE applicant_type = #{applicantType}
+          AND applicant_id = #{applicantId}
+        ORDER BY apply_time DESC, id DESC
+        LIMIT 1
+    </select>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT *
+        FROM volunteer_application
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT *
+        FROM volunteer_application
+        <where>
+            <if test="status != null and status != ''">
+                status = #{status}
+            </if>
+        </where>
+        ORDER BY apply_time DESC, id DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="int">
+        SELECT COUNT(*)
+        FROM volunteer_application
+        <where>
+            <if test="status != null and status != ''">
+                status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateStatus">
+        UPDATE volunteer_application
+        SET status = #{status},
+            audit_time = NOW(),
+            auditor_id = #{auditorId},
+            audit_reason = #{auditReason}
+        WHERE id = #{id}
+    </update>
+</mapper>

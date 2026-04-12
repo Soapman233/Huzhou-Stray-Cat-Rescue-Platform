@@ -1,0 +1,42 @@
+<view class="page">
+  <view class="card">
+    <view class="section-title">提交领养申请</view>
+    <view class="field">
+      <text>家庭收入</text>
+      <input type="digit" data-field="familyIncome" bindinput="handleInput" placeholder="请输入家庭收入" />
+    </view>
+    <view class="field">
+      <text>居住空间</text>
+      <input data-field="livingSpace" bindinput="handleInput" placeholder="如：两室一厅" />
+    </view>
+    <view class="field">
+      <text>工作时长</text>
+      <input type="number" data-field="workHours" bindinput="handleInput" placeholder="请输入每日工作时长" />
+    </view>
+    <view class="switch-row">
+      <text>养宠经验</text>
+      <switch data-field="hasOwnedPets" bindchange="handleSwitch" />
+    </view>
+    <view class="switch-row">
+      <text>吸烟</text>
+      <switch data-field="smoker" bindchange="handleSwitch" />
+    </view>
+    <view class="switch-row">
+      <text>哮喘</text>
+      <switch data-field="asthma" bindchange="handleSwitch" />
+    </view>
+    <view class="switch-row">
+      <text>过敏</text>
+      <switch data-field="allergy" bindchange="handleSwitch" />
+    </view>
+    <view class="switch-row">
+      <text>接受回访</text>
+      <switch data-field="acceptReturnVisit" bindchange="handleSwitch" checked />
+    </view>
+    <view class="field">
+      <text>备注</text>
+      <textarea data-field="remarks" bindinput="handleInput" placeholder="请输入补充说明"></textarea>
+    </view>
+    <button class="primary-btn" bindtap="submitApply">提交申请</button>
+  </view>
+</view>

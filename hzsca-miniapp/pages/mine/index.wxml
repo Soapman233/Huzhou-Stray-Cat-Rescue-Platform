@@ -1,0 +1,39 @@
+<view class="page">
+  <view class="card profile-card">
+    <view class="row">
+      <view class="avatar">
+        <image wx:if="{{userInfo.avatar}}" class="avatar-img" src="{{userInfo.avatar}}" mode="aspectFill"></image>
+        <view wx:else class="avatar-fallback">猫</view>
+      </view>
+      <view class="info">
+        <view class="name">{{userInfo.nickname || '未登录'}}</view>
+        <view class="sub">{{isLoggedIn ? '已登录' : '点击登录'}}</view>
+      </view>
+      <button wx:if="{{!isLoggedIn}}" size="mini" class="primary-btn" bindtap="goLogin">登录</button>
+      <button wx:else size="mini" class="ghost-btn" bindtap="goMe">编辑</button>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">领养与推荐</view>
+    <view class="menu">
+      <view class="item" bindtap="goProfile">领养档案</view>
+      <view class="item" bindtap="goRecommend">智能推荐</view>
+      <view class="item" bindtap="goApplications">我的申请</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-title">公益与服务</view>
+    <view class="menu">
+      <view class="item" bindtap="goRescueReport">救助上报</view>
+      <view class="item" bindtap="goDonate">捐助我们</view>
+      <view class="item" bindtap="goWorkReport">工作报告</view>
+    </view>
+  </view>
+
+  <view class="card" wx:if="{{isLoggedIn}}">
+    <view class="section-title">账户</view>
+    <button class="danger-btn" bindtap="doLogout">退出登录</button>
+  </view>
+</view>

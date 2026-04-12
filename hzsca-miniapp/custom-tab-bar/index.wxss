@@ -1,0 +1,69 @@
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10rpx 16rpx;
+  padding-bottom: calc(10rpx + env(safe-area-inset-bottom));
+  background: rgba(230, 220, 200, 0.92);
+  backdrop-filter: blur(10px);
+  border-top-left-radius: 22rpx;
+  border-top-right-radius: 22rpx;
+  box-shadow: 0 -10rpx 30rpx rgba(0, 0, 0, 0.10);
+  z-index: 999;
+}
+
+.tabbar-inner {
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+}
+
+.tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 10rpx 0 6rpx;
+  color: rgba(17, 24, 39, 0.72);
+}
+
+.icon {
+  width: 46rpx;
+  height: 46rpx;
+  margin: 0 auto;
+  border-radius: 14rpx;
+  background: rgba(255, 255, 255, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 800;
+  color: rgba(17, 24, 39, 0.72);
+  transform: translateY(0);
+  transition: transform 0.2s ease;
+}
+
+.label {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+  line-height: 1;
+  transform: scale(0.98);
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.active {
+  color: #111827;
+}
+
+.active .icon {
+  background: #333333;
+  color: #ffffff;
+  transform: translateY(-6rpx);
+}
+
+.active .label {
+  font-weight: 800;
+  color: #111827;
+  transform: scale(1.04);
+}

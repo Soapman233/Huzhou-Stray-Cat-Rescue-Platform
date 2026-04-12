@@ -6,6 +6,7 @@ import com.hzsca.entity.Users;
 import com.hzsca.entity.Admin;
 import com.hzsca.mapper.UserMapper;
 import com.hzsca.mapper.AdminMapper;
+import com.hzsca.security.JwtService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -30,6 +31,9 @@ public class AuthController {
     @Autowired
     private AdminMapper adminMapper;
 
+    @Autowired
+    private JwtService jwtService;
+
     @Operation(summary = "用户登录", description = "处理用户和管理员的登录请求")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "登录成功"),
@@ -47,7 +51,9 @@ public class AuthController {
                 result.put("message", "登录成功");
                 user.setPassword(null); // Don't send password back to client
                 result.put("user", user);
-                result.put("role", "user");
+                String role = user.getRole() == null || user.getRole().isBlank() ? "user" : user.getRole();
+                result.put("role", role);
+                result.put("token", jwtService.generateToken(user.getUserID(), role, "web"));
                 logger.info("User login successful for: {}", request.getUsername());
             } else {
                 result.put("success", false);
