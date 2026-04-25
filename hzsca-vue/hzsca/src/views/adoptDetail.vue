@@ -61,29 +61,27 @@ const cat = ref(null);
 const loading = ref(true);
 const error = ref(null);
 
+const fallbackImageUrl = new URL('../assets/animals-cat-banner.jpg', import.meta.url).href;
+
 const getImageUrl = (cat) => {
   try {
-    console.log('Processing cat image in detail:', cat);
     if (!cat?.ImageURL) {
-      console.log('No image URL provided, using default image');
-      return new URL('/src/assets/default-cat.jpg', import.meta.url).href;
+      return fallbackImageUrl;
     }
     if (cat.ImageURL.startsWith('http')) {
-      console.log('Using full URL:', cat.ImageURL);
       return cat.ImageURL;
     }
-    const fullUrl = `${config.imageBaseURL}/${cat.ImageURL}`;
-    console.log('Generated full URL:', fullUrl);
-    return fullUrl;
+    const base = (config.imageBaseURL || '').replace(/\/+$/, '');
+    const path = `${cat.ImageURL}`.replace(/^\/+/, '');
+    return `${base}/${path}`;
   } catch (err) {
-    console.error('Error processing image URL:', err);
-    return new URL('/src/assets/default-cat.jpg', import.meta.url).href;
+    return fallbackImageUrl;
   }
 };
 
 const handleImageError = (e) => {
-  console.log('Image load error, using default image');
-  e.target.src = new URL('/src/assets/default-cat.jpg', import.meta.url).href;
+  if (e?.target?.src === fallbackImageUrl) return;
+  e.target.src = fallbackImageUrl;
 };
 
 const fetchCat = async () => {

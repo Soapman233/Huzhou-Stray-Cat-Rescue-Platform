@@ -73,6 +73,16 @@ const normalizeStatus = (s) => {
   return v
 }
 
+const statusText = (code) => {
+  const v = (code || '').toString().toUpperCase()
+  if (v === 'PENDING') return '待审核'
+  if (v === 'APPROVED') return '已通过'
+  if (v === 'REJECTED') return '已拒绝'
+  if (v === 'CANCELLED' || v === 'CANCELED') return '已取消'
+  if (v === 'UNKNOWN') return '未知'
+  return '其他'
+}
+
 const ym = (ts) => {
   if (!ts) return '未知'
   const d = new Date(ts)
@@ -100,10 +110,19 @@ const build = (records) => {
     rejected: statusCounts.get('REJECTED') || 0
   }
 
-  const statusData = Array.from(statusCounts.entries()).map(([name, value]) => ({
-    name,
-    value
-  }))
+  const statusData = []
+  const known = ['PENDING', 'APPROVED', 'REJECTED', 'CANCELLED', 'CANCELED', 'UNKNOWN']
+  for (const k of known) {
+    const v = statusCounts.get(k) || 0
+    if (v > 0) statusData.push({ name: statusText(k), value: v })
+  }
+  let other = 0
+  for (const [k, v] of statusCounts.entries()) {
+    if (!known.includes(k)) {
+      other += v || 0
+    }
+  }
+  if (other > 0) statusData.push({ name: '其他', value: other })
 
   const monthKeys = Array.from(monthCounts.keys()).sort()
   const monthSeries = monthKeys.map(k => monthCounts.get(k) || 0)
