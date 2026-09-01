@@ -325,7 +325,7 @@ const handleCatImageLoad = (e) => {
 const fetchCats = async () => {
   loading.value = true;
   try {
-    const response = await request.get('/api/cats');
+    const response = await request.get('/api/cats/adoptable');
     console.log('API Response:', response);
 
     if (response.data && response.data.code === '200' && Array.isArray(response.data.data)) {

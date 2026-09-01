@@ -2,7 +2,7 @@
   <div class="dataset-export">
     <div class="page-header">
       <h2>数据导出</h2>
-      <p>用于毕业设计实验的数据查看与导出</p>
+      <p>用于实验的数据查看与导出</p>
     </div>
 
     <el-tabs v-model="activeTab">

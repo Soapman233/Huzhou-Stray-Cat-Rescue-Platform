@@ -84,7 +84,7 @@ export default {
       loading.value = true;
       error.value = '';
       try {
-        const response = await request.get('/api/cats');
+        const response = await request.get('/api/cats/adoptable');
         console.log('API Response:', response);
 
         const result = response.data; // 获取 Result 对象
@@ -114,7 +114,9 @@ export default {
           console.log('First cat raw object:', catData[0]);
         }
 
-        cats.value = catData.filter(cat => cat && Object.keys(cat).length > 0);
+        cats.value = catData
+          .filter(cat => cat && Object.keys(cat).length > 0)
+          .filter(cat => (cat.Status || '').toString().toUpperCase() === 'ADOPTABLE' || !cat.Status);
         console.log('Final processed cats:', cats.value);
 
         if (cats.value.length === 0) {
