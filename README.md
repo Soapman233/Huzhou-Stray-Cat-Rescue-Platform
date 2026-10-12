@@ -1,10 +1,12 @@
 <div align="center">
 
-# 🐱 HZSCA · 湖州流浪猫救助与领养平台
+# 🐱 HZSCA
 
-**一个面向流浪猫救助公益场景的「微信小程序 + 管理后台 + 后端服务」三端一体化平台**
+### 湖州流浪猫救助与领养平台
 
-用技术连接救助者、领养人与流浪猫，让每一次相遇都有依据。
+**用技术连接救助者、领养人与流浪猫，让每一次相遇都有依据。**
+
+一套后端 · 两个前端 —— 微信小程序承载 C 端体验，Vue 管理后台承载 B 端运营
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.12-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Vue](https://img.shields.io/badge/Vue-3.4-4FC08D?logo=vuedotjs&logoColor=white)](https://vuejs.org/)
@@ -12,54 +14,49 @@
 [![WeChat MiniProgram](https://img.shields.io/badge/微信小程序-原生-07C160?logo=wechat&logoColor=white)](#)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
 [![Redis](https://img.shields.io/badge/Redis-7.x-DC382D?logo=redis&logoColor=white)](https://redis.io/)
-[![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)](#)
+[![Tests](https://img.shields.io/badge/Tests-41%20passed-3fb950?logo=junit5&logoColor=white)](#-测试与质量)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
+**简体中文** · [English](README_EN.md)
+
 </div>
+
+---
+
+## ✨ 为什么值得一看
+
+- 🧠 **算法驱动决策** —— 不止「信息展示 + 增删改查」：用**六维加权匹配**回答「谁适合养哪只猫」，用**风险评分模型**辅助领养审核
+- 💰 **完整支付闭环** —— 下单 → 收银台 → 异步通知验签 → 主动查单兜底 → 每日对账与审计，且**零第三方 SDK**（JDK 内置 RSA2 手写签名）
+- 🚀 **工程化完备** —— Docker 全栈一键启动 · 数据库启动自举 · 41 个单元测试 · 首屏入口包仅 25 KB
+- 🎓 **归档级文档** —— 论文全文、部署指南、支付接入指南、算法局限分析一应俱全
 
 ---
 
 ## 📖 项目简介
 
-**HZSCA（Huzhou Stray Cat Association）** 是一个面向流浪猫救助公益组织的综合管理平台，也是本人的本科毕业设计作品。项目围绕流浪猫救助的真实业务链路，解决三个核心问题：
+**HZSCA（Huzhou Stray Cat Association）** 是面向流浪猫救助公益组织的综合管理平台，也是本人的本科毕业设计作品。围绕救助业务的真实链路，平台解决三件事：
 
-- **救助侧**：志愿者与热心市民可以上报流浪猫线索（含位置、紧急度、图片），由管理员统一调度跟进；
-- **领养侧**：用户填写领养偏好问卷后，系统基于**多维度加权匹配算法**推荐适配的猫咪，并对领养申请进行**风险评分**辅助审核；
-- **运营侧**：管理员通过后台完成猫咪档案、猫咪特征、活动、志愿者审核、领养申请审核、救助上报处理与数据导出。
-
-平台采用**一套后端、两个前端**的形态：微信小程序承载 C 端用户体验，Vue 管理后台承载 B 端运营工作台。
-
-> 💡 **设计亮点**：不是简单的「信息展示 + 增删改查」，而是把**推荐算法**与**风险评估**引入领养决策，让「谁适合养哪只猫」这件事有量化依据。
+| 角色 | 解决的问题 |
+|------|-----------|
+| 🙋 **救助侧** | 志愿者与热心市民上报流浪猫线索（定位 / 紧急度 / 图片），管理员统一调度跟进 |
+| 🏠 **领养侧** | 用户填写偏好问卷后，系统推荐适配猫咪并生成领养风险评分，辅助审核决策 |
+| 🛠️ **运营侧** | 猫咪档案、特征标签、活动、志愿者审核、领养审核、救助工单、数据导出 |
 
 ---
 
 ## 🖼️ 界面预览
 
-### 用户端 · 微信小程序（H5 版界面）
+### 用户端 · 微信小程序
 
 <div align="center">
 
-| 首页 · 待领养猫咪 | 领养列表 | 猫咪详情 |
+| 首页 | 领养列表 | 猫咪详情 |
 | :---: | :---: | :---: |
 | ![首页](docs/images/01-home.webp) | ![领养列表](docs/images/02-adopt-list.webp) | ![猫咪详情](docs/images/03-cat-detail.webp) |
 
-| 活动列表 | 全部活动 | 捐助我们 |
+| 活动列表 | 爱心捐助 | 支付成功 |
 | :---: | :---: | :---: |
-| ![活动](docs/images/04-activity.webp) | ![全部活动](docs/images/05-activity-all.webp) | ![捐助](docs/images/06-donate.webp) |
-
-| 工作报告 | 账号登录 |
-| :---: | :---: |
-| ![工作报告](docs/images/07-work-report.webp) | ![登录](docs/images/08-login.webp) |
-
-</div>
-
-### 💰 爱心捐助 · 支付宝支付流程
-
-<div align="center">
-
-| 捐助页（金额选择 / Mock 模式提示） | 支付结果（处理中） | 支付结果（成功） |
-| :---: | :---: | :---: |
-| ![捐助页](docs/images/20-donate.webp) | ![支付处理中](docs/images/21-payresult-pending.webp) | ![支付成功](docs/images/22-payresult-success.webp) |
+| ![活动列表](docs/images/04-activity.webp) | ![爱心捐助](docs/images/20-donate.webp) | ![支付成功](docs/images/22-payresult-success.webp) |
 
 </div>
 
@@ -67,533 +64,270 @@
 
 <div align="center">
 
-| 数据仪表盘（ECharts 可视化） | 猫咪档案管理 |
-| :---: | :---: |
-| ![仪表盘](docs/images/10-admin-dashboard.webp) | ![猫咪管理](docs/images/11-admin-cats.webp) |
+| 数据仪表盘 | 猫咪档案管理 | 猫咪特征标签 |
+| :---: | :---: | :---: |
+| ![仪表盘](docs/images/10-admin-dashboard.webp) | ![猫咪管理](docs/images/11-admin-cats.webp) | ![猫咪特征](docs/images/12-admin-cat-traits.webp) |
 
-| 猫咪特征标签管理 | 领养申请审核 |
-| :---: | :---: |
-| ![猫咪特征](docs/images/12-admin-cat-traits.webp) | ![领养申请](docs/images/13-admin-adoptions.webp) |
-
-| 志愿者审核 | 救助上报处理 |
-| :---: | :---: |
-| ![志愿者审核](docs/images/14-admin-volunteers.webp) | ![救助上报](docs/images/15-admin-rescues.webp) |
-
-| 实验数据导出 | 用户管理 |
-| :---: | :---: |
-| ![数据导出](docs/images/16-admin-dataset.webp) | ![用户管理](docs/images/17-admin-users.webp) |
+| 领养申请审核 | 志愿者审核 | 救助上报处理 |
+| :---: | :---: | :---: |
+| ![领养申请](docs/images/13-admin-adoptions.webp) | ![志愿者审核](docs/images/14-admin-volunteers.webp) | ![救助上报](docs/images/15-admin-rescues.webp) |
 
 </div>
 
 ---
 
-## ✨ 核心功能
+## 🎯 核心功能
 
-### 🧭 用户端（微信小程序 · 16 个页面）
-
-| 模块 | 功能说明 |
-|------|---------|
-| 微信登录 | 通过 `wx.login` 换取 code，后端调用微信 `jscode2session` 完成静默登录并签发 JWT |
-| 猫咪浏览 | 首页推荐位 + 领养列表 + 猫咪详情（品种、年龄、性别、健康状况、图片） |
-| **智能匹配** | 填写领养偏好档案后，一键获取按匹配度排序的推荐猫咪及推荐理由 |
-| 领养申请 | 填写家庭情况问卷提交申请，系统自动生成风险评分；支持查看申请进度与撤销 |
-| 活动报名 | 浏览救助活动，一键报名参与（需审核） |
-| 志愿者申请 | 提交志愿者申请，等待管理员审核 |
-| 救助上报 | 上报流浪猫线索：定位、地址、描述、图片、紧急度 |
-| **爱心捐助** | 选择金额（¥10/30/50/100 或自定义）→ 创建订单 → 支付 → 结果展示；Mock 模式下可一键模拟支付 |
-| 我的 | 个人资料、我的申请、领养档案维护 |
-
-### 🖥️ 管理端（Vue 3 后台 · 25 个视图）
-
-| 模块 | 功能说明 |
-|------|---------|
-| 数据仪表盘 | 领养申请总数/待审核/已通过/已拒绝 KPI，申请状态分布环形图、月度趋势柱状图（ECharts） |
-| 猫咪管理 | 猫咪档案增删改查 + 图片上传 |
-| 猫咪特征管理 | 维护每只猫的性格、活动量、亲人度、掉毛等级、是否适合儿童/宠物等 11 维特征标签 |
-| 活动管理 | 活动发布、编辑、删除、封面图上传 |
-| 志愿者审核 | 志愿者申请审核、活动报名审核 |
-| 领养申请审核 | 查看风险评分与理由，通过 / 驳回并记录审核意见 |
-| 救助上报管理 | 查看上报线索、指派处理人、关闭工单 |
-| 数据导出 | 领养数据与用户行为数据查询导出（用于实验分析） |
-| 用户管理 | 用户列表、新增、编辑、删除 |
-
-### 💰 捐助与支付（支付宝沙箱）
-
-| 能力 | 说明 |
+| 模块 | 能力 |
 |------|------|
-| 捐助下单 | 预设 ¥10/30/50/100 或自定义金额，可填写留言，金额以「分」存储避免浮点误差 |
-| 支付宝沙箱支付 | 通过 `alipay.trade.page.pay` 生成收银台跳转地址，签名采用 **RSA2（JDK 内置实现，零第三方 SDK）** |
-| 异步通知 | `notify_url` 回调**验签 + 金额校验 + 幂等置位**，重复通知不会重复处理 |
-| 主动查单 | `alipay.trade.query` 兜底同步；结果页每 3 秒轮询、最长 60 秒，超时后支持手动刷新 |
-| **对账与审计** | 订单状态变更全部写入 `payment_audit_log`；每日定时任务主动查单补记、超时关单、审计一致性检查，支持管理端手动触发 |
-| Mock 降级 | 未配置密钥时自动进入 Mock 演示模式，无需支付宝账号即可演示完整「下单 → 支付 → 结果」链路 |
-| 多端支持 | Web 端完整支付流程；小程序端同样接入 `/api/payment/**`（受平台限制，真实模式下提供收银台链接复制） |
-| 安全约束 | 订单归属校验（防越权查他人订单）、回调接口匿名放行、商户私钥不入库不入前端 |
-
-> 完整接入流程（沙箱申请 → 密钥生成 → 回调调试 → 内网穿透 → 常见问题）见 [`docs/支付接入指南.md`](docs/支付接入指南.md)。
-
-### ⚙️ 公共能力
-
-- **JWT 无状态鉴权**：统一签发、`Bearer` 头 / `access_token` 双通道解析，支持 `web` / `wx` / `admin` 三种主体类型；
-- **角色权限模型**：`user` / `volunteer` / `admin` 三级角色，接口级权限收敛；
-- **口令安全**：BCrypt 加盐哈希存储，兼容历史明文并支持首次登录自动迁移；
-- **统一响应体**：`Result{code, msg, data}` 全站统一；
-- **接口文档**：SpringDoc OpenAPI 自动生成 Swagger UI；
-- **文件服务**：活动/猫咪图片上传，扩展名白名单校验，静态资源映射访问；
-- **缓存**：Redis 支持（Lettuce 连接池）。
+| **智能匹配** | 偏好档案 → 硬性排除 + 六维加权打分 → Top-N 推荐，并给出「优势 / 需磨合」理由 |
+| **风险评分** | 领养问卷 → 100 分制加减分 → `LOW / MEDIUM / HIGH` 三档，保留明细作为审核依据 |
+| **爱心捐助** | 金额选择 → 支付宝沙箱收银台 → 结果轮询 → 对账审计；未配置密钥时自动降级为 Mock 演示 |
+| 猫咪与活动 | 档案浏览、猫咪详情、活动报名、救助线索上报（含定位与图片） |
+| 用户体系 | 微信静默登录 + 网页注册登录，`user` / `volunteer` / `admin` 三级角色 |
+| 运营后台 | 数据仪表盘（ECharts）、九大管理模块、数据导出、审核工单 |
+| 公共能力 | JWT 无状态鉴权、BCrypt 口令、统一响应体、Swagger 文档、Redis 缓存、上传白名单 |
 
 ---
 
 ## 🏗️ 系统架构
 
 ```mermaid
-graph TB
-    subgraph Client["🖥️ 客户端层"]
-        MP["微信小程序<br/>(原生 · 16 页面)"]
-        WEB["Vue 3 管理后台<br/>(Element Plus + ECharts)"]
+graph LR
+    subgraph Client["客户端"]
+        MP["微信小程序<br/>16 页面"]
+        WEB["Vue 3 后台<br/>25 视图"]
     end
 
-    subgraph Gateway["🌐 接入层"]
-        NGINX["HTTP / JSON<br/>CORS + JWT 鉴权过滤器"]
+    subgraph Server["Spring Boot 3 应用层"]
+        SEC["Security<br/>JWT 鉴权"]
+        CTRL["Controller ×23"]
+        SVC["Service<br/>业务 + 算法"]
+        MAP["MyBatis Mapper"]
     end
 
-    subgraph Server["⚙️ 应用层 · Spring Boot 3"]
-        CTRL["Controller 层<br/>21 个 REST 控制器"]
-        SEC["Security 层<br/>JwtService / Filter / SecurityUtils"]
-        SVC["Service 层<br/>业务逻辑 + 算法"]
-        MAPPER["Mapper 层<br/>MyBatis + XML"]
-        ALGO["核心算法<br/>智能匹配 / 风险评分"]
+    subgraph Data["数据层"]
+        DB[("MySQL 8<br/>19 张表")]
+        RD[("Redis<br/>缓存")]
+        FS[("文件存储")]
     end
 
-    subgraph Data["🗄️ 数据层"]
-        MYSQL[("MySQL 8<br/>17 张业务表")]
-        REDIS[("Redis<br/>缓存 / 会话")]
-        FS[("本地文件系统<br/>图片上传")]
-    end
-
-    MP --> NGINX
-    WEB --> NGINX
-    NGINX --> SEC --> CTRL
-    CTRL --> SVC
-    SVC --> ALGO
-    SVC --> MAPPER
-    MAPPER --> MYSQL
-    SVC --> REDIS
+    MP --> SEC
+    WEB --> SEC
+    SEC --> CTRL --> SVC
+    SVC --> MAP --> DB
+    SVC --> RD
     SVC --> FS
 
     style Client fill:#FDF6EC,stroke:#D9A86C,color:#4A3728
-    style Gateway fill:#F5EFE6,stroke:#D9A86C,color:#4A3728
     style Server fill:#EAF4EE,stroke:#6B9E7A,color:#2C3E33
     style Data fill:#EAF0F7,stroke:#7A94B8,color:#2C3E4A
-```
-
-### 请求鉴权流程
-
-```mermaid
-sequenceDiagram
-    participant C as 客户端
-    participant F as JwtAuthenticationFilter
-    participant S as SecurityFilterChain
-    participant API as Controller
-
-    C->>F: 携带 Authorization: Bearer <token>
-    F->>F: 解析 JWT（校验签名 + issuer + 过期）
-    alt Token 有效
-        F->>F: 注入 AuthPrincipal(id, type) + ROLE_xxx
-        F->>S: 放行
-        S->>S: 匹配接口权限规则
-        alt 权限满足
-            S->>API: 执行业务
-            API-->>C: Result{code:200, data}
-        else 权限不足
-            S-->>C: 403 Forbidden
-        end
-    else Token 无效/缺失
-        F->>S: 匿名放行
-        S-->>C: 401 / 403
-    end
 ```
 
 ---
 
 ## 🛠️ 技术栈
 
-### 后端 `hzsca-springboot`
-
-| 技术 | 版本 | 用途 |
-|------|------|------|
-| Spring Boot | 3.3.12 | 应用框架 |
-| Java | 17 | 语言版本 |
-| Spring Security | 6.x | 认证授权 |
-| JJWT | 0.12.6 | JWT 签发与校验（HS384） |
-| MyBatis | 3.0.4 | ORM 持久层 |
-| MySQL Connector/J | 8.0.33 | 数据库驱动 |
-| Spring Data Redis | — | 缓存（Lettuce 连接池） |
-| PageHelper | 1.4.6 | 物理分页 |
-| SpringDoc OpenAPI | 2.3.0 | 接口文档 |
-| Lombok | — | 简化实体代码 |
-| **支付宝沙箱** | RSA2（JDK 内置） | **零第三方 SDK**，手写签名与验签 |
-
-### 管理后台 `hzsca-vue`
-
-| 技术 | 版本 | 用途 |
-|------|------|------|
-| Vue | 3.4.15 | 前端框架（组合式 API） |
-| Vite | 5.1 | 构建工具（`manualChunks` 分包 + 按需引入） |
-| Vue Router | 4.2.5 | 路由 + 守卫 |
-| Element Plus | 2.5.6 | UI 组件库（`unplugin-vue-components` 按需自动引入） |
-| ECharts | 5.5.1 | 数据可视化（仅注册饼图/柱状图，管理端懒加载） |
-| axios | 1.6.7 | HTTP 请求封装 |
-| wangEditor | 5.1.23 | 富文本编辑器 |
-| Sass | 1.71 | 样式预处理 |
-
-### 微信小程序 `hzsca-miniapp`
-
-| 技术 | 说明 |
-|------|------|
-| 原生小程序框架 | 16 个页面，自定义 `custom-tab-bar` |
-| 统一请求封装 | `utils/request.js` 自动注入 token 与 `access_token` |
-| 集中配置 | `utils/config.js` 管理后端地址，便于真机部署切换 |
-
----
-
-## 📁 目录结构
-
-```
-HZSCA-WEB/
-├── hzsca-springboot/hzsca/          # 🔧 后端服务（Spring Boot）
-│   ├── src/main/java/com/hzsca/
-│   │   ├── common/                  #   统一响应 Result、跨域配置
-│   │   ├── config/                  #   数据库自举、口令迁移、支付宝配置、静态资源、Redis
-│   │   ├── controller/              #   23 个 REST 控制器（含 Payment / AdminPayment）
-│   │   ├── entity/                  #   实体 / DTO
-│   │   ├── exception/               #   全局异常处理
-│   │   ├── mapper/                  #   MyBatis Mapper 接口
-│   │   ├── security/                #   JWT 与 Spring Security
-│   │   ├── service/                 #   业务服务、匹配算法、风险评分、支付与对账服务
-│   │   └── utils/                   #   工具类（RedisUtil、AlipaySignUtils）
-│   ├── src/main/resources/
-│   │   ├── db/                      #   schema.sql 建表 / 增量脚本 / 种子数据 / payment.sql
-│   │   ├── mapper/                  #   MyBatis XML 映射
-│   │   ├── static/                  #   猫咪与活动图片（WebP，共约 6.3MB）
-│   │   └── application.yml          #   应用配置（支持环境变量覆盖）
-│   ├── src/test/java/com/hzsca/     #   ✅ 单元测试（匹配算法 19 例 + 风险评分 22 例）
-│   ├── Dockerfile                   #   🐳 多阶段构建镜像（Maven 编译 → JRE 运行）
-│   └── .dockerignore
-│
-├── hzsca-vue/hzsca/                 # 🖥️ 管理后台（Vue 3 + Vite）
-│   └── src/
-│       ├── views/                   #   前台页面 + admin/ 后台页面（25 个）
-│       ├── router/                  #   路由与权限守卫
-│       ├── utils/request.js         #   axios 封装与拦截器
-│       ├── utils/echarts.js         #   ECharts 按需引入（饼图/柱状图）
-│       └── config/config.js         #   接口地址配置
-│
-├── hzsca-miniapp/                   # 📱 微信小程序（原生）
-│   ├── pages/                       #   16 个业务页面（含捐助支付流程）
-│   ├── custom-tab-bar/              #   自定义底部导航
-│   └── utils/                       #   请求封装与配置
-│
-├── docs/                            # 📚 文档
-│   ├── images/                      #   README 界面截图（20 张）
-│   ├── 部署指南.md                   #   环境搭建 / Docker 全栈 / 检查清单
-│   ├── 支付接入指南.md               #   支付宝沙箱接入 + 对账与审计
-│   └── 算法说明与局限分析.md          #   两个核心算法的设计与局限（论文素材）
-├── deliverables/gstack/             # 📋 毕业设计归档评审报告
-├── docker-compose.yml               # 🐳 MySQL + Redis（--profile full 含后端）
-├── .env.example                     # 🔑 环境变量示例
-├── 毕业设计论文.md                   # 📄 毕业论文（Markdown 版）
-├── start-backend.bat                # ▶️ 后端一键启动脚本
-└── LICENSE                          # Apache License 2.0
-```
+| 层 | 技术 |
+|---|---|
+| **后端** | Spring Boot 3.3.12 · Java 17 · Spring Security 6 · MyBatis 3.0.4 · JJWT 0.12.6 · SpringDoc 2.3.0 |
+| **前端** | Vue 3.4 · Vite 5.1 · Element Plus 2.5.6 · ECharts 5.5 · Vue Router 4 · wangEditor 5 |
+| **小程序** | 微信原生框架（16 个页面 + 自定义 tabBar） |
+| **数据** | MySQL 8（19 张表） · Redis 7 |
+| **支付** | 支付宝沙箱 · RSA2 签名（JDK 内置实现，零第三方 SDK） |
+| **部署** | Docker 多阶段构建 · Docker Compose（`--profile full` 全栈一键启动） |
 
 ---
 
 ## 🚀 快速开始
 
-### 环境要求
+**环境要求**：JDK 17+ · MySQL 8+ · Redis 6+ · Node.js 18+ ·（可选）Docker · 微信开发者工具
 
-| 依赖 | 版本要求 |
-|------|---------|
-| JDK | 17+ |
-| MySQL | 8.0+ |
-| Redis | 6.x / 7.x |
-| Node.js | 18+ |
-| Docker | 可选（用于一键启动 MySQL + Redis） |
-| 微信开发者工具 | 最新稳定版 |
-
-### 1️⃣ 启动依赖服务（MySQL + Redis）
-
-**方式 A：Docker Compose（推荐）**
+### 1️⃣ 启动依赖服务
 
 ```bash
-# 只启动依赖服务（本地跑后端源码）
-docker compose up -d
+# 方式 A：Docker Compose（推荐）
+docker compose up -d                            # 仅启动 MySQL + Redis
+docker compose --profile full up -d --build     # 全栈一键启动（额外构建后端容器）
 
-# 或：全栈一键启动（额外构建并启动后端容器）
-docker compose --profile full up -d --build
-
-docker compose ps           # 等待服务变为 healthy
+# 方式 B：手动安装 —— 见 docs/部署指南.md（含 Windows / macOS / Linux）
 ```
-
-**方式 B：手动安装** — 参见 [`docs/部署指南.md`](docs/部署指南.md)（含 Windows / macOS / Linux 三种平台的安装步骤）。
 
 ### 2️⃣ 初始化数据库
 
 ```bash
-# 只需创建一个空库，表结构由应用启动时自动创建
 mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS hzsca DEFAULT CHARACTER SET utf8mb4;"
 ```
 
-启动后端时 `DbBootstrap` 会**自动完成**：
-
-| 步骤 | 说明 |
-|------|------|
-| 建表 | 检测核心表缺失 → 执行 `db/schema.sql`（17 张表，全部 `CREATE TABLE IF NOT EXISTS`，**不会删改已有数据**） |
-| 增量表 | 补齐匹配算法表、志愿者表（`matching.sql` / `volunteer.sql`） |
-| 种子数据 | 写入猫咪特征、演示申请/活动/救助数据 |
-| 管理员 | `admins` 表为空时创建演示账号 **`admin / admin123456`** |
-| 支付表 | 创建 `payment_order`（`db/payment.sql`） |
-| 口令迁移 | 把残留的**明文口令**统一升级为 BCrypt（幂等，可重复执行） |
-
-> 演示网页用户：`user1` ~ `user10`，口令均为 `123456`。
+> 只需创建**空库**。表结构、演示数据、管理员账号与支付表均由 `DbBootstrap` 在启动时**自动创建**，幂等且不会删改已有数据。
 
 ### 3️⃣ 启动后端
 
 ```bash
 cd hzsca-springboot/hzsca
 
-# Windows 一键启动（自动注入 JWT 密钥等环境变量）
-../../start-backend.bat
-
-# 或手动启动
-export JWT_SECRET="请替换为不少于32字节的随机密钥"
-export WECHAT_APPID="你的小程序AppID"
-export WECHAT_SECRET="你的小程序AppSecret"
+export JWT_SECRET="不少于32字节的随机字符串"      # 必填
 export DB_USERNAME=root
 export DB_PASSWORD=你的数据库密码
+
 ./mvnw spring-boot:run
+# Windows 用户可直接运行：../../start-backend.bat
 ```
 
-后端启动后：
-- 接口地址：`http://localhost:8080`
-- 接口文档：`http://localhost:8080/swagger-ui.html`
+启动后：接口地址 `http://localhost:8080` ｜ 接口文档 `http://localhost:8080/swagger-ui.html`
 
 ### 4️⃣ 启动管理后台
 
 ```bash
 cd hzsca-vue/hzsca
 npm install
-npm run dev          # 开发模式，默认 http://localhost:5173
-npm run build        # 生产构建
+npm run dev        # http://localhost:5173
 ```
 
-> 若后端地址非 `localhost:8080`，请修改 `src/config/config.js` 中的 `baseURL` 与 `imageBaseURL`。
+> 若后端地址非 `localhost:8080`，修改 `src/config/config.js` 的 `baseURL` 与 `imageBaseURL`。
 
 ### 5️⃣ 运行微信小程序
 
-1. 用微信开发者工具导入 `hzsca-miniapp` 目录；
-2. 修改 `utils/config.js` 中的 `BASE_URL` 为你的后端地址；
-3. 本地调试时勾选「详情 → 本地设置 → 不校验合法域名」；
-4. 真机预览 / 上线需将 `BASE_URL` 替换为已备案的 **HTTPS 合法域名**。
+用微信开发者工具导入 `hzsca-miniapp` → 修改 `utils/config.js` 的 `BASE_URL` → 本地调试勾选「不校验合法域名」。
+
+### 🔑 演示账号
+
+| 角色 | 账号 | 口令 |
+|------|------|------|
+| 管理员 | `admin` | `admin123456` |
+| 网页用户 | `user1` ~ `user10` | `123456` |
 
 ---
 
 ## 🧠 核心算法
 
-### 1. 猫咪智能匹配算法
+> 完整设计与局限分析见 [`docs/算法说明与局限分析.md`](docs/算法说明与局限分析.md)
 
-> 实现位置：`service/impl/MatchServiceImpl.java`
+**① 猫咪智能匹配** · `MatchServiceImpl`
 
-采用**「硬性排除 + 多维加权打分」**两阶段模型：
+```
+用户偏好档案
+  ├─ 阶段一 · 硬性排除：过敏×掉毛 / 儿童×不亲童 / 他宠×不亲宠 / 特殊照护 / 空间不足
+  └─ 阶段二 · 六维加权：活动量 1.0 · 亲人度 0.6 · 掉毛 1.2 · 空间 1.0 · 新手友好 1.0 · 作息 1.0
+                score = Σ(权重ᵢ × 匹配度ᵢ) / Σ权重ᵢ × 100  →  Top-N 推荐 + 推荐理由
+```
 
-**第一阶段 · 硬性排除（一票否决）**
+**② 领养风险评分** · `RiskScoringServiceImpl`
 
-| 条件 | 排除规则 |
-|------|---------|
-| 用户过敏 且 猫咪掉毛等级 > 用户容忍上限 | 排除 |
-| 家中有孩子 且 猫咪不适合与儿童相处 | 排除 |
-| 家中有其他宠物 且 猫咪不适合与宠物共处 | 排除 |
-| 用户不接受特殊照护 且 猫咪需要特殊照护 | 排除 |
-| 居住空间等级 < 猫咪空间需求等级 | 排除 |
+```
+过敏 −25 ｜ 哮喘 −15 ｜ 吸烟 −10 ｜ 工时≥12h −12 ｜ 收入<3000 −10 ｜ 无养宠经验 −5 ｜ 拒绝回访 −8
 
-**第二阶段 · 六维加权打分**
+        →   ≥80 LOW    ｜    60~79 MEDIUM    ｜    <60 HIGH
+```
 
-| 维度 | 权重（默认，可由 `match_weights` 表动态覆盖） | 计算方式 |
-|------|------|---------|
-| 活动量匹配 | 1.0 | 依据每日陪伴时长映射用户活跃度，与猫咪活跃度做归一化差值 |
-| 亲人度匹配 | 0.6 | 按用户偏好（黏人 / 独立 / 不限）对亲人度做正向或反向映射 |
-| 掉毛容忍度 | 1.2 | 掉毛等级低于容忍上限得满分，超出按比例衰减 |
-| 空间需求 | 1.0 | 居住空间满足需求得满分，不足按差值衰减 |
-| 新手友好度 | 1.0 | 零经验用户 × 非新手友好猫 → 0 分 |
-| 作息匹配 | 1.0 | 夜班用户 × 夜行猫 得满分，否则 0.6 |
-
-最终得分：`score = Σ(权重ᵢ × 匹配度ᵢ) / Σ权重ᵢ × 100`，按得分降序返回 Top-N（默认 10，上限 50），并为高分/低分维度生成「优势 / 需磨合」的推荐理由。
-
-### 2. 领养风险评分算法
-
-> 实现位置：`service/impl/RiskScoringServiceImpl.java`
-
-以 100 分为基准，按问卷项加减分，输出 `LOW / MEDIUM / HIGH` 三档风险：
-
-| 因素 | 分值变化 |
-|------|---------|
-| 家庭成员过敏 | −25 |
-| 家庭成员哮喘 | −15 |
-| 家中有人吸烟 | −10 |
-| 工作时长 ≥ 12h / ≥ 10h | −12 / −8 |
-| 工作时长 ≤ 6h | +3 |
-| 家庭月收入 < 3000 / ≥ 8000 | −10 / +5 |
-| 有养宠经验 / 无经验 | +2 / −5 |
-| 接受定期回访 / 拒绝回访 | +5 / −8 |
-
-评分归一化到 `[0, 100]`：`≥80 → LOW`，`60~79 → MEDIUM`，`<60 → HIGH`，并保留每一项的加减分明细作为审核依据。
+评分明细逐项入库，作为管理员审核时的量化依据。
 
 ---
 
-## 🔌 接口概览
+## 📁 项目结构
 
-| 分组 | 路径前缀 | 权限 |
-|------|---------|------|
-| 网页用户认证 | `/api/auth/**` | 公开 |
-| 管理员认证 | `/api/admin/login` | 公开 |
-| 微信小程序登录 | `/api/wx/login` | 公开 |
-| 猫咪浏览 | `GET /api/cats/**` | 公开 |
-| 活动浏览 | `GET /api/activity/**` | 公开 |
-| 领养申请 / 档案 | `/api/adoption-requests`、`/api/adoption-profile` | 登录用户 |
-| 智能匹配推荐 | `/api/match/recommendations` | 登录用户 |
-| 救助上报 | `/api/rescue-reports` | 登录用户 |
-| 志愿者申请 | `/api/volunteer/apply` | 登录用户 |
-| 用户资料 | `/api/users/current`、`/api/users/update` | 本人或管理员 |
-| 捐助支付 | `/api/payment/config` | 公开 |
-| 捐助支付 | `/api/payment/orders`、`/orders/{no}`、`/orders/{no}/sync`、`/orders/{no}/mock/pay` | 登录用户（限本人订单） |
-| 支付宝回调 | `/api/payment/alipay/notify`、`/api/payment/alipay/return` | 公开（验签保护） |
-| 支付对账（后台） | `/api/admin/payment/reconcile`、`/api/admin/payment/orders/{no}/audit` | 仅管理员 |
-| 猫咪/活动写操作 | `POST/PUT/DELETE /api/cats/**`、`/api/activity/add\|update\|delete\|upload` | 仅管理员 |
-| 后台管理 | `/api/admin/**` | 仅管理员 |
-
-> 完整接口清单可在启动后访问 Swagger UI 查看：`http://localhost:8080/swagger-ui.html`
+```
+HZSCA-WEB/
+├── hzsca-springboot/hzsca/      # 🔧 后端服务（Spring Boot）
+│   ├── src/main/java/com/hzsca/ #   common / config / controller / entity / mapper / security / service / utils
+│   ├── src/main/resources/      #   db 建表脚本 · mapper XML · static 图片 · application.yml
+│   ├── src/test/                #   ✅ 41 个单元测试
+│   └── Dockerfile               #   🐳 多阶段构建
+├── hzsca-vue/hzsca/             # 🖥️ 管理后台（Vue 3 + Vite）
+├── hzsca-miniapp/               # 📱 微信小程序（原生）
+├── docs/                        # 📚 部署指南 · 支付接入指南 · 算法局限分析 · 截图
+├── deliverables/gstack/         # 📋 归档评审报告
+├── docker-compose.yml           # 🐳 MySQL + Redis（--profile full 含后端）
+└── .env.example                 # 🔑 环境变量示例
+```
 
 ---
 
-## 🗄️ 数据库设计（19 张表）
-
-| 分类 | 表名 | 说明 |
-|------|------|------|
-| 用户 | `wx_user` | 微信小程序用户 |
-| 用户 | `users` | 网页注册用户 |
-| 用户 | `admins` | 管理员账号 |
-| 用户 | `adopters` | 领养人档案 |
-| 猫咪 | `animals` | 猫咪基础档案 |
-| 猫咪 | `cat_traits` | 猫咪 11 维特征标签 |
-| 领养 | `user_adoption_profile` | 用户领养偏好档案 |
-| 领养 | `adoption_request` | 领养申请（含风险评分） |
-| 领养 | `adoption_form` | 领养问卷明细 |
-| 领养 | `adoption_assessment` | 领养评估记录 |
-| 领养 | `adoption_record` | 领养成交记录 |
-| 算法 | `match_weights` | 匹配算法权重配置 |
-| 运营 | `activity` | 救助活动 |
-| 运营 | `activity_participation` | 活动报名 |
-| 运营 | `volunteer_application` | 志愿者申请 |
-| 运营 | `rescue_report` | 流浪猫救助上报 |
-| 行为 | `user_behavior` | 用户行为埋点日志 |
-| 支付 | `payment_order` | 支付订单（金额以分存储，含状态机与回调报文） |
-| 支付 | `payment_audit_log` | 支付审计日志（状态变更、回调验签结果、对账过程） |
-
-> 完整表结构见 [`schema.sql`](hzsca-springboot/hzsca/src/main/resources/db/schema.sql)（由数据库实际结构导出）。
-
----
-
-## ✅ 质量保障与测试
-
-后端已补齐针对两个核心算法的**单元测试**（JUnit 5 + Mockito + AssertJ），不依赖数据库，可离线运行：
+## ✅ 测试与质量
 
 ```bash
 cd hzsca-springboot/hzsca
 ./mvnw -o test -Dtest='RiskScoringServiceImplTest,MatchServiceImplTest'
+# Tests run: 41, Failures: 0, Errors: 0, Skipped: 0
 ```
 
-| 测试类 | 用例数 | 覆盖要点 |
-|--------|-------|---------|
-| `RiskScoringServiceImplTest` | 22 | 各单项加减分、满分/零分边界、80/79/60/59 分风险档位边界、上下界截断、null 表单 |
-| `MatchServiceImplTest` | 19 | 5 条硬性排除规则、六维全优/全劣打分、权重表覆盖与全零权重、limit 边界（0/负数/超上限）、缺失特征兜底、结果降序排序 |
+41 个单元测试覆盖两个核心算法的单项加减分、档位边界（80 / 79 / 60 / 59）、上下界截断、硬性排除规则、`limit` 边界与排序。
 
-```
-Tests run: 41, Failures: 0, Errors: 0, Skipped: 0
-```
-
-> 需要真实数据库的 `HzscaApplicationTests` 已标记 `@Tag("integration")`，可用 `-DexcludedGroups=integration` 排除。
+| 构建指标 | 结果 |
+|---------|------|
+| 后端编译 | ✅ 通过 |
+| 前端构建 | ✅ 通过，无 >500KB chunk 警告 |
+| 入口 chunk | 1,141 KB → **25 KB**（`manualChunks` + 按需引入） |
+| 静态图片 | 161 MB → **6.2 MB**（WebP） |
 
 ---
 
-## ⚡ 性能优化
+## 📚 文档导航
 
-针对前端首屏体积做了两项优化（`vite.config.js` + `src/utils/echarts.js`）：
-
-| 优化项 | 优化前 | 优化后 | 说明 |
-|--------|-------|--------|------|
-| 入口 chunk | 1,141 KB | **25 KB** | 通过 `manualChunks` 拆分第三方库 |
-| Element Plus | 853 KB | **447 KB** | 移除 `app.use(ElementPlus)`，改为 `unplugin-vue-components` 按需引入 |
-| ECharts | 1,031 KB | **505 KB** | 由全量引入改为只注册饼图/柱状图与必要组件；且**仅管理端懒加载**，不在首屏 |
-| 图片资源 | 161 MB | **6.3 MB** | 猫咪图与活动图转 WebP（-96%） |
-
-> 优化后构建**不再出现 >500KB chunk 警告**；首屏实际加载约 715 KB（gzip ≈ 239 KB），ECharts 仅在进入管理端/工作报告页时按需加载。
-
----
-
-## ⚠️ 已知限制与后续计划
-
-**已完成**：✅ 自动化测试 41 例 ｜ ✅ 明文口令一次性迁移 ｜ ✅ Docker 全栈部署 ｜ ✅ 图片转 WebP ｜ ✅ 支付宝沙箱支付 ｜ ✅ 支付对账与审计日志 ｜ ✅ 前端分包与按需加载 ｜ ✅ 小程序端支付流程
-
-**仍待改进**：
-
-- [ ] **小程序端真实支付**：微信小程序受平台限制无法直接跳转支付宝收银台，真实模式下当前提供「收银台链接复制」；正式场景应接入**微信支付**（可实现同一 `PaymentService` 接口，前端无需改动）；
-- [ ] **算法局限**：`matchSpace` 维度因空间不足会先被硬性排除而**不具区分度**；风险评分中 `if (score < 0) score = 0` 为**死代码**（最大扣分 85，理论最低 15 分）。详见 [`docs/算法说明与局限分析.md`](docs/算法说明与局限分析.md)；
-- [ ] **缺少离线评估指标**：两个算法均未与真实标签（用户最终领养结果、人工审核结论）做校验，无 AUC / NDCG 等量化指标；
-- [ ] **图片可进一步上对象存储**：当前仍随 jar 打包（约 6.3MB），生产环境建议迁移到 OSS/CDN；
-- [ ] **前端 CSS 仍为全量引入**：Element Plus 样式表约 326KB，可改按需引入进一步压缩。
-
-### 📌 历史技术债：两套并存的领养流程
-
-项目在迭代中形成了**两套功能重叠的领养流程**，属历史遗留，答辩时可能被追问，特此说明：
-
-| | 旧流程（技术债） | 新流程（当前主流程） |
-|---|---|---|
-| **实体** | `Adopter` + `AdoptionApplication` | `AdoptionRequest` + `AdoptionForm` |
-| **接口前缀** | `/api/adopters`、`/api/adoption-assessments` | `/api/adoption-requests` |
-| **数据表** | `adopters`、`adoption_assessment` | `adoption_request`、`adoption_form`、`adoption_record` |
-| **风险评分** | ❌ 无 | ✅ 有（`RiskScoringService`） |
-| **使用方** | 仅前台 `Apply.vue`（提交评估） | 小程序、前台、管理端**全部**在用 |
-| **权限** | 已收敛为仅管理员 | 用户可提交，管理员审核 |
-
-**结论**：新流程（`adoption_request`）是唯一被完整使用的主流程；旧流程的查询接口已收敛为管理员专用，仅保留兼容性。后续迭代建议将 `Apply.vue` 迁移到新流程并下线旧表。
-
----
-
-## 📄 文档与归档
-
-| 文件 | 说明 |
+| 文档 | 内容 |
 |------|------|
-| [`毕业设计论文.md`](毕业设计论文.md) | 本科毕业设计论文全文 |
-| [`docs/部署指南.md`](docs/部署指南.md) | 环境搭建、Docker 全栈部署、数据库初始化、首次运行检查清单 |
-| [`docs/支付接入指南.md`](docs/支付接入指南.md) | 支付宝沙箱申请、密钥生成、回调调试、对账与审计、常见问题 |
-| [`docs/算法说明与局限分析.md`](docs/算法说明与局限分析.md) | 智能匹配与风险评分的算法设计、已知局限与改进方向（论文素材） |
-| [`deliverables/gstack/`](deliverables/gstack/) | 毕业设计归档评审报告（架构梳理 + 缺陷审计 + 修复验证） |
+| [毕业设计论文.md](毕业设计论文.md) | 论文全文 |
+| [docs/部署指南.md](docs/部署指南.md) | 环境搭建 · Docker 全栈部署 · 首次运行检查清单 |
+| [docs/支付接入指南.md](docs/支付接入指南.md) | 支付宝沙箱申请 · 密钥生成 · 回调调试 · 对账与审计 |
+| [docs/算法说明与局限分析.md](docs/算法说明与局限分析.md) | 算法设计 · 已知局限 · 改进方向（论文素材） |
+| [deliverables/gstack/](deliverables/gstack/) | 归档评审报告（架构梳理 + 缺陷审计 + 修复验证） |
+| [schema.sql](hzsca-springboot/hzsca/src/main/resources/db/schema.sql) | 完整数据表结构 |
+| Swagger UI | 完整接口清单（启动后访问 `http://localhost:8080/swagger-ui.html`） |
 
 ---
 
-## 🙏 致谢
+## 🗺️ Roadmap
 
-感谢湖州流浪猫救助公益场景带来的真实需求，让这个毕业设计不止是一次技术练习，也能对真实的公益救助工作有所助益。
+- [x] 两个核心算法的单元测试（41 例）
+- [x] 明文口令 BCrypt 一次性迁移
+- [x] Docker 全栈部署方案
+- [x] 图片转 WebP（体积 −96%）
+- [x] 支付宝沙箱支付 + 对账与审计日志
+- [x] 前端分包与按需加载
+- [x] 小程序端支付流程
+- [ ] 小程序接入微信支付（复用 `PaymentService` 接口）
+- [ ] 算法离线评估指标（AUC / NDCG）
+- [ ] 图片迁移对象存储 · Element Plus 样式按需引入
 
-愿每一只流浪猫，都能被温柔以待。🐾
+---
+
+## 🤝 贡献指南
+
+欢迎提交 Issue 与 Pull Request。
+
+**1. 分支约定** —— 从 `main` 切出功能分支，命名 `feat/xxx`、`fix/xxx`、`docs/xxx`
+
+**2. 代码规范**
+
+- **后端**：Java 17；遵循现有分包（`controller / service / mapper / entity`）；新增接口须在 `SecurityConfig` 中明确权限，禁止默认放行
+- **前端**：Vue 3 组合式 API + `<script setup>`；样式沿用现有暖色调变量
+- **数据库**：建表脚本使用 `CREATE TABLE IF NOT EXISTS`，禁止 `DROP`
+
+**3. 提交前自检**
+
+```bash
+cd hzsca-springboot/hzsca && ./mvnw -o test -Dtest='RiskScoringServiceImplTest,MatchServiceImplTest'
+cd hzsca-vue/hzsca && npm run build
+```
+
+**4. 提交信息** —— 遵循 [Conventional Commits](https://www.conventionalcommits.org/)：`feat:` / `fix:` / `docs:` / `chore:`
+
+**5. PR 描述** —— 说明改动动机、影响范围与验证方式
+
+> 🔐 **安全提示**：请勿提交任何真实密钥（`JWT_SECRET`、支付宝私钥、微信 AppSecret）。本地配置使用 `.env`（已被 `.gitignore` 忽略），可参考 `.env.example`。
+
+---
+
+## 📄 许可证
+
+[Apache License 2.0](LICENSE) · 本项目为本科毕业设计作品，仅供学习与交流。
 
 ---
 
 <div align="center">
 
-**License · [Apache 2.0](LICENSE)**
+**如果这个项目对你有帮助，欢迎点一个 ⭐ Star**
 
-<sub>本项目为本科毕业设计作品，仅用于学习与交流。</sub>
+愿每一只流浪猫，都能被温柔以待。🐾
 
 </div>
