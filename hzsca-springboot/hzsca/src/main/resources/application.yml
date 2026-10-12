@@ -93,3 +93,16 @@ alipay:
   # 单笔金额上下限（单位：分），默认 1 元 ~ 50000 元
   min-amount: 100
   max-amount: 5000000
+
+# 支付对账定时任务
+payment:
+  reconcile:
+    enabled: ${PAYMENT_RECONCILE_ENABLED:true}
+    # 每天凌晨 02:30 执行；如需更频繁可改为 0 */30 * * * ?
+    cron: ${PAYMENT_RECONCILE_CRON:0 30 2 * * ?}
+    # 超过该分钟数仍未支付的订单才会被对账（避免与用户正在进行的支付冲突）
+    pending-minutes: 30
+    # 超过该小时数仍未支付的订单自动关闭
+    close-hours: 24
+    # 单次对账处理上限
+    batch-size: 200

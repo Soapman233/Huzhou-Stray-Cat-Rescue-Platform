@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzsca.mapper.PaymentAuditLogMapper">
+
+    <resultMap id="BaseResultMap" type="com.hzsca.entity.PaymentAuditLog">
+        <id column="id" property="id"/>
+        <result column="out_trade_no" property="outTradeNo"/>
+        <result column="action" property="action"/>
+        <result column="from_status" property="fromStatus"/>
+        <result column="to_status" property="toStatus"/>
+        <result column="success" property="success"/>
+        <result column="detail" property="detail"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.hzsca.entity.PaymentAuditLog" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO payment_audit_log
+            (out_trade_no, action, from_status, to_status, success, detail, create_time)
+        VALUES
+            (#{outTradeNo}, #{action}, #{fromStatus}, #{toStatus}, #{success}, #{detail}, NOW())
+    </insert>
+
+    <select id="selectByOutTradeNo" resultMap="BaseResultMap">
+        SELECT id, out_trade_no, action, from_status, to_status, success, detail, create_time
+        FROM payment_audit_log
+        WHERE out_trade_no = #{outTradeNo}
+        ORDER BY id DESC
+        LIMIT 100
+    </select>
+
+    <select id="countByActionSince" resultType="int">
+        SELECT COUNT(*)
+        FROM payment_audit_log
+        WHERE action = #{action} AND create_time >= #{since}
+    </select>
+
+    <select id="selectPaidOrdersWithoutAudit" resultType="string">
+        SELECT o.out_trade_no
+        FROM payment_order o
+        WHERE o.status IN ('PAID', 'FINISHED')
+          AND NOT EXISTS (
+              SELECT 1 FROM payment_audit_log l
+              WHERE l.out_trade_no = o.out_trade_no AND l.action IN ('PAY', 'NOTIFY')
+          )
+        LIMIT 200
+    </select>
+</mapper>

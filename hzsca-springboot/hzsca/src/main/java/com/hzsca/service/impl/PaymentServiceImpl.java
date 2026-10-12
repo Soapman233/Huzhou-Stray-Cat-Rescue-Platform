@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hzsca.config.AlipayProperties;
 import com.hzsca.entity.PaymentOrder;
 import com.hzsca.mapper.PaymentOrderMapper;
+import com.hzsca.service.PaymentAuditService;
 import com.hzsca.service.PaymentService;
 import com.hzsca.utils.AlipaySignUtils;
 import org.slf4j.Logger;
@@ -54,11 +55,14 @@ public class PaymentServiceImpl implements PaymentService {
     private final AlipayProperties props;
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
+    private final PaymentAuditService auditService;
 
-    public PaymentServiceImpl(PaymentOrderMapper orderMapper, AlipayProperties props, ObjectMapper objectMapper) {
+    public PaymentServiceImpl(PaymentOrderMapper orderMapper, AlipayProperties props,
+                              ObjectMapper objectMapper, PaymentAuditService auditService) {
         this.orderMapper = orderMapper;
         this.props = props;
         this.objectMapper = objectMapper;
+        this.auditService = auditService;
         this.restClient = RestClient.builder().build();
     }
 
@@ -90,6 +94,8 @@ public class PaymentServiceImpl implements PaymentService {
         order.setSubjectId(subjectId);
         order.setRemark(remark);
         orderMapper.insert(order);
+        auditService.record(outTradeNo, PaymentAuditService.ACTION_CREATE, null, ST_CREATED, true,
+                "创建订单：金额 " + amountFen + " 分，渠道 " + order.getChannel());
 
         if (isMockMode()) {
             logger.info("创建捐助订单(Mock 模式) outTradeNo={}, amount={}分", outTradeNo, amountFen);
@@ -152,6 +158,8 @@ public class PaymentServiceImpl implements PaymentService {
             if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
                 markPaid(order.getOutTradeNo(), resp.path("trade_no").asText(null),
                         resp.path("buyer_user_id").asText(null), "{\"source\":\"sync\"}");
+                auditService.record(order.getOutTradeNo(), PaymentAuditService.ACTION_SYNC,
+                        order.getStatus(), ST_PAID, true, "主动查单确认已支付，trade_status=" + tradeStatus);
                 return orderMapper.selectByOutTradeNo(order.getOutTradeNo());
             }
         } catch (Exception e) {
@@ -178,6 +186,8 @@ public class PaymentServiceImpl implements PaymentService {
             String sign = params.get("sign");
             if (sign == null || sign.isBlank()) {
                 logger.warn("支付宝通知缺少 sign");
+                auditService.record(params.get("out_trade_no"), PaymentAuditService.ACTION_NOTIFY,
+                        null, null, false, "通知缺少 sign，已拒绝");
                 return "failure";
             }
             // 验签：用支付宝公钥验证，防止伪造通知
@@ -185,6 +195,8 @@ public class PaymentServiceImpl implements PaymentService {
                     AlipaySignUtils.buildSignContent(params), sign, props.getAlipayPublicKey());
             if (!ok) {
                 logger.warn("支付宝通知验签失败 outTradeNo={}", params.get("out_trade_no"));
+                auditService.record(params.get("out_trade_no"), PaymentAuditService.ACTION_NOTIFY,
+                        null, null, false, "通知验签失败，已拒绝");
                 return "failure";
             }
 
@@ -210,9 +222,13 @@ public class PaymentServiceImpl implements PaymentService {
             if ("TRADE_SUCCESS".equals(tradeStatus) || "TRADE_FINISHED".equals(tradeStatus)) {
                 markPaid(outTradeNo, params.get("trade_no"), params.get("buyer_id"),
                         objectMapper.writeValueAsString(params));
+                auditService.record(outTradeNo, PaymentAuditService.ACTION_NOTIFY,
+                        order.getStatus(), ST_PAID, true, "异步通知处理成功，trade_status=" + tradeStatus);
             } else if ("TRADE_CLOSED".equals(tradeStatus)) {
                 orderMapper.updateStatusIfCurrent(outTradeNo, ST_CLOSED,
                         List.of(ST_CREATED, ST_PAYING), null, null, null);
+                auditService.record(outTradeNo, PaymentAuditService.ACTION_NOTIFY,
+                        order.getStatus(), ST_CLOSED, true, "异步通知：交易已关闭");
             }
             return "success";
         } catch (Exception e) {
@@ -236,6 +252,8 @@ public class PaymentServiceImpl implements PaymentService {
                 List.of(ST_CREATED, ST_PAYING, ST_PAID), tradeNo, buyerId, payload);
         if (rows > 0) {
             logger.info("订单已支付 outTradeNo={}, tradeNo={}", outTradeNo, tradeNo);
+            auditService.record(outTradeNo, PaymentAuditService.ACTION_PAY, null, ST_PAID, true,
+                    "订单支付成功：tradeNo=" + tradeNo);
         }
     }
 

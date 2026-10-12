@@ -65,12 +65,11 @@ public class DbBootstrap implements ApplicationRunner {
         executeSqlResource("db/schema.sql");
     }
 
-    /** 支付订单表 */
+    /** 支付订单表与支付审计日志表 */
     private void ensurePaymentTables() throws Exception {
-        if (tableExists("payment_order")) {
-            return;
+        if (!tableExists("payment_order") || !tableExists("payment_audit_log")) {
+            executeSqlResource("db/payment.sql");
         }
-        executeSqlResource("db/payment.sql");
     }
 
     /** admins 表为空时创建演示管理员（admin / admin123456，口令为 BCrypt 哈希） */

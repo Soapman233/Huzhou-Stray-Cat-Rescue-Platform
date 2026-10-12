@@ -4,6 +4,103 @@
     <view class="sub">您的每一份爱心都能改变一只流浪猫的命运</view>
   </view>
 
+  <!-- ============ 爱心捐助 ============ -->
+  <view class="card">
+    <view class="donate-head">
+      <view class="section-title" style="margin-bottom:0;">爱心捐助</view>
+      <view wx:if="{{mock}}" class="mock-badge">演示模式</view>
+    </view>
+
+    <view wx:if="{{mock}}" class="mock-alert">
+      当前未接入真实支付通道，捐助将以「模拟支付」方式演示，不会产生真实扣款。
+    </view>
+
+    <view class="stat-line">
+      <text class="stat-label">累计收到爱心捐助</text>
+      <text class="stat-value">¥ {{totalDonatedYuan}}</text>
+    </view>
+
+    <view class="amount-label">选择捐助金额</view>
+    <view class="amount-presets">
+      <view
+        wx:for="{{presets}}"
+        wx:key="*this"
+        class="amount-chip {{!customMode && amountYuan === item ? 'active' : ''}}"
+        data-value="{{item}}"
+        bindtap="selectPreset"
+      >¥ {{item}}</view>
+      <view class="amount-chip {{customMode ? 'active' : ''}}" bindtap="enableCustom">自定义</view>
+    </view>
+
+    <view wx:if="{{customMode}}" class="custom-amount">
+      <input
+        class="custom-input"
+        type="digit"
+        placeholder="请输入金额"
+        value="{{customAmount}}"
+        bindinput="onCustomInput"
+      />
+      <text class="unit">元</text>
+    </view>
+
+    <input
+      class="remark-input"
+      placeholder="留言 / 昵称（选填，将记录在订单中）"
+      maxlength="50"
+      value="{{remark}}"
+      bindinput="onRemarkInput"
+    />
+
+    <view class="tip-line">单笔捐助金额范围：¥{{minYuan}} ~ ¥{{maxYuan}}</view>
+
+    <view class="submit-btn {{submitting ? 'disabled' : ''}}" bindtap="onSubmit">
+      {{submitting ? '正在创建订单…' : '确认捐助'}}
+    </view>
+
+    <view class="safe-tip">支付过程由支付宝安全承载，平台不接触您的支付凭证</view>
+  </view>
+
+  <!-- ============ 订单状态 ============ -->
+  <view wx:if="{{order}}" class="card">
+    <view class="section-title">订单信息</view>
+
+    <view class="status-banner {{statusType}}">
+      <text class="status-text">{{statusText}}</text>
+    </view>
+
+    <view class="order-row">
+      <text>订单号</text>
+      <text class="order-value mono">{{order.outTradeNo}}</text>
+    </view>
+    <view class="order-row">
+      <text>捐助金额</text>
+      <text class="order-value amount">¥ {{order.amount / 100}}</text>
+    </view>
+    <view class="order-row">
+      <text>支付渠道</text>
+      <text class="order-value">{{mock ? '模拟支付（演示）' : '支付宝'}}</text>
+    </view>
+    <view wx:if="{{order.remark}}" class="order-row">
+      <text>留言</text>
+      <text class="order-value">{{order.remark}}</text>
+    </view>
+
+    <!-- Mock 模式：一键模拟支付 -->
+    <view wx:if="{{mock && statusType !== 'success' && statusType !== 'closed'}}"
+          class="submit-btn {{submitting ? 'disabled' : ''}}" bindtap="onMockPay">
+      模拟支付成功（演示）
+    </view>
+
+    <!-- 真实模式：复制收银台链接 / 刷新状态 -->
+    <block wx:if="{{!mock}}">
+      <view wx:if="{{payUrl}}" class="ghost-btn" bindtap="onCopyPayUrl">复制收银台链接</view>
+      <view wx:if="{{statusType !== 'success' && statusType !== 'closed'}}"
+            class="ghost-btn" bindtap="onRefresh">刷新支付结果</view>
+    </block>
+
+    <view class="ghost-btn" bindtap="onReset">{{statusType === 'success' ? '再来一单' : '返回捐助'}}</view>
+  </view>
+
   <view class="card">
     <view class="section-title">救助目的</view>
     <view class="p">我们致力于为无家可归的流浪猫提供：</view>

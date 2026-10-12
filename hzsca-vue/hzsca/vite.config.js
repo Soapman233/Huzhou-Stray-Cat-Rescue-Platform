@@ -19,15 +19,44 @@ export default defineConfig({
       reactivityTransform: true,
     }),
     AutoImport({
-      resolvers: [ElementPlusResolver()],
+      // 已在 main.js 全量引入 element-plus 样式，这里关闭按需样式引入避免重复
+      resolvers: [ElementPlusResolver({ importStyle: false })],
     }),
     Components({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [ElementPlusResolver({ importStyle: false })],
     }),
   ],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src')
+    }
+  },
+  build: {
+    // 单文件超过 800KB 才告警（拆分后主包应远低于此值）
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        // 把体积较大的第三方库拆成独立 chunk，避免主包过大、提升首屏加载与缓存命中率
+        manualChunks(id) {
+          if (!id.includes('node_modules')) {
+            return undefined
+          }
+          const normalized = id.replace(/\\/g, '/')
+          if (normalized.includes('element-plus') || normalized.includes('@element-plus')) {
+            return 'element-plus'
+          }
+          if (normalized.includes('echarts') || normalized.includes('zrender')) {
+            return 'echarts'
+          }
+          if (normalized.includes('@wangeditor')) {
+            return 'wangeditor'
+          }
+          if (/node_modules\/(vue|@vue|vue-router|vue-demi|@vueuse)\//.test(normalized)) {
+            return 'vue-vendor'
+          }
+          return 'vendor'
+        }
+      }
     }
   },
   css: {

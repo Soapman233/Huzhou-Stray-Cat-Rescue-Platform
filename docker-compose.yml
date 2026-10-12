@@ -55,6 +55,49 @@ services:
       timeout: 5s
       retries: 10
 
+  # ------------------------------------------------------------
+  # 后端服务（可选，使用 profile "full" 启用）
+  #   docker compose --profile full up -d --build
+  # 默认 `docker compose up -d` 只启动 MySQL 与 Redis，便于本地跑后端源码。
+  # ------------------------------------------------------------
+  app:
+    build:
+      context: ./hzsca-springboot/hzsca
+      dockerfile: Dockerfile
+    image: hzsca-backend:latest
+    container_name: hzsca-app
+    restart: unless-stopped
+    profiles: ["full"]
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # 容器内通过服务名访问依赖
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_NAME: hzsca
+      DB_USERNAME: root
+      DB_PASSWORD: "1234"
+      # 必须 ≥32 字节；生产环境请务必覆盖
+      JWT_SECRET: ${JWT_SECRET:-HzscaWeb_Docker_Default_JwtSecret_ChangeMe_0123456789}
+      WECHAT_APPID: ${WECHAT_APPID:-}
+      WECHAT_SECRET: ${WECHAT_SECRET:-}
+      # 留空则自动降级为 Mock 演示模式
+      ALIPAY_ENABLED: ${ALIPAY_ENABLED:-false}
+      ALIPAY_APP_ID: ${ALIPAY_APP_ID:-}
+      ALIPAY_PRIVATE_KEY: ${ALIPAY_PRIVATE_KEY:-}
+      ALIPAY_PUBLIC_KEY: ${ALIPAY_PUBLIC_KEY:-}
+      ALIPAY_NOTIFY_URL: ${ALIPAY_NOTIFY_URL:-http://localhost:8080/api/payment/alipay/notify}
+      ALIPAY_RETURN_URL: ${ALIPAY_RETURN_URL:-http://localhost:5173/hzsca/donate/result}
+      TZ: Asia/Shanghai
+    ports:
+      - "8080:8080"
+    volumes:
+      - hzsca-uploads:/app/uploads
+
 volumes:
   hzsca-mysql-data:
   hzsca-redis-data:
+  hzsca-uploads:

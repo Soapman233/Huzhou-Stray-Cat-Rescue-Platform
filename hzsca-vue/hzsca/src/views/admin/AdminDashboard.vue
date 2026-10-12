@@ -52,7 +52,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
-import * as echarts from 'echarts'
+import echarts from '../../utils/echarts'
 import request from '@/utils/request'
 
 const statusChartRef = ref(null)

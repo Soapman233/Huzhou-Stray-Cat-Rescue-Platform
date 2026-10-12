@@ -100,6 +100,7 @@
 | 活动报名 | 浏览救助活动，一键报名参与（需审核） |
 | 志愿者申请 | 提交志愿者申请，等待管理员审核 |
 | 救助上报 | 上报流浪猫线索：定位、地址、描述、图片、紧急度 |
+| **爱心捐助** | 选择金额（¥10/30/50/100 或自定义）→ 创建订单 → 支付 → 结果展示；Mock 模式下可一键模拟支付 |
 | 我的 | 个人资料、我的申请、领养档案维护 |
 
 ### 🖥️ 管理端（Vue 3 后台 · 25 个视图）
@@ -124,7 +125,9 @@
 | 支付宝沙箱支付 | 通过 `alipay.trade.page.pay` 生成收银台跳转地址，签名采用 **RSA2（JDK 内置实现，零第三方 SDK）** |
 | 异步通知 | `notify_url` 回调**验签 + 金额校验 + 幂等置位**，重复通知不会重复处理 |
 | 主动查单 | `alipay.trade.query` 兜底同步；结果页每 3 秒轮询、最长 60 秒，超时后支持手动刷新 |
+| **对账与审计** | 订单状态变更全部写入 `payment_audit_log`；每日定时任务主动查单补记、超时关单、审计一致性检查，支持管理端手动触发 |
 | Mock 降级 | 未配置密钥时自动进入 Mock 演示模式，无需支付宝账号即可演示完整「下单 → 支付 → 结果」链路 |
+| 多端支持 | Web 端完整支付流程；小程序端同样接入 `/api/payment/**`（受平台限制，真实模式下提供收银台链接复制） |
 | 安全约束 | 订单归属校验（防越权查他人订单）、回调接口匿名放行、商户私钥不入库不入前端 |
 
 > 完整接入流程（沙箱申请 → 密钥生成 → 回调调试 → 内网穿透 → 常见问题）见 [`docs/支付接入指南.md`](docs/支付接入指南.md)。
@@ -236,10 +239,10 @@ sequenceDiagram
 | 技术 | 版本 | 用途 |
 |------|------|------|
 | Vue | 3.4.15 | 前端框架（组合式 API） |
-| Vite | 5.1 | 构建工具 |
+| Vite | 5.1 | 构建工具（`manualChunks` 分包 + 按需引入） |
 | Vue Router | 4.2.5 | 路由 + 守卫 |
-| Element Plus | 2.5.6 | UI 组件库 |
-| ECharts | 5.5.1 | 数据可视化 |
+| Element Plus | 2.5.6 | UI 组件库（`unplugin-vue-components` 按需自动引入） |
+| ECharts | 5.5.1 | 数据可视化（仅注册饼图/柱状图，管理端懒加载） |
 | axios | 1.6.7 | HTTP 请求封装 |
 | wangEditor | 5.1.23 | 富文本编辑器 |
 | Sass | 1.71 | 样式预处理 |
@@ -262,38 +265,42 @@ HZSCA-WEB/
 │   ├── src/main/java/com/hzsca/
 │   │   ├── common/                  #   统一响应 Result、跨域配置
 │   │   ├── config/                  #   数据库自举、口令迁移、支付宝配置、静态资源、Redis
-│   │   ├── controller/              #   22 个 REST 控制器（含 PaymentController）
+│   │   ├── controller/              #   23 个 REST 控制器（含 Payment / AdminPayment）
 │   │   ├── entity/                  #   实体 / DTO
 │   │   ├── exception/               #   全局异常处理
 │   │   ├── mapper/                  #   MyBatis Mapper 接口
 │   │   ├── security/                #   JWT 与 Spring Security
-│   │   ├── service/                 #   业务服务、匹配算法、风险评分、支付服务
+│   │   ├── service/                 #   业务服务、匹配算法、风险评分、支付与对账服务
 │   │   └── utils/                   #   工具类（RedisUtil、AlipaySignUtils）
 │   ├── src/main/resources/
 │   │   ├── db/                      #   schema.sql 建表 / 增量脚本 / 种子数据 / payment.sql
 │   │   ├── mapper/                  #   MyBatis XML 映射
-│   │   ├── static/                  #   猫咪与活动静态图片
+│   │   ├── static/                  #   猫咪与活动图片（WebP，共约 6.3MB）
 │   │   └── application.yml          #   应用配置（支持环境变量覆盖）
-│   └── src/test/java/com/hzsca/     #   ✅ 单元测试（匹配算法 19 例 + 风险评分 22 例）
+│   ├── src/test/java/com/hzsca/     #   ✅ 单元测试（匹配算法 19 例 + 风险评分 22 例）
+│   ├── Dockerfile                   #   🐳 多阶段构建镜像（Maven 编译 → JRE 运行）
+│   └── .dockerignore
 │
 ├── hzsca-vue/hzsca/                 # 🖥️ 管理后台（Vue 3 + Vite）
 │   └── src/
 │       ├── views/                   #   前台页面 + admin/ 后台页面（25 个）
 │       ├── router/                  #   路由与权限守卫
 │       ├── utils/request.js         #   axios 封装与拦截器
+│       ├── utils/echarts.js         #   ECharts 按需引入（饼图/柱状图）
 │       └── config/config.js         #   接口地址配置
 │
 ├── hzsca-miniapp/                   # 📱 微信小程序（原生）
-│   ├── pages/                       #   16 个业务页面
+│   ├── pages/                       #   16 个业务页面（含捐助支付流程）
 │   ├── custom-tab-bar/              #   自定义底部导航
 │   └── utils/                       #   请求封装与配置
 │
 ├── docs/                            # 📚 文档
 │   ├── images/                      #   README 界面截图（20 张）
-│   ├── 部署指南.md                   #   环境搭建 / 数据库初始化 / 检查清单
-│   └── 支付接入指南.md               #   支付宝沙箱接入全流程
+│   ├── 部署指南.md                   #   环境搭建 / Docker 全栈 / 检查清单
+│   ├── 支付接入指南.md               #   支付宝沙箱接入 + 对账与审计
+│   └── 算法说明与局限分析.md          #   两个核心算法的设计与局限（论文素材）
 ├── deliverables/gstack/             # 📋 毕业设计归档评审报告
-├── docker-compose.yml               # 🐳 一键启动 MySQL + Redis
+├── docker-compose.yml               # 🐳 MySQL + Redis（--profile full 含后端）
 ├── .env.example                     # 🔑 环境变量示例
 ├── 毕业设计论文.md                   # 📄 毕业论文（Markdown 版）
 ├── start-backend.bat                # ▶️ 后端一键启动脚本
@@ -320,8 +327,13 @@ HZSCA-WEB/
 **方式 A：Docker Compose（推荐）**
 
 ```bash
-docker compose up -d        # 启动 MySQL 8 + Redis 7，参数与 application.yml 默认值一致
-docker compose ps           # 等待两个服务变为 healthy
+# 只启动依赖服务（本地跑后端源码）
+docker compose up -d
+
+# 或：全栈一键启动（额外构建并启动后端容器）
+docker compose --profile full up -d --build
+
+docker compose ps           # 等待服务变为 healthy
 ```
 
 **方式 B：手动安装** — 参见 [`docs/部署指南.md`](docs/部署指南.md)（含 Windows / macOS / Linux 三种平台的安装步骤）。
@@ -456,6 +468,7 @@ npm run build        # 生产构建
 | 捐助支付 | `/api/payment/config` | 公开 |
 | 捐助支付 | `/api/payment/orders`、`/orders/{no}`、`/orders/{no}/sync`、`/orders/{no}/mock/pay` | 登录用户（限本人订单） |
 | 支付宝回调 | `/api/payment/alipay/notify`、`/api/payment/alipay/return` | 公开（验签保护） |
+| 支付对账（后台） | `/api/admin/payment/reconcile`、`/api/admin/payment/orders/{no}/audit` | 仅管理员 |
 | 猫咪/活动写操作 | `POST/PUT/DELETE /api/cats/**`、`/api/activity/add\|update\|delete\|upload` | 仅管理员 |
 | 后台管理 | `/api/admin/**` | 仅管理员 |
 
@@ -463,7 +476,7 @@ npm run build        # 生产构建
 
 ---
 
-## 🗄️ 数据库设计（18 张表）
+## 🗄️ 数据库设计（19 张表）
 
 | 分类 | 表名 | 说明 |
 |------|------|------|
@@ -485,6 +498,7 @@ npm run build        # 生产构建
 | 运营 | `rescue_report` | 流浪猫救助上报 |
 | 行为 | `user_behavior` | 用户行为埋点日志 |
 | 支付 | `payment_order` | 支付订单（金额以分存储，含状态机与回调报文） |
+| 支付 | `payment_audit_log` | 支付审计日志（状态变更、回调验签结果、对账过程） |
 
 > 完整表结构见 [`schema.sql`](hzsca-springboot/hzsca/src/main/resources/db/schema.sql)（由数据库实际结构导出）。
 
@@ -512,18 +526,47 @@ Tests run: 41, Failures: 0, Errors: 0, Skipped: 0
 
 ---
 
+## ⚡ 性能优化
+
+针对前端首屏体积做了两项优化（`vite.config.js` + `src/utils/echarts.js`）：
+
+| 优化项 | 优化前 | 优化后 | 说明 |
+|--------|-------|--------|------|
+| 入口 chunk | 1,141 KB | **25 KB** | 通过 `manualChunks` 拆分第三方库 |
+| Element Plus | 853 KB | **447 KB** | 移除 `app.use(ElementPlus)`，改为 `unplugin-vue-components` 按需引入 |
+| ECharts | 1,031 KB | **505 KB** | 由全量引入改为只注册饼图/柱状图与必要组件；且**仅管理端懒加载**，不在首屏 |
+| 图片资源 | 161 MB | **6.3 MB** | 猫咪图与活动图转 WebP（-96%） |
+
+> 优化后构建**不再出现 >500KB chunk 警告**；首屏实际加载约 715 KB（gzip ≈ 239 KB），ECharts 仅在进入管理端/工作报告页时按需加载。
+
+---
+
 ## ⚠️ 已知限制与后续计划
 
-**已完善**：✅ 自动化测试 ｜ ✅ 明文口令一次性迁移 ｜ ✅ Redis/MySQL 一键部署方案 ｜ ✅ 图片资源压缩 ｜ ✅ 支付宝沙箱支付接口与接入文档
+**已完成**：✅ 自动化测试 41 例 ｜ ✅ 明文口令一次性迁移 ｜ ✅ Docker 全栈部署 ｜ ✅ 图片转 WebP ｜ ✅ 支付宝沙箱支付 ｜ ✅ 支付对账与审计日志 ｜ ✅ 前端分包与按需加载 ｜ ✅ 小程序端支付流程
 
 **仍待改进**：
 
-- [ ] **图片进一步瘦身**：猫咪原图已从 146MB 压缩至约 8.4MB（1600px JPEG），如需更小可转 WebP 并接入对象存储；
-- [ ] **前端分包**：构建产物仍有 2 个 >500KB 的 chunk，计划通过 `manualChunks` 拆分；
-- [ ] **后端容器化**：当前 `docker-compose.yml` 只托管 MySQL 与 Redis，后端 jar 尚未容器化；
-- [ ] **支付对账**：缺少每日对账定时任务与支付审计日志表；
-- [ ] **小程序端支付**：小程序 `pages/donate` 仍为静态展示，未对齐 Web 端支付流程；
-- [ ] **两套领养流程并存**：`adoption_assessment`（旧）与 `adoption_request`（新，含风险评分）功能重叠，属历史技术债。
+- [ ] **小程序端真实支付**：微信小程序受平台限制无法直接跳转支付宝收银台，真实模式下当前提供「收银台链接复制」；正式场景应接入**微信支付**（可实现同一 `PaymentService` 接口，前端无需改动）；
+- [ ] **算法局限**：`matchSpace` 维度因空间不足会先被硬性排除而**不具区分度**；风险评分中 `if (score < 0) score = 0` 为**死代码**（最大扣分 85，理论最低 15 分）。详见 [`docs/算法说明与局限分析.md`](docs/算法说明与局限分析.md)；
+- [ ] **缺少离线评估指标**：两个算法均未与真实标签（用户最终领养结果、人工审核结论）做校验，无 AUC / NDCG 等量化指标；
+- [ ] **图片可进一步上对象存储**：当前仍随 jar 打包（约 6.3MB），生产环境建议迁移到 OSS/CDN；
+- [ ] **前端 CSS 仍为全量引入**：Element Plus 样式表约 326KB，可改按需引入进一步压缩。
+
+### 📌 历史技术债：两套并存的领养流程
+
+项目在迭代中形成了**两套功能重叠的领养流程**，属历史遗留，答辩时可能被追问，特此说明：
+
+| | 旧流程（技术债） | 新流程（当前主流程） |
+|---|---|---|
+| **实体** | `Adopter` + `AdoptionApplication` | `AdoptionRequest` + `AdoptionForm` |
+| **接口前缀** | `/api/adopters`、`/api/adoption-assessments` | `/api/adoption-requests` |
+| **数据表** | `adopters`、`adoption_assessment` | `adoption_request`、`adoption_form`、`adoption_record` |
+| **风险评分** | ❌ 无 | ✅ 有（`RiskScoringService`） |
+| **使用方** | 仅前台 `Apply.vue`（提交评估） | 小程序、前台、管理端**全部**在用 |
+| **权限** | 已收敛为仅管理员 | 用户可提交，管理员审核 |
+
+**结论**：新流程（`adoption_request`）是唯一被完整使用的主流程；旧流程的查询接口已收敛为管理员专用，仅保留兼容性。后续迭代建议将 `Apply.vue` 迁移到新流程并下线旧表。
 
 ---
 
@@ -532,9 +575,10 @@ Tests run: 41, Failures: 0, Errors: 0, Skipped: 0
 | 文件 | 说明 |
 |------|------|
 | [`毕业设计论文.md`](毕业设计论文.md) | 本科毕业设计论文全文 |
-| [`docs/部署指南.md`](docs/部署指南.md) | 环境搭建、数据库初始化、首次运行检查清单 |
-| [`docs/支付接入指南.md`](docs/支付接入指南.md) | 支付宝沙箱申请、密钥生成、回调调试与常见问题 |
-| [`deliverables/gstack/grad-archive-hzsca-2026-10-12.md`](deliverables/gstack/grad-archive-hzsca-2026-10-12.md) | 项目归档评审报告（架构梳理 + 缺陷审计 + 修复验证） |
+| [`docs/部署指南.md`](docs/部署指南.md) | 环境搭建、Docker 全栈部署、数据库初始化、首次运行检查清单 |
+| [`docs/支付接入指南.md`](docs/支付接入指南.md) | 支付宝沙箱申请、密钥生成、回调调试、对账与审计、常见问题 |
+| [`docs/算法说明与局限分析.md`](docs/算法说明与局限分析.md) | 智能匹配与风险评分的算法设计、已知局限与改进方向（论文素材） |
+| [`deliverables/gstack/`](deliverables/gstack/) | 毕业设计归档评审报告（架构梳理 + 缺陷审计 + 修复验证） |
 
 ---
 

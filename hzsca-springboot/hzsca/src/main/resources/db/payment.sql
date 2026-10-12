@@ -36,3 +36,22 @@ CREATE TABLE IF NOT EXISTS `payment_order` (
     KEY `idx_payment_subject` (`subject_type`, `subject_id`),
     KEY `idx_payment_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付订单表';
+
+-- ------------------------------------------------------------
+-- 支付审计日志：记录订单状态变更与对账过程，便于排查与对账追溯
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `payment_audit_log` (
+    `id`           BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `out_trade_no` VARCHAR(64)  NULL COMMENT '关联商户订单号（对账任务级日志可为空）',
+    `action`       VARCHAR(32)  NOT NULL COMMENT '动作：CREATE/PAY/NOTIFY/SYNC/RECONCILE/CLOSE/FAIL',
+    `from_status`  VARCHAR(20)  NULL COMMENT '变更前状态',
+    `to_status`    VARCHAR(20)  NULL COMMENT '变更后状态',
+    `success`      TINYINT(1)   NOT NULL DEFAULT 1 COMMENT '是否成功',
+    `detail`       TEXT         NULL COMMENT '详细信息（原因、报文摘要、错误信息等）',
+    `create_time`  DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '记录时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_audit_out_trade_no` (`out_trade_no`),
+    KEY `idx_audit_action` (`action`),
+    KEY `idx_audit_create_time` (`create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='支付审计日志表';
+

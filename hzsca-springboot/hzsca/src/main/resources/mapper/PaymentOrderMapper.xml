@@ -86,4 +86,19 @@
         FROM payment_order
         WHERE status IN ('PAID', 'FINISHED')
     </select>
+
+    <select id="selectStalePending" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM payment_order
+        WHERE status IN ('CREATED', 'PAYING')
+          AND create_time &lt; #{before}
+        ORDER BY id ASC
+        LIMIT #{limit}
+    </select>
+
+    <select id="countByStatus" resultType="int">
+        SELECT COUNT(*)
+        FROM payment_order
+        WHERE status = #{status}
+    </select>
 </mapper>

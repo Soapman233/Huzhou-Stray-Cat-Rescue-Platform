@@ -35,4 +35,16 @@ public interface PaymentOrderMapper {
 
     /** 汇总已支付金额（分），用于捐助统计 */
     long sumPaidAmount();
+
+    /**
+     * 查询「长时间未支付」的订单，用于对账任务主动查单与关单。
+     *
+     * @param before 创建时间早于该时刻的订单才会被查出
+     * @param limit  单次处理上限
+     */
+    List<PaymentOrder> selectStalePending(@Param("before") java.time.LocalDateTime before,
+                                          @Param("limit") int limit);
+
+    /** 统计指定状态的订单数量 */
+    int countByStatus(@Param("status") String status);
 }
