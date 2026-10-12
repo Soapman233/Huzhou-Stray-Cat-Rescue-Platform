@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hzsca.mapper.PaymentOrderMapper">
+
+    <resultMap id="BaseResultMap" type="com.hzsca.entity.PaymentOrder">
+        <id column="id" property="id"/>
+        <result column="out_trade_no" property="outTradeNo"/>
+        <result column="subject" property="subject"/>
+        <result column="amount" property="amount"/>
+        <result column="currency" property="currency"/>
+        <result column="channel" property="channel"/>
+        <result column="purpose" property="purpose"/>
+        <result column="status" property="status"/>
+        <result column="trade_no" property="tradeNo"/>
+        <result column="buyer_id" property="buyerId"/>
+        <result column="subject_type" property="subjectType"/>
+        <result column="subject_id" property="subjectId"/>
+        <result column="pay_url" property="payUrl"/>
+        <result column="pay_form" property="payForm"/>
+        <result column="notify_payload" property="notifyPayload"/>
+        <result column="remark" property="remark"/>
+        <result column="create_time" property="createTime"/>
+        <result column="pay_time" property="payTime"/>
+        <result column="finish_time" property="finishTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="BaseColumns">
+        id, out_trade_no, subject, amount, currency, channel, purpose, status,
+        trade_no, buyer_id, subject_type, subject_id, pay_url, pay_form,
+        notify_payload, remark, create_time, pay_time, finish_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.hzsca.entity.PaymentOrder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO payment_order
+            (out_trade_no, subject, amount, currency, channel, purpose, status,
+             trade_no, buyer_id, subject_type, subject_id, pay_url, pay_form,
+             notify_payload, remark, create_time, pay_time, finish_time, update_time)
+        VALUES
+            (#{outTradeNo}, #{subject}, #{amount}, #{currency}, #{channel}, #{purpose}, #{status},
+             #{tradeNo}, #{buyerId}, #{subjectType}, #{subjectId}, #{payUrl}, #{payForm},
+             #{notifyPayload}, #{remark}, NOW(), #{payTime}, #{finishTime}, NOW())
+    </insert>
+
+    <select id="selectByOutTradeNo" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM payment_order
+        WHERE out_trade_no = #{outTradeNo}
+    </select>
+
+    <select id="selectBySubject" resultMap="BaseResultMap">
+        SELECT <include refid="BaseColumns"/>
+        FROM payment_order
+        WHERE subject_type = #{subjectType} AND subject_id = #{subjectId}
+        ORDER BY id DESC
+        LIMIT 50
+    </select>
+
+    <update id="updateStatusIfCurrent">
+        UPDATE payment_order
+        SET status = #{status},
+            <if test="tradeNo != null">trade_no = #{tradeNo},</if>
+            <if test="buyerId != null">buyer_id = #{buyerId},</if>
+            <if test="notifyPayload != null">notify_payload = #{notifyPayload},</if>
+            <if test="status == 'PAID' or status == 'FINISHED'">pay_time = IFNULL(pay_time, NOW()),</if>
+            <if test="status == 'FINISHED'">finish_time = IFNULL(finish_time, NOW()),</if>
+            update_time = NOW()
+        WHERE out_trade_no = #{outTradeNo}
+          AND status IN
+          <foreach collection="allowedStatuses" item="st" open="(" separator="," close=")">
+              #{st}
+          </foreach>
+    </update>
+
+    <update id="updatePayInfo">
+        UPDATE payment_order
+        SET pay_url = #{payUrl},
+            pay_form = #{payForm},
+            status = IF(status = 'CREATED', 'PAYING', status),
+            update_time = NOW()
+        WHERE out_trade_no = #{outTradeNo}
+    </update>
+
+    <select id="sumPaidAmount" resultType="long">
+        SELECT IFNULL(SUM(amount), 0)
+        FROM payment_order
+        WHERE status IN ('PAID', 'FINISHED')
+    </select>
+</mapper>

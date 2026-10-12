@@ -6,11 +6,12 @@ VALUES
 (9002, 'demo_openid_9002', NULL, '小红', '', 2, '杭州', '浙江', '中国', NOW()),
 (9003, 'demo_openid_9003', NULL, '小李', '', 1, '上海', '上海', '中国', NOW());
 
+-- 演示网页用户：口令均为 123456（以 BCrypt 哈希存储，不存明文）
 INSERT IGNORE INTO users (UserID, Username, Password, Name, Phone, Gender, Profile, Avatar, Role)
 VALUES
-(8001, 'demo_user_8001', '123456', '网页用户A', '13800000001', 1, '喜欢参与公益活动', '', 'user'),
-(8002, 'demo_user_8002', '123456', '网页用户B', '13800000002', 2, '有多次救助经历', '', 'volunteer'),
-(8003, 'demo_user_8003', '123456', '网页用户C', '13800000003', 1, '希望参与线下活动', '', 'user');
+(8001, 'demo_user_8001', '$2b$10$f.wSshWp3Z0Pb5mcvQNnHugNcWBLDjtKTT9YHdSU8BtnPRwIiAygu', '网页用户A', '13800000001', 1, '喜欢参与公益活动', '', 'user'),
+(8002, 'demo_user_8002', '$2b$10$f.wSshWp3Z0Pb5mcvQNnHugNcWBLDjtKTT9YHdSU8BtnPRwIiAygu', '网页用户B', '13800000002', 2, '有多次救助经历', '', 'volunteer'),
+(8003, 'demo_user_8003', '$2b$10$f.wSshWp3Z0Pb5mcvQNnHugNcWBLDjtKTT9YHdSU8BtnPRwIiAygu', '网页用户C', '13800000003', 1, '希望参与线下活动', '', 'user');
 
 UPDATE wx_user SET role = 'volunteer' WHERE id = 9002;
 

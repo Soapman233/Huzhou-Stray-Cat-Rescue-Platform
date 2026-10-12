@@ -88,6 +88,11 @@ const router = createRouter({
                     meta: {title: '捐助我们'}
                 },
                 {
+                    path: 'donate/result',
+                    component: () => import('../views/PayResult.vue'),
+                    meta: {title: '支付结果', requiresAuth: true}
+                },
+                {
                     path: 'report',
                     component: () => import('../views/report.vue'),
                     meta: {title: '工作报告'}

@@ -1,0 +1,60 @@
+# ============================================================
+# HZSCA 流浪猫救助与领养平台 —— 依赖服务一键启动
+# ------------------------------------------------------------
+# 仅启动本项目依赖的 MySQL 与 Redis（后端与前端仍在本地运行）。
+#
+# 使用：
+#   docker compose up -d          # 启动
+#   docker compose ps             # 查看状态
+#   docker compose logs -f mysql  # 查看日志
+#   docker compose down           # 停止（保留数据）
+#   docker compose down -v        # 停止并删除数据卷（谨慎）
+#
+# 默认账号与 application.yml 的默认值保持一致：
+#   MySQL: root / 1234，库名 hzsca，端口 3306
+#   Redis: 无密码，端口 6379
+# ============================================================
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: hzsca-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "1234"
+      MYSQL_DATABASE: "hzsca"
+      TZ: "Asia/Shanghai"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
+      - --default-time-zone=+08:00
+      - --lower-case-table-names=0
+    ports:
+      - "3306:3306"
+    volumes:
+      - hzsca-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p1234"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    container_name: hzsca-redis
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - hzsca-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  hzsca-mysql-data:
+  hzsca-redis-data:

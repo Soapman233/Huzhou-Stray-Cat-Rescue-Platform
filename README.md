@@ -53,6 +53,16 @@
 
 </div>
 
+### 💰 爱心捐助 · 支付宝支付流程
+
+<div align="center">
+
+| 捐助页（金额选择 / Mock 模式提示） | 支付结果（处理中） | 支付结果（成功） |
+| :---: | :---: | :---: |
+| ![捐助页](docs/images/20-donate.webp) | ![支付处理中](docs/images/21-payresult-pending.webp) | ![支付成功](docs/images/22-payresult-success.webp) |
+
+</div>
+
 ### 管理端 · Vue 运营后台
 
 <div align="center">
@@ -105,6 +115,19 @@
 | 救助上报管理 | 查看上报线索、指派处理人、关闭工单 |
 | 数据导出 | 领养数据与用户行为数据查询导出（用于实验分析） |
 | 用户管理 | 用户列表、新增、编辑、删除 |
+
+### 💰 捐助与支付（支付宝沙箱）
+
+| 能力 | 说明 |
+|------|------|
+| 捐助下单 | 预设 ¥10/30/50/100 或自定义金额，可填写留言，金额以「分」存储避免浮点误差 |
+| 支付宝沙箱支付 | 通过 `alipay.trade.page.pay` 生成收银台跳转地址，签名采用 **RSA2（JDK 内置实现，零第三方 SDK）** |
+| 异步通知 | `notify_url` 回调**验签 + 金额校验 + 幂等置位**，重复通知不会重复处理 |
+| 主动查单 | `alipay.trade.query` 兜底同步；结果页每 3 秒轮询、最长 60 秒，超时后支持手动刷新 |
+| Mock 降级 | 未配置密钥时自动进入 Mock 演示模式，无需支付宝账号即可演示完整「下单 → 支付 → 结果」链路 |
+| 安全约束 | 订单归属校验（防越权查他人订单）、回调接口匿名放行、商户私钥不入库不入前端 |
+
+> 完整接入流程（沙箱申请 → 密钥生成 → 回调调试 → 内网穿透 → 常见问题）见 [`docs/支付接入指南.md`](docs/支付接入指南.md)。
 
 ### ⚙️ 公共能力
 
@@ -206,6 +229,7 @@ sequenceDiagram
 | PageHelper | 1.4.6 | 物理分页 |
 | SpringDoc OpenAPI | 2.3.0 | 接口文档 |
 | Lombok | — | 简化实体代码 |
+| **支付宝沙箱** | RSA2（JDK 内置） | **零第三方 SDK**，手写签名与验签 |
 
 ### 管理后台 `hzsca-vue`
 
@@ -237,23 +261,24 @@ HZSCA-WEB/
 ├── hzsca-springboot/hzsca/          # 🔧 后端服务（Spring Boot）
 │   ├── src/main/java/com/hzsca/
 │   │   ├── common/                  #   统一响应 Result、跨域配置
-│   │   ├── config/                  #   数据库自举、静态资源、Redis、Swagger 配置
-│   │   ├── controller/              #   21 个 REST 控制器
+│   │   ├── config/                  #   数据库自举、口令迁移、支付宝配置、静态资源、Redis
+│   │   ├── controller/              #   22 个 REST 控制器（含 PaymentController）
 │   │   ├── entity/                  #   实体 / DTO
 │   │   ├── exception/               #   全局异常处理
 │   │   ├── mapper/                  #   MyBatis Mapper 接口
 │   │   ├── security/                #   JWT 与 Spring Security
-│   │   ├── service/                 #   业务服务与算法实现
-│   │   └── utils/                   #   工具类（RedisUtil）
-│   └── src/main/resources/
-│       ├── db/                      #   建表 / 增量 / 演示数据 SQL
-│       ├── mapper/                  #   MyBatis XML 映射
-│       ├── static/                  #   猫咪与活动静态图片
-│       └── application.yml          #   应用配置（支持环境变量覆盖）
+│   │   ├── service/                 #   业务服务、匹配算法、风险评分、支付服务
+│   │   └── utils/                   #   工具类（RedisUtil、AlipaySignUtils）
+│   ├── src/main/resources/
+│   │   ├── db/                      #   schema.sql 建表 / 增量脚本 / 种子数据 / payment.sql
+│   │   ├── mapper/                  #   MyBatis XML 映射
+│   │   ├── static/                  #   猫咪与活动静态图片
+│   │   └── application.yml          #   应用配置（支持环境变量覆盖）
+│   └── src/test/java/com/hzsca/     #   ✅ 单元测试（匹配算法 19 例 + 风险评分 22 例）
 │
 ├── hzsca-vue/hzsca/                 # 🖥️ 管理后台（Vue 3 + Vite）
 │   └── src/
-│       ├── views/                   #   前台页面 + admin/ 后台页面（24 个）
+│       ├── views/                   #   前台页面 + admin/ 后台页面（25 个）
 │       ├── router/                  #   路由与权限守卫
 │       ├── utils/request.js         #   axios 封装与拦截器
 │       └── config/config.js         #   接口地址配置
@@ -263,8 +288,13 @@ HZSCA-WEB/
 │   ├── custom-tab-bar/              #   自定义底部导航
 │   └── utils/                       #   请求封装与配置
 │
-├── docs/images/                     # 📸 README 界面截图
+├── docs/                            # 📚 文档
+│   ├── images/                      #   README 界面截图（20 张）
+│   ├── 部署指南.md                   #   环境搭建 / 数据库初始化 / 检查清单
+│   └── 支付接入指南.md               #   支付宝沙箱接入全流程
 ├── deliverables/gstack/             # 📋 毕业设计归档评审报告
+├── docker-compose.yml               # 🐳 一键启动 MySQL + Redis
+├── .env.example                     # 🔑 环境变量示例
 ├── 毕业设计论文.md                   # 📄 毕业论文（Markdown 版）
 ├── start-backend.bat                # ▶️ 后端一键启动脚本
 └── LICENSE                          # Apache License 2.0
@@ -284,17 +314,38 @@ HZSCA-WEB/
 | Node.js | 18+ |
 | 微信开发者工具 | 最新稳定版 |
 
-### 1️⃣ 初始化数据库
+### 1️⃣ 启动依赖服务（MySQL + Redis）
+
+**方式 A：Docker Compose（推荐）**
 
 ```bash
-# 创建数据库
-mysql -uroot -p -e "CREATE DATABASE hzsca DEFAULT CHARACTER SET utf8mb4;"
-
-# 导入基础表结构（animals / users / activity 等 17 张表）
-# 首次启动后端时，DbBootstrap 会自动补齐 matching / volunteer 相关表与演示数据
+docker compose up -d        # 启动 MySQL 8 + Redis 7，参数与 application.yml 默认值一致
+docker compose ps           # 等待两个服务变为 healthy
 ```
 
-### 2️⃣ 启动后端
+**方式 B：手动安装** — 参见 [`docs/部署指南.md`](docs/部署指南.md)（含 Windows / macOS / Linux 三种平台的安装步骤）。
+
+### 2️⃣ 初始化数据库
+
+```bash
+# 只需创建一个空库，表结构由应用启动时自动创建
+mysql -uroot -p -e "CREATE DATABASE IF NOT EXISTS hzsca DEFAULT CHARACTER SET utf8mb4;"
+```
+
+启动后端时 `DbBootstrap` 会**自动完成**：
+
+| 步骤 | 说明 |
+|------|------|
+| 建表 | 检测核心表缺失 → 执行 `db/schema.sql`（17 张表，全部 `CREATE TABLE IF NOT EXISTS`，**不会删改已有数据**） |
+| 增量表 | 补齐匹配算法表、志愿者表（`matching.sql` / `volunteer.sql`） |
+| 种子数据 | 写入猫咪特征、演示申请/活动/救助数据 |
+| 管理员 | `admins` 表为空时创建演示账号 **`admin / admin123456`** |
+| 支付表 | 创建 `payment_order`（`db/payment.sql`） |
+| 口令迁移 | 把残留的**明文口令**统一升级为 BCrypt（幂等，可重复执行） |
+
+> 演示网页用户：`user1` ~ `user10`，口令均为 `123456`。
+
+### 3️⃣ 启动后端
 
 ```bash
 cd hzsca-springboot/hzsca
@@ -315,7 +366,7 @@ export DB_PASSWORD=你的数据库密码
 - 接口地址：`http://localhost:8080`
 - 接口文档：`http://localhost:8080/swagger-ui.html`
 
-### 3️⃣ 启动管理后台
+### 4️⃣ 启动管理后台
 
 ```bash
 cd hzsca-vue/hzsca
@@ -326,7 +377,7 @@ npm run build        # 生产构建
 
 > 若后端地址非 `localhost:8080`，请修改 `src/config/config.js` 中的 `baseURL` 与 `imageBaseURL`。
 
-### 4️⃣ 运行微信小程序
+### 5️⃣ 运行微信小程序
 
 1. 用微信开发者工具导入 `hzsca-miniapp` 目录；
 2. 修改 `utils/config.js` 中的 `BASE_URL` 为你的后端地址；
@@ -401,6 +452,9 @@ npm run build        # 生产构建
 | 救助上报 | `/api/rescue-reports` | 登录用户 |
 | 志愿者申请 | `/api/volunteer/apply` | 登录用户 |
 | 用户资料 | `/api/users/current`、`/api/users/update` | 本人或管理员 |
+| 捐助支付 | `/api/payment/config` | 公开 |
+| 捐助支付 | `/api/payment/orders`、`/orders/{no}`、`/orders/{no}/sync`、`/orders/{no}/mock/pay` | 登录用户（限本人订单） |
+| 支付宝回调 | `/api/payment/alipay/notify`、`/api/payment/alipay/return` | 公开（验签保护） |
 | 猫咪/活动写操作 | `POST/PUT/DELETE /api/cats/**`、`/api/activity/add\|update\|delete\|upload` | 仅管理员 |
 | 后台管理 | `/api/admin/**` | 仅管理员 |
 
@@ -408,7 +462,7 @@ npm run build        # 生产构建
 
 ---
 
-## 🗄️ 数据库设计（17 张表）
+## 🗄️ 数据库设计（18 张表）
 
 | 分类 | 表名 | 说明 |
 |------|------|------|
@@ -429,16 +483,46 @@ npm run build        # 生产构建
 | 运营 | `volunteer_application` | 志愿者申请 |
 | 运营 | `rescue_report` | 流浪猫救助上报 |
 | 行为 | `user_behavior` | 用户行为埋点日志 |
+| 支付 | `payment_order` | 支付订单（金额以分存储，含状态机与回调报文） |
+
+> 完整表结构见 [`schema.sql`](hzsca-springboot/hzsca/src/main/resources/db/schema.sql)（由数据库实际结构导出）。
+
+---
+
+## ✅ 质量保障与测试
+
+后端已补齐针对两个核心算法的**单元测试**（JUnit 5 + Mockito + AssertJ），不依赖数据库，可离线运行：
+
+```bash
+cd hzsca-springboot/hzsca
+./mvnw -o test -Dtest='RiskScoringServiceImplTest,MatchServiceImplTest'
+```
+
+| 测试类 | 用例数 | 覆盖要点 |
+|--------|-------|---------|
+| `RiskScoringServiceImplTest` | 22 | 各单项加减分、满分/零分边界、80/79/60/59 分风险档位边界、上下界截断、null 表单 |
+| `MatchServiceImplTest` | 19 | 5 条硬性排除规则、六维全优/全劣打分、权重表覆盖与全零权重、limit 边界（0/负数/超上限）、缺失特征兜底、结果降序排序 |
+
+```
+Tests run: 41, Failures: 0, Errors: 0, Skipped: 0
+```
+
+> 需要真实数据库的 `HzscaApplicationTests` 已标记 `@Tag("integration")`，可用 `-DexcludedGroups=integration` 排除。
 
 ---
 
 ## ⚠️ 已知限制与后续计划
 
-- [ ] **补充自动化测试**：当前无单元/集成测试，计划使用 `spring-boot-starter-test` 覆盖核心算法；
-- [ ] **图片资源优化**：猫咪原图体积偏大（单张最大 8MB），计划压缩为 WebP 并接入对象存储；
-- [ ] **前端分包**：构建产物存在 >500KB 的 chunk，计划通过 `manualChunks` 拆分；
-- [ ] **支付能力**：捐助页当前为展示性质，未接入真实支付通道；
-- [ ] **容器化部署**：计划补充 Dockerfile 与 docker-compose 一键部署方案。
+**已完善**：✅ 自动化测试 ｜ ✅ 明文口令一次性迁移 ｜ ✅ Redis/MySQL 一键部署方案 ｜ ✅ 图片资源压缩 ｜ ✅ 支付宝沙箱支付接口与接入文档
+
+**仍待改进**：
+
+- [ ] **图片进一步瘦身**：猫咪原图已从 146MB 压缩至约 8.4MB（1600px JPEG），如需更小可转 WebP 并接入对象存储；
+- [ ] **前端分包**：构建产物仍有 2 个 >500KB 的 chunk，计划通过 `manualChunks` 拆分；
+- [ ] **后端容器化**：当前 `docker-compose.yml` 只托管 MySQL 与 Redis，后端 jar 尚未容器化；
+- [ ] **支付对账**：缺少每日对账定时任务与支付审计日志表；
+- [ ] **小程序端支付**：小程序 `pages/donate` 仍为静态展示，未对齐 Web 端支付流程；
+- [ ] **两套领养流程并存**：`adoption_assessment`（旧）与 `adoption_request`（新，含风险评分）功能重叠，属历史技术债。
 
 ---
 
@@ -447,6 +531,8 @@ npm run build        # 生产构建
 | 文件 | 说明 |
 |------|------|
 | [`毕业设计论文.md`](毕业设计论文.md) | 本科毕业设计论文全文 |
+| [`docs/部署指南.md`](docs/部署指南.md) | 环境搭建、数据库初始化、首次运行检查清单 |
+| [`docs/支付接入指南.md`](docs/支付接入指南.md) | 支付宝沙箱申请、密钥生成、回调调试与常见问题 |
 | [`deliverables/gstack/grad-archive-hzsca-2026-10-12.md`](deliverables/gstack/grad-archive-hzsca-2026-10-12.md) | 项目归档评审报告（架构梳理 + 缺陷审计 + 修复验证） |
 
 ---

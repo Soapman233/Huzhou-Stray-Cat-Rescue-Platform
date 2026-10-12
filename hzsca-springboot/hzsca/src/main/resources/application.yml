@@ -74,3 +74,22 @@ wechat:
   miniapp:
     appid: ${WECHAT_APPID:}
     secret: ${WECHAT_SECRET:}
+
+# 支付宝（沙箱）配置
+# enabled=false 或密钥为空时，支付模块自动降级为 Mock 演示模式，无需真实账号即可演示完整支付流程
+alipay:
+  enabled: ${ALIPAY_ENABLED:false}
+  # 沙箱网关（新版）；若使用旧版沙箱可改为 https://openapi.alipaydev.com/gateway.do
+  gateway: ${ALIPAY_GATEWAY:https://openapi-sandbox.dl.alipaydev.com/gateway.do}
+  app-id: ${ALIPAY_APP_ID:}
+  # 商户应用私钥（PKCS#8，Base64，可含 PEM 头尾或换行）
+  merchant-private-key: ${ALIPAY_PRIVATE_KEY:}
+  # 支付宝公钥（用于异步通知验签）
+  alipay-public-key: ${ALIPAY_PUBLIC_KEY:}
+  notify-url: ${ALIPAY_NOTIFY_URL:http://localhost:8080/api/payment/alipay/notify}
+  return-url: ${ALIPAY_RETURN_URL:http://localhost:5173/hzsca/donate/result}
+  sign-type: RSA2
+  charset: UTF-8
+  # 单笔金额上下限（单位：分），默认 1 元 ~ 50000 元
+  min-amount: 100
+  max-amount: 5000000

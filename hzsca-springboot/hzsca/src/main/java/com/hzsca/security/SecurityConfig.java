@@ -29,6 +29,10 @@ public class SecurityConfig {
                         "/api/wx/login",
                         "/api/admin/login",
                         "/api/auth/**",
+                        // 支付宝回调必须匿名可访问；支付配置供捐助页在登录前读取
+                        "/api/payment/alipay/notify",
+                        "/api/payment/alipay/return",
+                        "/api/payment/config",
                         "/swagger-ui.html",
                         "/swagger-ui/**",
                         "/v3/api-docs/**"
