@@ -1,12 +1,9 @@
 <div align="center">
 
-# 🐱 HZSCA
+<img src="docs/images/social-preview.png" alt="HZSCA · 湖州流浪猫救助与领养平台 —— 用技术连接救助者、领养人与流浪猫，让每一次相遇都有依据" width="880">
 
-### 湖州流浪猫救助与领养平台
-
-**用技术连接救助者、领养人与流浪猫，让每一次相遇都有依据。**
-
-一套后端 · 两个前端 —— 微信小程序承载 C 端体验，Vue 管理后台承载 B 端运营
+<br>
+<br>
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.12-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Vue](https://img.shields.io/badge/Vue-3.4-4FC08D?logo=vuedotjs&logoColor=white)](https://vuejs.org/)
@@ -23,12 +20,13 @@
 
 ---
 
-## ✨ 为什么值得一看
+## 🔧 工程亮点
 
-- 🧠 **算法驱动决策** —— 不止「信息展示 + 增删改查」：用**六维加权匹配**回答「谁适合养哪只猫」，用**风险评分模型**辅助领养审核
-- 💰 **完整支付闭环** —— 下单 → 收银台 → 异步通知验签 → 主动查单兜底 → 每日对账与审计，且**零第三方 SDK**（JDK 内置 RSA2 手写签名）
-- 🚀 **工程化完备** —— Docker 全栈一键启动 · 数据库启动自举 · 41 个单元测试 · 首屏入口包仅 25 KB
-- 🎓 **归档级文档** —— 论文全文、部署指南、支付接入指南、算法局限分析一应俱全
+- **零第三方 SDK 的支付实现** —— 支付宝 RSA2 签名与验签全部基于 JDK `java.security` 手写，可离线构建，也便于讲解原理
+- **数据库启动自举** —— 新环境只需建一个空库；表结构、种子数据、管理员账号由 `DbBootstrap` 幂等创建，且**绝不 `DROP`**
+- **真·对账兜底** —— 不假设异步通知一定送达：主动查单补记 + 超时关单 + 审计一致性检查，每日定时执行
+- **可验证的算法** —— 两个核心算法配 41 个单元测试，覆盖档位边界与全部硬性排除规则
+- **工程化收口** —— Docker 多阶段构建 + Compose profile 一键起全栈；前端分包后入口 chunk 1,141 KB → 25 KB
 
 ---
 

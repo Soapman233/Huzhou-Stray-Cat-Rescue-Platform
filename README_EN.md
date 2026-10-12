@@ -1,12 +1,9 @@
 <div align="center">
 
-# 🐱 HZSCA
+<img src="docs/images/social-preview-en.png" alt="HZSCA — Stray Cat Rescue & Adoption Platform. Connecting rescuers, adopters, and stray cats with data behind every match." width="880">
 
-### Stray Cat Rescue & Adoption Platform
-
-**Connecting rescuers, adopters, and stray cats — with data behind every match.**
-
-One backend · Two frontends — a WeChat Mini Program for end users, a Vue admin console for operations
+<br>
+<br>
 
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.3.12-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Vue](https://img.shields.io/badge/Vue-3.4-4FC08D?logo=vuedotjs&logoColor=white)](https://vuejs.org/)
@@ -23,12 +20,13 @@ One backend · Two frontends — a WeChat Mini Program for end users, a Vue admi
 
 ---
 
-## ✨ Why It Stands Out
+## 🔧 Engineering Highlights
 
-- 🧠 **Algorithm-driven decisions** — far beyond plain CRUD: a **six-dimension weighted matching model** answers "which cat suits this adopter", and a **risk-scoring model** supports adoption review
-- 💰 **Complete payment loop** — order → cashier → signed async notification → active query fallback → daily reconciliation & audit, all with **zero third-party SDKs** (RSA2 implemented on the JDK)
-- 🚀 **Production-minded engineering** — one-command Docker stack · self-bootstrapping database · 41 unit tests · a 25 KB entry bundle
-- 🎓 **Archive-grade docs** — full thesis, deployment guide, payment integration guide, and algorithm limitation analysis
+- **Payments with zero third-party SDKs** — Alipay RSA2 signing and verification are hand-written on the JDK's `java.security`, keeping builds offline-friendly and the mechanics teachable
+- **Self-bootstrapping database** — a fresh environment needs only an empty database; tables, seed data, and the admin account are created idempotently by `DbBootstrap`, and nothing is ever `DROP`ped
+- **Real reconciliation fallback** — async notifications are assumed lossy: active query backfill, timeout closing, and audit consistency checks run on a daily schedule
+- **Verifiable algorithms** — both core algorithms ship with 41 unit tests covering tier boundaries and every hard-exclusion rule
+- **Production-minded packaging** — multi-stage Docker build plus a Compose profile for the whole stack; the entry chunk dropped from 1,141 KB to 25 KB
 
 ---
 
