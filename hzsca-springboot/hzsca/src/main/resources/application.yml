@@ -5,9 +5,9 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: 1234
-    url: jdbc:mysql://localhost:3306/hzsca?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:1234}
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:hzsca}?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
   servlet:
     multipart:
       max-file-size: 10MB
@@ -26,6 +26,15 @@ spring:
           max-wait: -1ms
           max-idle: 8
           min-idle: 0
+  # Jackson 配置（必须位于 spring 下才会生效）
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    serialization:
+      write-dates-as-timestamps: false
+  # 允许循环引用（必须位于 spring.main 下才会生效）
+  main:
+    allow-circular-references: true
 
 # 配置mybatis实体和xml映射
 mybatis:
@@ -41,17 +50,6 @@ mybatis:
 file:
   upload:
     path: uploads
-
-# Jackson配置
-jackson:
-  date-format: yyyy-MM-dd HH:mm:ss
-  time-zone: GMT+8
-  serialization:
-    write-dates-as-timestamps: false
-
-# 允许循环引用
-main:
-  allow-circular-references: true
 
 # Springdoc-OpenAPI 配置
 springdoc:

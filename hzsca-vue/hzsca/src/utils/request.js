@@ -21,9 +21,7 @@ request.interceptors.request.use(config => {
 
     console.log('Request Config:', {
         url: config.url,
-        method: config.method,
-        data: config.data,
-        params: config.params
+        method: config.method
     });
 
     // 从 localStorage 获取 token（如果有的话）
@@ -41,11 +39,6 @@ request.interceptors.request.use(config => {
 // 可以在接口响应后统一处理结果
 request.interceptors.response.use(
     response => {
-        console.log('Response:', {
-            status: response.status,
-            data: response.data,
-            config: response.config
-        });
         return response;
     },
     error => {

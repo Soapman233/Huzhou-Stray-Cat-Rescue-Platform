@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -18,8 +19,16 @@ public class FileServiceImpl implements FileService {
 
     private static final String ACTIVITY_DIR = "activity";
 
+    /** 允许上传的图片扩展名白名单，避免任意文件写入 */
+    private static final Set<String> ALLOWED_EXTENSIONS =
+            Set.of(".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp");
+
     @Override
     public String uploadFile(MultipartFile file) throws IOException {
+        if (file == null || file.isEmpty()) {
+            throw new IllegalArgumentException("上传文件不能为空");
+        }
+
         // 获取项目根目录的绝对路径
         String projectPath = System.getProperty("user.dir");
 
@@ -29,9 +38,17 @@ public class FileServiceImpl implements FileService {
         // 确保目录存在
         Files.createDirectories(uploadPath);
 
-        // 生成唯一文件名
+        // 解析并校验扩展名（原实现未判空，文件名无后缀时会抛 StringIndexOutOfBoundsException）
         String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String extension = "";
+        if (originalFilename != null && originalFilename.lastIndexOf('.') >= 0) {
+            extension = originalFilename.substring(originalFilename.lastIndexOf('.')).toLowerCase();
+        }
+        if (!ALLOWED_EXTENSIONS.contains(extension)) {
+            throw new IllegalArgumentException("仅支持上传图片文件（jpg/jpeg/png/gif/webp/bmp）");
+        }
+
+        // 生成唯一文件名
         String filename = UUID.randomUUID().toString() + extension;
 
         // 构建文件完整路径

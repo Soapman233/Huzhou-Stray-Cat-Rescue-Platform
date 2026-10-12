@@ -3,6 +3,7 @@ package com.hzsca.controller;
 import com.hzsca.common.Result;
 import com.hzsca.entity.Users;
 import com.hzsca.mapper.UserMapper;
+import com.hzsca.security.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,6 +23,30 @@ public class UserController {
 
     @Autowired
     private UserMapper userMapper;
+
+    /**
+     * 当前登录者是否为管理员。
+     */
+    private boolean isAdmin() {
+        String role = SecurityUtils.getCurrentRole();
+        return role != null && role.equalsIgnoreCase("ROLE_admin");
+    }
+
+    /**
+     * 校验当前登录者是否有权操作该用户名对应的账号：管理员放行，普通用户仅能操作自己。
+     * 用于防止通过修改 username 参数越权查看/修改/删除他人资料（IDOR）。
+     */
+    private boolean isSelfOrAdmin(String username) {
+        if (isAdmin()) {
+            return true;
+        }
+        Long currentId = SecurityUtils.getCurrentUserId();
+        if (currentId == null || username == null) {
+            return false;
+        }
+        Users target = userMapper.selectByUsername(username);
+        return target != null && target.getUserID() != null && target.getUserID().longValue() == currentId;
+    }
 
     @Operation(summary = "获取所有用户", description = "获取系统中所有用户的列表")
     @ApiResponses(value = {
@@ -47,6 +72,9 @@ public class UserController {
     })
     @GetMapping("/current")
     public Result getCurrentUser(@Parameter(description = "用户名") @RequestParam String username) {
+        if (!isSelfOrAdmin(username)) {
+            return Result.error("403", "无权查看其他用户信息");
+        }
         Users user = userMapper.selectByUsername(username);
         if (user == null) {
             return Result.error("500", "User not found");
@@ -63,6 +91,9 @@ public class UserController {
     })
     @PutMapping("/update")
     public Result updateUser(@RequestBody Users user) {
+        if (!isSelfOrAdmin(user.getUsername())) {
+            return Result.error("403", "无权修改其他用户信息");
+        }
         Users existingUser = userMapper.selectByUsername(user.getUsername());
         if (existingUser == null) {
             return Result.error("500", "User not found");
@@ -92,6 +123,9 @@ public class UserController {
     })
     @DeleteMapping("/delete")
     public Result deleteUser(@Parameter(description = "用户名") @RequestParam String username) {
+        if (!isSelfOrAdmin(username)) {
+            return Result.error("403", "无权删除其他用户");
+        }
         Users existingUser = userMapper.selectByUsername(username);
         if (existingUser == null) {
             return Result.error("500", "User not found");

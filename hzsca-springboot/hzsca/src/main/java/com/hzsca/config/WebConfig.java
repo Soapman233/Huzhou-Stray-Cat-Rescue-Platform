@@ -14,7 +14,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         String projectPath = System.getProperty("user.dir");
-        String uploadPath = "file:" + Paths.get(projectPath, uploadBasePath).toString() + "/";
+        // 使用 toUri() 生成合法的 file: URI，避免 Windows 下反斜杠（file:C:\...）导致资源无法定位
+        String uploadPath = Paths.get(projectPath, uploadBasePath).toAbsolutePath().normalize().toUri().toString();
 
         // 添加静态资源处理器，处理/cats/下的图片请求
         registry.addResourceHandler("/cats/**")

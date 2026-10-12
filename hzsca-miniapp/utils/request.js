@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:8080/api'
+const { BASE_URL } = require('./config')
 
 function request({ url, method = 'GET', data = {}, header = {} }) {
   const app = getApp()

@@ -7,6 +7,7 @@ import com.hzsca.entity.Admin;
 import com.hzsca.mapper.UserMapper;
 import com.hzsca.mapper.AdminMapper;
 import com.hzsca.security.JwtService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,6 +35,42 @@ public class AuthController {
     @Autowired
     private JwtService jwtService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    /**
+     * 校验密码。兼容历史明文密码：首次以明文匹配成功后自动升级为 BCrypt 哈希。
+     */
+    private boolean verifyAndUpgradePassword(Users user, String rawPassword) {
+        if (user == null || user.getPassword() == null || rawPassword == null) {
+            return false;
+        }
+        String stored = user.getPassword();
+        if (stored.startsWith("$2a$") || stored.startsWith("$2b$") || stored.startsWith("$2y$")) {
+            return passwordEncoder.matches(rawPassword, stored);
+        }
+        if (stored.equals(rawPassword)) {
+            user.setPassword(passwordEncoder.encode(rawPassword));
+            userMapper.updatePassword(user.getUsername(), user.getPassword());
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 安全解析性别字段，避免前端未传值或传入非数字时抛出 NumberFormatException / NPE。
+     */
+    private Integer parseGender(String gender) {
+        if (gender == null || gender.isBlank()) {
+            return 1;
+        }
+        try {
+            return Integer.parseInt(gender.trim());
+        } catch (NumberFormatException e) {
+            return 1;
+        }
+    }
+
     @Operation(summary = "用户登录", description = "处理用户和管理员的登录请求")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "登录成功"),
@@ -46,7 +83,7 @@ public class AuthController {
 
         if ("user".equals(request.getRole())) {
             Users user = userMapper.selectByUsername(request.getUsername());
-            if (user != null && user.getPassword().equals(request.getPassword())) {
+            if (user != null && verifyAndUpgradePassword(user, request.getPassword())) {
                 result.put("success", true);
                 result.put("message", "登录成功");
                 user.setPassword(null); // Don't send password back to client
@@ -64,12 +101,14 @@ public class AuthController {
             Admin admin = adminMapper.selectByUsername(request.getUsername());
             logger.info("Admin lookup result: {}", admin != null ? "found" : "not found");
 
-            if (admin != null && admin.getPassword().equals(request.getPassword())) {
+            if (admin != null && admin.getPassword() != null && admin.getPassword().equals(request.getPassword())) {
                 result.put("success", true);
                 result.put("message", "登录成功");
                 admin.setPassword(null); // Don't send password back to client
                 result.put("user", admin);
                 result.put("role", "admin");
+                // 与 /api/admin/login 保持一致，管理员登录同样签发 token，避免后续请求 401
+                result.put("token", jwtService.generateToken(admin.getId(), "admin", "admin"));
                 logger.info("Admin login successful for: {}", request.getUsername());
             } else {
                 result.put("success", false);
@@ -105,10 +144,11 @@ public class AuthController {
         // 创建新用户
         Users newUser = new Users();
         newUser.setUsername(request.getUsername());
-        newUser.setPassword(request.getPassword());
+        // 密码统一以 BCrypt 哈希存储，避免明文落库
+        newUser.setPassword(passwordEncoder.encode(request.getPassword()));
         newUser.setName(request.getName());
         newUser.setPhone(request.getPhone());
-        newUser.setGender(Integer.parseInt(request.getGender())); // 将String转换为Integer
+        newUser.setGender(parseGender(request.getGender()));
         newUser.setProfile(request.getProfile());
         newUser.setAvatar(request.getAvatar());
         newUser.setRole("user");  // 默认角色为普通用户

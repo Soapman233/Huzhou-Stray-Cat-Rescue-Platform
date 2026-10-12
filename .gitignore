@@ -1,1 +1,40 @@
-node_modules
+# ===== 依赖 =====
+node_modules/
+**/node_modules/
+
+# ===== 构建产物 =====
+target/
+**/target/
+dist/
+**/dist/
+.verify-build/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+
+# ===== IDE / 编辑器 =====
+.idea/
+**/.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+
+# ===== 运行时上传文件（用户上传，不入库） =====
+uploads/
+hzsca-springboot/uploads/
+
+# ===== 本地 Redis 便携版（体积大，请自行安装 Redis） =====
+Redis/
+
+# ===== 日志与系统文件 =====
+*.log
+logs/
+.DS_Store
+Thumbs.db
+
+# ===== 环境变量 / 本地配置 =====
+.env
+.env.local
+*.local

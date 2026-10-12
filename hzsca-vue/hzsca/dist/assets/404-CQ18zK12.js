@@ -1,1 +1,0 @@
-import{_ as o,a as t,o as c,aj as n}from"./index-RSqoChkx.js";/* empty css                 */const r={};function _(s,a){const e=n;return c(),t(e,{description:"404 NOT FOUND"})}const f=o(r,[["render",_]]);export{f as default};
